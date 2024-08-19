@@ -1,5 +1,6 @@
 package com.cookyuu.ecms_server.domain.member.entity;
 
+import com.cookyuu.ecms_server.domain.cart.entity.Cart;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.domain.review.entity.Review;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
@@ -32,6 +33,8 @@ public class Member extends BaseTimeEntity {
     private List<Order> orders = new ArrayList<>();
     @OneToMany(mappedBy = "member")
     private List<Review> reviews = new ArrayList<>();
+    @OneToMany(mappedBy = "member")
+    private List<Cart> carts = new ArrayList<>();
 }
 
 

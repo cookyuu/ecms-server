@@ -19,8 +19,11 @@ public class CartItem extends BaseTimeEntity {
 
     private Integer quantity;
 
+    @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;
+
+    @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
 }
