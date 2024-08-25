@@ -23,6 +23,7 @@ public class Member extends BaseTimeEntity {
     private Long id;
     private String name;
     private String email;
+    private String userId;
     private String password;
     private String phoneNumber;
     private String address;
@@ -35,6 +36,18 @@ public class Member extends BaseTimeEntity {
     private List<Review> reviews = new ArrayList<>();
     @OneToMany(mappedBy = "member")
     private List<Cart> carts = new ArrayList<>();
+
+    public static Member of(String name, String email, String userId, String password, String phoneNumber, String address) {
+        Member member = new Member();
+        member.name = name;
+        member.email = email;
+        member.userId = userId;
+        member.password = password;
+        member.phoneNumber = phoneNumber;
+        member.address = address;
+        member.role = RoleType.USER;
+        return member;
+    }
 }
 
 
