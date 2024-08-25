@@ -30,6 +30,15 @@ public class ApiResponse<T> {
         );
     }
 
+    public static <T> ApiResponse<T> success(ResultCode resultCode){
+        return new ApiResponse<>(
+                resultCode,
+                resultCode.getMessage(),
+                null,
+                null
+        );
+    }
+
     public static <T> ApiResponse<T> success(T data) {
         return new ApiResponse<>(
                 ResultCode.SUCCESS,
@@ -54,6 +63,15 @@ public class ApiResponse<T> {
                 ResultCode.SUCCESS.getMessage(),
                 data.getContent(),
                 PageResponse.from(data)
+        );
+    }
+
+    public static <T> ApiResponse<T> created() {
+        return new ApiResponse<>(
+                ResultCode.CREATED,
+                ResultCode.CREATED.getMessage(),
+                null,
+                null
         );
     }
 

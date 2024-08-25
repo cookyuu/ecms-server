@@ -22,7 +22,7 @@ public class ValidateUtil {
     /* 핸드폰번호 : 앞3자리 - 중간 3or4자리 - 마지막 4자리 */
     String phoneNumberRegex = "^\\d{3}-\\d{3,4}-\\d{4}$";
     /* 유저아이디 : 공백X, 알파벳으로 시작, 6~14자리 */
-    String userIdRegex = "^(?!.*\\s)[a-zA-Z][a-zA-Z0-9._-]{6,14}$";
+    String userIdRegex = "^(?!.*\\s)[a-zA-Z][a-zA-Z0-9._-]{5,14}$";
 
     public void isAvailableEmailFormat(String email) {
         log.debug("[ValidEmailFormat] validate email format. email : {}", email);
