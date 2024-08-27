@@ -10,30 +10,30 @@ public abstract class ECMSAppException extends RuntimeException{
     private String[] args;
     private Object data;
 
-    public ECMSAppException(ResultCode resultCode) {
+    protected ECMSAppException(ResultCode resultCode) {
         super(resultCode.getMessage());
         this.resultCode = resultCode;
     }
 
-    public ECMSAppException(ResultCode resultCode, String customMsg) {
+    protected ECMSAppException(ResultCode resultCode, String customMsg) {
         super(resultCode.getMessage());
         this.resultCode = resultCode;
         this.message = customMsg;
     }
 
-    public ECMSAppException(ResultCode resultCode, Object data, String[] args) {
+    protected ECMSAppException(ResultCode resultCode, Object data, String[] args) {
         super(resultCode.getMessage());
         this.data = data;
         this.args = args;
         this.resultCode = resultCode;
     }
 
-    public ECMSAppException(ResultCode resultCode, Throwable t) {
+    protected ECMSAppException(ResultCode resultCode, Throwable t) {
         super(t);
         this.resultCode = resultCode;
     }
 
-    public ECMSAppException(ResultCode resultCode, Throwable t, String customMsg) {
+    protected ECMSAppException(ResultCode resultCode, Throwable t, String customMsg) {
         super(t);
         this.resultCode = resultCode;
         this.message = customMsg;

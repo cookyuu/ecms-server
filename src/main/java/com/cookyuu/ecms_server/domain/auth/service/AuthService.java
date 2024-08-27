@@ -35,13 +35,13 @@ public class AuthService {
         memberRepository.save(member);
     }
 
-    private void validateProfileInfo(String userId, String email, String phoneNumber) {
+    protected void validateProfileInfo(String userId, String email, String phoneNumber) {
         validateEmail(email);
         validateUserId(userId);
         validatePhoneNumber(phoneNumber);
     }
 
-    private String validateAndEncryptPassword(String password) {
+    protected String validateAndEncryptPassword(String password) {
         validateUtil.isAvailablePasswordFormat(password);
         return authUtil.encryptPassword(password);
     }
@@ -53,7 +53,7 @@ public class AuthService {
         validateUtil.isAvailableUserIdFormat(userId);
     }
 
-    private void validateEmail(String email) {
+    protected void validateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
             throw new ValidateEmailException(ResultCode.VALID_EMAIL_DUPLICATE);
         }
