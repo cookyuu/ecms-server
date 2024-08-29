@@ -2,6 +2,7 @@ package com.cookyuu.ecms_server.domain.auth.controller;
 
 import com.cookyuu.ecms_server.domain.auth.dto.SignupDto;
 import com.cookyuu.ecms_server.domain.auth.service.AuthService;
+import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
 import com.cookyuu.ecms_server.global.dto.ResultCode;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final MemberService memberService;
 
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
@@ -25,7 +27,7 @@ public class AuthController {
 
     @GetMapping("/validation/user-id")
     public ResponseEntity<ApiResponse<Object>> validateUserId(@RequestParam(name = "userId") String userId) {
-        authService.validateUserId(userId);
+        memberService.checkDuplicateUserId(userId);
         return ResponseEntity.ok(ApiResponse.success(ResultCode.VALID_USERID_SUCCESS));
     }
 }
