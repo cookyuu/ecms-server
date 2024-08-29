@@ -3,9 +3,7 @@ package com.cookyuu.ecms_server.domain.auth.service;
 import com.cookyuu.ecms_server.domain.auth.dto.SignupDto;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.repository.MemberRepository;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
-import com.cookyuu.ecms_server.global.exception.auth.ValidateEmailException;
-import com.cookyuu.ecms_server.global.exception.auth.ValidatePhoneNumberException;
+import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.global.utils.AuthUtil;
 import com.cookyuu.ecms_server.global.utils.ValidateUtil;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @RequiredArgsConstructor
 public class AuthService {
-    private final MemberRepository memberRepository;
+    private final MemberService memberService;
     private final ValidateUtil validateUtil;
     private final AuthUtil authUtil;
 
@@ -32,13 +30,7 @@ public class AuthService {
 
         validateProfileInfo(userId, email, phoneNumber);
         Member member = Member.of(name, email, userId, validateAndEncryptPassword(password), phoneNumber, address);
-        memberRepository.save(member);
-    }
-
-    protected void validateProfileInfo(String userId, String email, String phoneNumber) {
-        validateEmail(email);
-        validateUserId(userId);
-        validatePhoneNumber(phoneNumber);
+        memberService.save(member);
     }
 
     protected String validateAndEncryptPassword(String password) {
@@ -46,26 +38,18 @@ public class AuthService {
         return authUtil.encryptPassword(password);
     }
 
-    public void validateUserId(String userId) {
-        if (memberRepository.existsByUserId(userId)) {
-            throw new ValidatePhoneNumberException(ResultCode.VALID_USERID_DUPLICATE);
-        }
+    protected void validateProfileInfo(String userId, String email, String phoneNumber) {
+        memberService.checkDuplicateUserId(userId);
         validateUtil.isAvailableUserIdFormat(userId);
-    }
 
-    protected void validateEmail(String email) {
-        if (memberRepository.existsByEmail(email)) {
-            throw new ValidateEmailException(ResultCode.VALID_EMAIL_DUPLICATE);
-        }
+        memberService.checkDuplicateEmail(email);
         validateUtil.isAvailableEmailFormat(email);
-    }
 
-    private void validatePhoneNumber(String phoneNumber) {
-        if (memberRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new ValidatePhoneNumberException(ResultCode.VALID_PHONENUMBER_DUPLICATE);
-        }
+        memberService.checkDuplicatePhoneNumber(phoneNumber);
         validateUtil.isAvailablePhoneNumberFormat(phoneNumber);
     }
+
+
 
 
 

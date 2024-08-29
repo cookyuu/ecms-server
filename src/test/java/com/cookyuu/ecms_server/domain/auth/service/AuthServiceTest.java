@@ -3,9 +3,11 @@ package com.cookyuu.ecms_server.domain.auth.service;
 import com.cookyuu.ecms_server.domain.auth.dto.SignupDto;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.repository.MemberRepository;
+import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.exception.auth.ValidateEmailException;
 import com.cookyuu.ecms_server.global.exception.auth.ValidatePasswordException;
+import com.cookyuu.ecms_server.global.exception.auth.ValidatePhoneNumberException;
 import com.cookyuu.ecms_server.global.exception.auth.ValidateUserIdException;
 import com.cookyuu.ecms_server.global.utils.AuthUtil;
 import com.cookyuu.ecms_server.global.utils.ValidateUtil;
@@ -28,7 +30,7 @@ class AuthServiceTest {
     private AuthService authService;
 
     @Mock
-    private MemberRepository memberRepository;
+    private MemberService memberService;
     @Spy
     private ValidateUtil validateUtil;
     @Mock
@@ -47,11 +49,11 @@ class AuthServiceTest {
                 .build();
 
         Member mockMember = mock(Member.class);
-        when(memberRepository.save(any(Member.class))).thenReturn(mockMember);
+        when(memberService.save(any(Member.class))).thenReturn(mockMember);
 
         authService.signupNormal(request);
 
-        verify(memberRepository, times(1)).save(any(Member.class));
+        verify(memberService, times(1)).save(any(Member.class));
     }
 
     @DisplayName("회원가입 예외 발생 테스트 (이메일)")
@@ -83,7 +85,7 @@ class AuthServiceTest {
         assertEquals(ResultCode.VALID_EMAIL_FORMAT.getMessage(), exception1.getResultCode().getMessage());
         assertEquals(ResultCode.VALID_EMAIL_FORMAT.getMessage(), exception2.getResultCode().getMessage());
 
-        verify(memberRepository, never()).save(any(Member.class));
+        verify(memberService, never()).save(any(Member.class));
     }
 
     @DisplayName("회원가입 예외 발생 테스트 (유저 아이디)")
@@ -127,7 +129,7 @@ class AuthServiceTest {
         assertEquals(ResultCode.VALID_USERID_FORMAT.getMessage(), exception2.getResultCode().getMessage());
         assertEquals(ResultCode.VALID_USERID_FORMAT.getMessage(), exception3.getResultCode().getMessage());
 
-        verify(memberRepository, never()).save(any(Member.class));
+        verify(memberService, never()).save(any(Member.class));
     }
 
     @DisplayName("회원가입 예외 발생 테스트 (핸드폰 번호)")
@@ -166,25 +168,25 @@ class AuthServiceTest {
                 .address("테스트 주소")
                 .build();
 
-        ValidateUserIdException exception1 = assertThrows(ValidateUserIdException.class, () -> {
+        ValidatePhoneNumberException exception1 = assertThrows(ValidatePhoneNumberException.class, () -> {
             authService.signupNormal(request1);
         });
-        ValidateUserIdException exception2 = assertThrows(ValidateUserIdException.class, () -> {
+        ValidatePhoneNumberException exception2 = assertThrows(ValidatePhoneNumberException.class, () -> {
             authService.signupNormal(request2);
         });
-        ValidateUserIdException exception3 = assertThrows(ValidateUserIdException.class, () -> {
+        ValidatePhoneNumberException exception3 = assertThrows(ValidatePhoneNumberException.class, () -> {
             authService.signupNormal(request3);
         });
-        ValidateUserIdException exception4 = assertThrows(ValidateUserIdException.class, () -> {
+        ValidatePhoneNumberException exception4 = assertThrows(ValidatePhoneNumberException.class, () -> {
             authService.signupNormal(request4);
         });
 
-        assertEquals(ResultCode.VALID_USERID_FORMAT.getMessage(), exception1.getResultCode().getMessage());
-        assertEquals(ResultCode.VALID_USERID_FORMAT.getMessage(), exception2.getResultCode().getMessage());
-        assertEquals(ResultCode.VALID_USERID_FORMAT.getMessage(), exception3.getResultCode().getMessage());
-        assertEquals(ResultCode.VALID_USERID_FORMAT.getMessage(), exception4.getResultCode().getMessage());
+        assertEquals(ResultCode.VALID_PHONENUMBER_FORMAT.getMessage(), exception1.getResultCode().getMessage());
+        assertEquals(ResultCode.VALID_PHONENUMBER_FORMAT.getMessage(), exception2.getResultCode().getMessage());
+        assertEquals(ResultCode.VALID_PHONENUMBER_FORMAT.getMessage(), exception3.getResultCode().getMessage());
+        assertEquals(ResultCode.VALID_PHONENUMBER_FORMAT.getMessage(), exception4.getResultCode().getMessage());
 
-        verify(memberRepository, never()).save(any(Member.class));
+        verify(memberService, never()).save(any(Member.class));
     }
 
     @DisplayName("회원가입 예외 발생 테스트 (패스워드)")
@@ -253,7 +255,7 @@ class AuthServiceTest {
         assertEquals(ResultCode.VALID_PASSWORD_FORMAT.getMessage(), exception4.getResultCode().getMessage());
         assertEquals(ResultCode.VALID_PASSWORD_FORMAT.getMessage(), exception5.getResultCode().getMessage());
 
-        verify(memberRepository, never()).save(any(Member.class));
+        verify(memberService, never()).save(any(Member.class));
     }
 
 }

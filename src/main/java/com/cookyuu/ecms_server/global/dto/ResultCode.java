@@ -20,6 +20,9 @@ public enum ResultCode {
     NOT_FOUND(HttpStatus.NOT_FOUND,"C-007", "데이터를 찾을 수 없습니다."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "C-008", "잘못된 요청입니다."),
 
+    // AUTH - SUCCESS
+    NORMAL_LOGIN_SUCCESS(HttpStatus.OK, "0000", "일반 로그인 성공."),
+    OAUTH_LOGIN_SUCCESS(HttpStatus.OK, "0000", "SNS 로그인 성공."),
 
     // Member - SUCCESS
     VALID_USERID_SUCCESS(HttpStatus.OK, "0000", "유저 아이디 유효성 검증 완료. 사용 가능한 유저 아이디입니다."),
