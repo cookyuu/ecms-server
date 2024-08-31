@@ -19,9 +19,9 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
-    public void checkDuplicateUserId(String userId) {
-        if (memberRepository.existsByUserId(userId)) {
-            throw new ValidatePhoneNumberException(ResultCode.VALID_USERID_DUPLICATE);
+    public void checkDuplicateLoginId(String loginId) {
+        if (memberRepository.existsByLoginId(loginId)) {
+            throw new ValidatePhoneNumberException(ResultCode.VALID_LOGINID_DUPLICATE);
         }
     }
 

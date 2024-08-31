@@ -11,16 +11,16 @@ public class SignupDto {
     public static class Request {
             private String name;
             private String email;
-            private String userId;
+            private String loginId;
             private String password;
             private String phoneNumber;
             private String address;
 
-            public Request(String name, String email, String userId, String password, String phoneNumber, String address) {
+            public Request(String name, String email, String loginId, String password, String phoneNumber, String address) {
                 this.name = name.strip();
                 this.email = email.strip();
                 this.password = password.strip();
-                this.userId = userId.strip();
+                this.loginId = loginId.strip();
                 this.phoneNumber = phoneNumber.strip();
                 this.address = address.strip();
             }
