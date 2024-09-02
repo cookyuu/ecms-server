@@ -2,15 +2,14 @@ package com.cookyuu.ecms_server.domain.auth.service;
 
 import com.cookyuu.ecms_server.domain.auth.dto.SignupDto;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
-import com.cookyuu.ecms_server.domain.member.repository.MemberRepository;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.exception.auth.ValidateEmailException;
 import com.cookyuu.ecms_server.global.exception.auth.ValidatePasswordException;
 import com.cookyuu.ecms_server.global.exception.auth.ValidatePhoneNumberException;
 import com.cookyuu.ecms_server.global.exception.auth.ValidateUserIdException;
-import com.cookyuu.ecms_server.global.utils.AuthUtil;
-import com.cookyuu.ecms_server.global.utils.ValidateUtil;
+import com.cookyuu.ecms_server.global.utils.AuthUtils;
+import com.cookyuu.ecms_server.global.utils.ValidateUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,9 +31,9 @@ class AuthServiceTest {
     @Mock
     private MemberService memberService;
     @Spy
-    private ValidateUtil validateUtil;
+    private ValidateUtils validateUtils;
     @Mock
-    private AuthUtil authUtil;
+    private AuthUtils authUtils;
 
     @DisplayName("정상 로그인 테스트")
     @Test
@@ -42,7 +41,7 @@ class AuthServiceTest {
         SignupDto.Request request = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@test.com")
-                .userId("test123")
+                .loginId("test123")
                 .password("test123!@#")
                 .phoneNumber("010-0000-0000")
                 .address("테스트 주소")
@@ -62,7 +61,7 @@ class AuthServiceTest {
         SignupDto.Request request1 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("testtest.com")
-                .userId("test123")
+                .loginId("test123")
                 .password("test123!@#")
                 .phoneNumber("010-0000-0000")
                 .address("테스트 주소")
@@ -70,7 +69,7 @@ class AuthServiceTest {
         SignupDto.Request request2 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@testcom")
-                .userId("test123")
+                .loginId("test123")
                 .password("test123!@#")
                 .phoneNumber("010-0000-0000")
                 .address("테스트 주소")
@@ -94,7 +93,7 @@ class AuthServiceTest {
         SignupDto.Request request1 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@test.com")
-                .userId("test12345678901")
+                .loginId("test12345678901")
                 .password("test123!@#")
                 .phoneNumber("010-0000-0000")
                 .address("테스트 주소")
@@ -102,7 +101,7 @@ class AuthServiceTest {
         SignupDto.Request request2 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@test.com")
-                .userId("1est1789")
+                .loginId("1est1789")
                 .password("test123!@#")
                 .phoneNumber("010-0000-0000")
                 .address("테스트 주소")
@@ -110,7 +109,7 @@ class AuthServiceTest {
         SignupDto.Request request3 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@test.com")
-                .userId("test1")
+                .loginId("test1")
                 .password("test123!@#")
                 .phoneNumber("010-0000-0000")
                 .address("테스트 주소")
@@ -125,9 +124,9 @@ class AuthServiceTest {
         ValidateUserIdException exception3 = assertThrows(ValidateUserIdException.class, () -> {
             authService.signupNormal(request3);
         });
-        assertEquals(ResultCode.VALID_USERID_FORMAT.getMessage(), exception1.getResultCode().getMessage());
-        assertEquals(ResultCode.VALID_USERID_FORMAT.getMessage(), exception2.getResultCode().getMessage());
-        assertEquals(ResultCode.VALID_USERID_FORMAT.getMessage(), exception3.getResultCode().getMessage());
+        assertEquals(ResultCode.VALID_LOGINID_FORMAT.getMessage(), exception1.getResultCode().getMessage());
+        assertEquals(ResultCode.VALID_LOGINID_FORMAT.getMessage(), exception2.getResultCode().getMessage());
+        assertEquals(ResultCode.VALID_LOGINID_FORMAT.getMessage(), exception3.getResultCode().getMessage());
 
         verify(memberService, never()).save(any(Member.class));
     }
@@ -138,7 +137,7 @@ class AuthServiceTest {
         SignupDto.Request request1 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@test.com")
-                .userId("test1234")
+                .loginId("test1234")
                 .password("test123!@#")
                 .phoneNumber("01-0000-0000")
                 .address("테스트 주소")
@@ -146,7 +145,7 @@ class AuthServiceTest {
         SignupDto.Request request2 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@test.com")
-                .userId("test1234")
+                .loginId("test1234")
                 .password("test123!@#")
                 .phoneNumber("010-00-0000")
                 .address("테스트 주소")
@@ -154,7 +153,7 @@ class AuthServiceTest {
         SignupDto.Request request3 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@test.com")
-                .userId("test1234")
+                .loginId("test1234")
                 .password("test123!@#")
                 .phoneNumber("010-000-000")
                 .address("테스트 주소")
@@ -162,7 +161,7 @@ class AuthServiceTest {
         SignupDto.Request request4 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@test.com")
-                .userId("test1234")
+                .loginId("test1234")
                 .password("test123!@#")
                 .phoneNumber("010-000-000A")
                 .address("테스트 주소")
@@ -195,7 +194,7 @@ class AuthServiceTest {
         SignupDto.Request request1 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@test.com")
-                .userId("test1234")
+                .loginId("test1234")
                 .password("test123123")
                 .phoneNumber("010-0000-0000")
                 .address("테스트 주소")
@@ -203,7 +202,7 @@ class AuthServiceTest {
         SignupDto.Request request2 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@test.com")
-                .userId("test1234")
+                .loginId("test1234")
                 .password("testtest!@#")
                 .phoneNumber("010-000-0000")
                 .address("테스트 주소")
@@ -211,7 +210,7 @@ class AuthServiceTest {
         SignupDto.Request request3 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@test.com")
-                .userId("test1234")
+                .loginId("test1234")
                 .password("123123!@#")
                 .phoneNumber("010-000-0000")
                 .address("테스트 주소")
@@ -219,7 +218,7 @@ class AuthServiceTest {
         SignupDto.Request request4 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@test.com")
-                .userId("test1234")
+                .loginId("test1234")
                 .password("te3!@##")
                 .phoneNumber("010-000-0000")
                 .address("테스트 주소")
@@ -227,7 +226,7 @@ class AuthServiceTest {
         SignupDto.Request request5 = SignupDto.Request.builder()
                 .name("테스트이름")
                 .email("test@test.com")
-                .userId("test1234")
+                .loginId("test1234")
                 .password("test12345678!@##")
                 .phoneNumber("010-000-0000")
                 .address("테스트 주소")

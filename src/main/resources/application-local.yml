@@ -1,0 +1,38 @@
+server:
+  port: 7777
+
+spring:
+  config:
+    activate:
+      on-profile: local # 환경이름설정
+
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://localhost:13306/ecms_db?characterEncoding=UTF-8&serverTimezone=UTC
+    username: cookyuu
+    password: hk1234
+    hikari:
+      maximum-pool-size: 60
+
+  jpa:
+    hibernate:
+      :ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+    auditing:
+      enabled: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+auth:
+  jwt:
+    secret: TESTECMSSECRETKEYISJWTTESTTESTECMSSECRETKEYISJWTTEST
+    access:
+      exp: 180000 # 30분 : 1000*60*30
+    refresh:
+      exp: 604800000 # 7일 : 1000*60*60*24*7

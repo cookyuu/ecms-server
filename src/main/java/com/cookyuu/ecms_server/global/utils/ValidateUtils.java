@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Component
-public class ValidateUtil {
+public class ValidateUtils {
 
     /*   @앞 문자 : 소문자, 숫자, -. 가능 || @뒷 문자 : 하나 이상 라벨 존재 */
     String emailRegex = "^[_a-z0-9-]+(.[_a-z0-9-]+)*@(?:\\w+\\.)+\\w+$";
@@ -59,7 +59,7 @@ public class ValidateUtil {
         Pattern pattern = Pattern.compile(userIdRegex);
         Matcher matcher = pattern.matcher(userId);
         if (!matcher.matches()) {
-            throw new ValidateUserIdException(ResultCode.VALID_USERID_FORMAT);
+            throw new ValidateUserIdException(ResultCode.VALID_LOGINID_FORMAT);
         }
     }
 }
