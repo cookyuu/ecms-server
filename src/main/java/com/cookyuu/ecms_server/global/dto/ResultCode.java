@@ -25,6 +25,8 @@ public enum ResultCode {
     // AUTH - SUCCESS
     NORMAL_LOGIN_SUCCESS(HttpStatus.OK, "0000", "일반 로그인 성공."),
     OAUTH_LOGIN_SUCCESS(HttpStatus.OK, "0000", "SNS 로그인 성공."),
+    LOGOUT_SUCCESS(HttpStatus.OK, "0000", "로그아웃 성공."),
+    SIGNUP_SUCCESS(HttpStatus.CREATED,"0000" ,"회원가입 성공" ),
 
     // AUTH - ERROR
     ALREADY_LOGOUT_USER(HttpStatus.BAD_REQUEST,"A-001", "이미 로그아웃된 유저입니다. 다시 로그인해주세요."),
@@ -36,6 +38,7 @@ public enum ResultCode {
     JWT_EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "J-003", "토큰 유효기한이 만료되었습니다."),
     JWT_UNSUPPORTED_TOKEN(HttpStatus.BAD_REQUEST, "J-004", "지원하지 않는 토큰입니다."),
     JWT_EMPTY_TOKEN(HttpStatus.BAD_REQUEST, "J-005", "토큰 데이터가 비어있습니다."),
+    JWT_ALREADY_LOGOUT(HttpStatus.UNAUTHORIZED, "J-006", "이미 로그아웃된 사용자입니다."),
 
     // Member - SUCCESS
     VALID_USERID_SUCCESS(HttpStatus.OK, "0000", "유저 아이디 유효성 검증 완료. 사용 가능한 유저 아이디입니다."),

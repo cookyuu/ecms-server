@@ -8,6 +8,7 @@ import com.cookyuu.ecms_server.global.exception.auth.ValidateJwtTokenException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -61,7 +62,7 @@ public class JwtUtils {
                 .compact();
     }
 
-    public Long getUserId(String token) {
+    public Long getMemberId(String token) {
         return parseClaims(token).get("memberId", Long.class);
     }
 
@@ -73,6 +74,10 @@ public class JwtUtils {
         return parseClaims(token).get("role", String.class);
     }
 
+    public String getAccessToken(String authorization) {
+        return authorization.substring(7);
+    }
+
     private Claims parseClaims(String accessToken) {
         try {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
@@ -81,10 +86,11 @@ public class JwtUtils {
         }
     }
 
-    private void isLogoutToken(String token) {
+    public void isLogoutToken(Long memberId, String accessToken) {
         log.debug("[CheckRedisCache] Logout token check");
         try {
-            if (redisUtils.getData(RedisKeyCode.LOGOUT_TOKEN.getSeparator() + token) != null) {
+            String logoutToken = redisUtils.getData(RedisKeyCode.LOGOUT_TOKEN.getSeparator() + memberId);
+            if (logoutToken != null && logoutToken.equals(accessToken)) {
                 throw new UserLoginException(ResultCode.ALREADY_LOGOUT_USER);
             }
         } catch (Exception e) {
@@ -95,7 +101,6 @@ public class JwtUtils {
     public void validateToken(String token) {
         try {
             log.debug("[ValidateJwtToken] Validate accessToken. ");
-            isLogoutToken(token);
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
         } catch (SecurityException e) {
             log.info("[ValidateJwtToken] Invalid JWT Token. ", e);
