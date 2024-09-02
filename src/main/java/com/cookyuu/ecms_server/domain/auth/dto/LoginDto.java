@@ -1,5 +1,6 @@
 package com.cookyuu.ecms_server.domain.auth.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,5 +17,13 @@ public class LoginDto {
             this.loginId = loginId.strip();
             this.password = password.strip();
         }
+    }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Response {
+        private String accessToken;
     }
 }
