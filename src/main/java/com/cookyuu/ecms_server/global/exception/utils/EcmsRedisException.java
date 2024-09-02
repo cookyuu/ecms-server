@@ -1,13 +1,17 @@
-package com.cookyuu.ecms_server.global.exception.auth;
+package com.cookyuu.ecms_server.global.exception.utils;
 
 import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.exception.ECMSAppException;
 
-public class ValidateUserIdException extends ECMSAppException {
-    public ValidateUserIdException() {
-        super(ResultCode.INVALID_INPUT_VALUE);
+public class EcmsRedisException extends ECMSAppException {
+    public EcmsRedisException() {
+        super(ResultCode.REDIS_COMMON_EXP);
     }
-    public ValidateUserIdException(ResultCode resultCode) {
+    public EcmsRedisException(ResultCode resultCode) {
         super(resultCode);
+    }
+
+    public EcmsRedisException(Throwable t) {
+        super(ResultCode.REDIS_COMMON_EXP, t);
     }
 }
