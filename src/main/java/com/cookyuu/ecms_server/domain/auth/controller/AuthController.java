@@ -6,10 +6,13 @@ import com.cookyuu.ecms_server.domain.auth.service.AuthService;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
 import com.cookyuu.ecms_server.global.dto.ResultCode;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,13 +27,19 @@ public class AuthController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<ApiResponse<Object>> signupNormal(@RequestBody SignupDto.Request request) {
         authService.signupNormal(request);
-        return ResponseEntity.ok(ApiResponse.created());
+        return ResponseEntity.ok(ApiResponse.created(ResultCode.SIGNUP_SUCCESS));
     }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginDto.Response>> loginNormal(@RequestBody LoginDto.Request request, HttpServletResponse response) {
         LoginDto.Response res = authService.loginNormal(request, response);
-        return ResponseEntity.ok(ApiResponse.success(res));
+        return ResponseEntity.ok(ApiResponse.success(ResultCode.NORMAL_LOGIN_SUCCESS, res));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<Object>> logoutNormal(@AuthenticationPrincipal UserDetails user, HttpServletRequest request, HttpServletResponse response) {
+        authService.logoutNormal(user, request, response);
+        return ResponseEntity.ok(ApiResponse.success(ResultCode.LOGOUT_SUCCESS));
     }
 
     @GetMapping("/validation/login-id")
@@ -38,5 +47,4 @@ public class AuthController {
         memberService.checkDuplicateLoginId(loginId);
         return ResponseEntity.ok(ApiResponse.success(ResultCode.VALID_USERID_SUCCESS));
     }
-
 }

@@ -19,8 +19,6 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String id) throws UsernameNotFoundException {
         Member member = memberRepository.findById(Long.parseLong(id))
                 .orElseThrow(() -> new UsernameNotFoundException("[ValidateJwtToken] Can not find member. No exists"));
-        JWTUserInfo userInfo = new JWTUserInfo();
-        userInfo.of(member);
-        return new CustomUserDetails(userInfo);
+        return new CustomUserDetails(new JWTUserInfo().of(member));
     }
 }

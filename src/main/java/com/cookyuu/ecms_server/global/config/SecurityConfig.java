@@ -5,6 +5,7 @@ import com.cookyuu.ecms_server.global.security.jwt.CustomAuthenticationEntryPoin
 import com.cookyuu.ecms_server.global.security.jwt.CustomUserDetailsService;
 import com.cookyuu.ecms_server.global.security.jwt.JwtAuthFilter;
 import com.cookyuu.ecms_server.global.utils.JwtUtils;
+import com.cookyuu.ecms_server.global.utils.RedisUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +25,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     private final CustomUserDetailsService customUserDetailsService;
     private final JwtUtils jwtUtils;
+    private final RedisUtils redisUtils;
     private final CustomAccessDeniedHandler accessDeniedHandler;
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
@@ -48,7 +50,7 @@ public class SecurityConfig {
         http.formLogin((form) -> form.disable());
         http.httpBasic(AbstractHttpConfigurer::disable);
 
-        http.addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtils), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new JwtAuthFilter(customUserDetailsService, jwtUtils, redisUtils), UsernamePasswordAuthenticationFilter.class);
 
         http.exceptionHandling(exceptionHandler -> exceptionHandler
                 .authenticationEntryPoint(authenticationEntryPoint)

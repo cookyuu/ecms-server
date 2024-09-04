@@ -48,6 +48,15 @@ public class ApiResponse<T> {
         );
     }
 
+    public static <T> ApiResponse<T> success(ResultCode resultCode, T data) {
+        return new ApiResponse<>(
+                resultCode,
+                resultCode.getMessage(),
+                data,
+                null
+        );
+    }
+
     public static <T> ApiResponse<List<T>> success(List<T> data) {
         return new ApiResponse<>(
                 ResultCode.SUCCESS,
@@ -70,6 +79,15 @@ public class ApiResponse<T> {
         return new ApiResponse<>(
                 ResultCode.CREATED,
                 ResultCode.CREATED.getMessage(),
+                null,
+                null
+        );
+    }
+
+    public static <T> ApiResponse<T> created(ResultCode resultCode) {
+        return new ApiResponse<>(
+                resultCode,
+                resultCode.getMessage(),
                 null,
                 null
         );
