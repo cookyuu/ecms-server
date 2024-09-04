@@ -9,10 +9,12 @@ import com.cookyuu.ecms_server.global.dto.CookieCode;
 import com.cookyuu.ecms_server.global.dto.RedisKeyCode;
 import com.cookyuu.ecms_server.global.utils.*;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
     @Value("${auth.jwt.refresh.exp}")
     private String refreshTokenExp;
+    @Value("${auth.jwt.refresh.exp}")
+    private String accessTokenExp;
 
     private final MemberService memberService;
     private final ValidateUtils validateUtils;
@@ -55,10 +59,19 @@ public class AuthService {
         Cookie cookie = cookieUtils.setCookieExpire(CookieCode.REFRESH_TOKEN, refreshToken, refreshTokenExp);
         response.addCookie(cookie);
 
-        redisUtils.setDataExpire(RedisKeyCode.REFRESH_TOKEN.getSeparator() + userInfo.getLoginId(), refreshToken, Long.parseLong(refreshTokenExp)/1000);
+        redisUtils.setDataExpire(RedisKeyCode.REFRESH_TOKEN.getSeparator() + userInfo.getMemberId(), refreshToken, Long.parseLong(refreshTokenExp)/1000);
         return LoginDto.Response.builder()
                 .accessToken(accessToken)
                 .build();
+    }
+
+    @Transactional
+    public void logoutNormal(UserDetails user, HttpServletRequest request, HttpServletResponse response) {
+        String memberId = user.getUsername();
+        String accessToken = jwtUtils.getAccessToken(request.getHeader("Authorization"));
+        redisUtils.setDataExpire(RedisKeyCode.LOGOUT_TOKEN.getSeparator()+memberId, accessToken, Long.parseLong(accessTokenExp)/1000);
+        redisUtils.deleteData(RedisKeyCode.REFRESH_TOKEN.getSeparator()+memberId);
+        cookieUtils.removeCookie("refresh_token", response);
     }
 
     protected String validateAndEncryptPassword(String password) {
