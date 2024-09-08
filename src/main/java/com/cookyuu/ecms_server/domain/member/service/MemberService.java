@@ -30,7 +30,9 @@ public class MemberService {
                 new UserLoginException(ResultCode.MEMBER_NOT_FOUND));
         log.info("[CheckLoginCredential] Member loginId : {}", member.getLoginId());
         authUtils.checkPassword(member.getPassword(), password);
-        return new JWTUserInfo().of(member);
+        JWTUserInfo userInfo = new JWTUserInfo();
+        userInfo.of(member);
+        return userInfo;
     }
 
     public void checkDuplicateLoginId(String loginId) {
