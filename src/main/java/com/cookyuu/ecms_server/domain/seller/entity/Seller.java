@@ -5,6 +5,7 @@ import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,6 +27,11 @@ public class Seller extends BaseTimeEntity {
     private String businessAddress;
     private String businessContactTelNum;
     private String businessContactEmail;
+
+    @Builder
+    public Seller(String name) {
+        this.name = name;
+    }
 
     @OneToMany(mappedBy = "seller")
     private List<Product> products = new ArrayList<>();
