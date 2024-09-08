@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/product")
-@PreAuthorize("hasRole('ROLE_SELLER') or hasRole('ROLE_ADMIN')")
+@RequestMapping("/api/v1/product")
+//@PreAuthorize("hasRole('ROLE_SELLER') or hasRole('ROLE_ADMIN')")
 public class ProductController {
     private final ProductService productService;
+
     @PostMapping("/registration")
     public ResponseEntity<ApiResponse<Object>> registerProduct(@AuthenticationPrincipal UserDetails user, @RequestBody RegisterProductDto.Request productInfo) {
         productService.registerProduct(user, productInfo);
