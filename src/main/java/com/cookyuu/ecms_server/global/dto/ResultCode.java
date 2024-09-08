@@ -9,8 +9,6 @@ public enum ResultCode {
     // Common - SUCCESS
     SUCCESS(HttpStatus.OK,"0000","성공!"),
     CREATED(HttpStatus.CREATED,"0000", "성공!"),
-
-
     // Common - ERROR
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST,"C-001", "잘못된 요청값입니다."),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "C-002", "허용되지 않은 HTTP 메서드입니다."),
@@ -21,14 +19,12 @@ public enum ResultCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "C-008", "잘못된 요청입니다."),
     BAD_CREDENTIAL(HttpStatus.UNAUTHORIZED, "C-009", "자격 증명에 실패했습니다."),
 
-
     // AUTH - SUCCESS
     NORMAL_LOGIN_SUCCESS(HttpStatus.OK, "0000", "일반 로그인 성공."),
     OAUTH_LOGIN_SUCCESS(HttpStatus.OK, "0000", "SNS 로그인 성공."),
 
     // AUTH - ERROR
     ALREADY_LOGOUT_USER(HttpStatus.BAD_REQUEST,"A-001", "이미 로그아웃된 유저입니다. 다시 로그인해주세요."),
-
 
     // JWT - ERROR
     JWT_SECURE_EXP(HttpStatus.FORBIDDEN, "J-001", "토큰 보안 오류 발생. "),
@@ -49,6 +45,13 @@ public enum ResultCode {
     VALID_LOGINID_FORMAT(HttpStatus.BAD_REQUEST, "M-006", "유저 아이디 유효성 검증 실패. 잘못된 아이디 형식입니다."),
     VALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "M-007", "패스워드 유효성 검증 실패. 잘못된 패스워드 형식입니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "M-008", "해당 유저를 찾을 수 없습니다."),
+
+    // Category - ERROR
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CA-001", "해당 카테고리를 찾을 수 없습니다."),
+
+    // Seller - ERROR
+    SELLER_NOT_FOUND(HttpStatus.NOT_FOUND, "S-001", "해당 판매자를 찾을 수 없습니다."),
+
 
     // Utils
     REDIS_COMMON_EXP(HttpStatus.INTERNAL_SERVER_ERROR,"U-001","Redis Exception 발생. ");

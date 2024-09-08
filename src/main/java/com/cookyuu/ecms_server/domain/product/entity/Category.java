@@ -3,6 +3,7 @@ package com.cookyuu.ecms_server.domain.product.entity;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +12,6 @@ import java.util.List;
 
 @Entity
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "ecms_category")
 public class Category extends BaseTimeEntity {
@@ -20,6 +20,10 @@ public class Category extends BaseTimeEntity {
     private Long id;
     private String name;
 
+    @Builder
+    public Category(String name) {
+        this.name = name;
+    }
     @ManyToOne
     @JoinColumn(name = "parent_category_id")
     private Category parent;
