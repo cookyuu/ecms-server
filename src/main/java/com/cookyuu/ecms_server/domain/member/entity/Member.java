@@ -39,7 +39,8 @@ public class Member extends BaseTimeEntity {
     private List<Cart> carts = new ArrayList<>();
 
     @Builder
-    public Member(String name, String email, String loginId, String password, String phoneNumber, String address, RoleType role) {
+    public Member(Long id, String name, String email, String loginId, String password, String phoneNumber, String address, RoleType role) {
+        this.id = id;
         this.name = name;
         this.email = email;
         this.loginId = loginId;

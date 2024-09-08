@@ -7,9 +7,11 @@ import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.exception.auth.UserLoginException;
 import com.cookyuu.ecms_server.global.exception.auth.ValidateEmailException;
 import com.cookyuu.ecms_server.global.exception.auth.ValidatePhoneNumberException;
+import com.cookyuu.ecms_server.global.exception.domain.ECMSMemberException;
 import com.cookyuu.ecms_server.global.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -28,7 +30,9 @@ public class MemberService {
                 new UserLoginException(ResultCode.MEMBER_NOT_FOUND));
         log.info("[CheckLoginCredential] Member loginId : {}", member.getLoginId());
         authUtils.checkPassword(member.getPassword(), password);
-        return new JWTUserInfo().of(member);
+        JWTUserInfo userInfo = new JWTUserInfo();
+        userInfo.of(member);
+        return userInfo;
     }
 
     public void checkDuplicateLoginId(String loginId) {
@@ -50,4 +54,7 @@ public class MemberService {
     }
 
 
+    public Member findMemberById(Long id) {
+        return memberRepository.findById(id).orElseThrow(() -> new ECMSMemberException(ResultCode.MEMBER_NOT_FOUND));
+    }
 }
