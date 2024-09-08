@@ -1,8 +1,9 @@
 package com.cookyuu.ecms_server.global.security.jwt;
 
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
+import com.cookyuu.ecms_server.domain.member.entity.RoleType;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,24 +11,42 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Getter
-@RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
     private final JWTUserInfo user;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<String> roles = new ArrayList<>();
-        roles.add("ROLE_" + user.getRole().toString());
-
-        return roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+    public CustomUserDetails (JWTUserInfo user) {
+        this.user = user;
     }
 
+    private GrantedAuthority getAuthority(RoleType role) {
+        return new SimpleGrantedAuthority("ROLE_" + role.name());
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        List<GrantedAuthority> authorityList = new ArrayList<>();
+
+        switch (user.getRole()) {
+            case ADMIN :
+                authorityList.add(getAuthority(RoleType.ADMIN));
+                break;
+            case SELLER :
+                authorityList.add(getAuthority(RoleType.SELLER));
+                break;
+            case USER :
+                authorityList.add(getAuthority(RoleType.USER));
+                break;
+        }
+        return authorityList;
+    }
+
+    public RoleType getRole() {
+        return user.getRole();
+    }
     @Override
     public String getPassword() {
         return user.getPassword();

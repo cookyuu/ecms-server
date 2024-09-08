@@ -8,7 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Getter
 @Builder
 @AllArgsConstructor
@@ -20,12 +22,10 @@ public class JWTUserInfo {
     @Enumerated(EnumType.STRING)
     private RoleType role;
 
-    public JWTUserInfo of(Member member) {
-        return JWTUserInfo.builder()
-                .memberId(member.getId())
-                .loginId(member.getLoginId())
-                .password(member.getPassword())
-                .role(member.getRole())
-                .build();
+    public void of(Member member) {
+        this.memberId = member.getId();
+        this.loginId = member.getLoginId();
+        this.password = member.getPassword();
+        this.role = member.getRole();
     }
 }
