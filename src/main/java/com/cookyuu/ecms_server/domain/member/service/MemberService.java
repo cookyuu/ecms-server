@@ -5,13 +5,11 @@ import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.repository.MemberRepository;
 import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.exception.auth.UserLoginException;
-import com.cookyuu.ecms_server.global.exception.auth.ValidateEmailException;
-import com.cookyuu.ecms_server.global.exception.auth.ValidatePhoneNumberException;
+import com.cookyuu.ecms_server.global.exception.auth.ValidationException;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSMemberException;
 import com.cookyuu.ecms_server.global.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.reactivestreams.Publisher;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -37,19 +35,19 @@ public class MemberService {
 
     public void checkDuplicateLoginId(String loginId) {
         if (memberRepository.existsByLoginId(loginId)) {
-            throw new ValidatePhoneNumberException(ResultCode.VALID_LOGINID_DUPLICATE);
+            throw new ValidationException(ResultCode.VALID_LOGINID_DUPLICATE);
         }
     }
 
     public void checkDuplicateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
-            throw new ValidateEmailException(ResultCode.VALID_EMAIL_DUPLICATE);
+            throw new ValidationException(ResultCode.VALID_EMAIL_DUPLICATE);
         }
     }
 
     public void checkDuplicatePhoneNumber(String phoneNumber) {
         if (memberRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new ValidatePhoneNumberException(ResultCode.VALID_PHONENUMBER_DUPLICATE);
+            throw new ValidationException(ResultCode.VALID_PHONENUMBER_DUPLICATE);
         }
     }
 

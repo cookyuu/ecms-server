@@ -54,7 +54,8 @@ public enum ResultCode {
 
     // Seller - ERROR
     SELLER_NOT_FOUND(HttpStatus.NOT_FOUND, "S-001", "해당 판매자를 찾을 수 없습니다."),
-
+    VALID_BUSINESSNUM_FORMAT(HttpStatus.BAD_REQUEST,"S-002" ,"사업자등록번호 유효성 검증 실패. 잘못된 형식의 사업자등록번호입니다." ),
+    VALID_BUSINESSNUM_DUPLICATE(HttpStatus.BAD_REQUEST,"S-003" ,"사업자등록번호 유효성 검증 실패. 이미 등록된 사업자 등록번호입니다." ),
 
     // Utils
     REDIS_COMMON_EXP(HttpStatus.INTERNAL_SERVER_ERROR,"U-001","Redis Exception 발생. ");

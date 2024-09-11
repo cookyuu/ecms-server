@@ -4,10 +4,7 @@ import com.cookyuu.ecms_server.domain.auth.dto.SignupDto;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.global.dto.ResultCode;
-import com.cookyuu.ecms_server.global.exception.auth.ValidateEmailException;
-import com.cookyuu.ecms_server.global.exception.auth.ValidatePasswordException;
-import com.cookyuu.ecms_server.global.exception.auth.ValidatePhoneNumberException;
-import com.cookyuu.ecms_server.global.exception.auth.ValidateUserIdException;
+import com.cookyuu.ecms_server.global.exception.auth.*;
 import com.cookyuu.ecms_server.global.utils.AuthUtils;
 import com.cookyuu.ecms_server.global.utils.ValidateUtils;
 import org.junit.jupiter.api.DisplayName;
@@ -75,10 +72,10 @@ class AuthServiceTest {
                 .address("테스트 주소")
                 .build();
 
-        ValidateEmailException exception1 = assertThrows(ValidateEmailException.class, () -> {
+        ValidationException exception1 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request1);
         });
-        ValidateEmailException exception2 = assertThrows(ValidateEmailException.class, () -> {
+        ValidationException exception2 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request2);
         });
         assertEquals(ResultCode.VALID_EMAIL_FORMAT.getMessage(), exception1.getResultCode().getMessage());
@@ -115,13 +112,13 @@ class AuthServiceTest {
                 .address("테스트 주소")
                 .build();
 
-        ValidateUserIdException exception1 = assertThrows(ValidateUserIdException.class, () -> {
+        ValidationException exception1 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request1);
         });
-        ValidateUserIdException exception2 = assertThrows(ValidateUserIdException.class, () -> {
+        ValidationException exception2 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request2);
         });
-        ValidateUserIdException exception3 = assertThrows(ValidateUserIdException.class, () -> {
+        ValidationException exception3 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request3);
         });
         assertEquals(ResultCode.VALID_LOGINID_FORMAT.getMessage(), exception1.getResultCode().getMessage());
@@ -167,16 +164,16 @@ class AuthServiceTest {
                 .address("테스트 주소")
                 .build();
 
-        ValidatePhoneNumberException exception1 = assertThrows(ValidatePhoneNumberException.class, () -> {
+        ValidationException exception1 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request1);
         });
-        ValidatePhoneNumberException exception2 = assertThrows(ValidatePhoneNumberException.class, () -> {
+        ValidationException exception2 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request2);
         });
-        ValidatePhoneNumberException exception3 = assertThrows(ValidatePhoneNumberException.class, () -> {
+        ValidationException exception3 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request3);
         });
-        ValidatePhoneNumberException exception4 = assertThrows(ValidatePhoneNumberException.class, () -> {
+        ValidationException exception4 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request4);
         });
 
@@ -232,19 +229,19 @@ class AuthServiceTest {
                 .address("테스트 주소")
                 .build();
 
-        ValidatePasswordException exception1 = assertThrows(ValidatePasswordException.class, () -> {
+        ValidationException exception1 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request1);
         });
-        ValidatePasswordException exception2 = assertThrows(ValidatePasswordException.class, () -> {
+        ValidationException exception2 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request2);
         });
-        ValidatePasswordException exception3 = assertThrows(ValidatePasswordException.class, () -> {
+        ValidationException exception3 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request3);
         });
-        ValidatePasswordException exception4 = assertThrows(ValidatePasswordException.class, () -> {
+        ValidationException exception4 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request4);
         });
-        ValidatePasswordException exception5 = assertThrows(ValidatePasswordException.class, () -> {
+        ValidationException exception5 = assertThrows(ValidationException.class, () -> {
             authService.signupNormal(request5);
         });
 
