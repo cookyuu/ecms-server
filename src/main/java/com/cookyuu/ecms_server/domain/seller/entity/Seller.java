@@ -14,6 +14,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "ecms_seller")
@@ -21,17 +22,13 @@ public class Seller extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
     private String businessName;
     private String businessNumber;
     private String businessAddress;
     private String businessContactTelNum;
     private String businessContactEmail;
-
-    @Builder
-    public Seller(String name) {
-        this.name = name;
-    }
 
     @OneToMany(mappedBy = "seller")
     private List<Product> products = new ArrayList<>();

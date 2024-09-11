@@ -1,10 +1,7 @@
 package com.cookyuu.ecms_server.global.utils;
 
 import com.cookyuu.ecms_server.global.dto.ResultCode;
-import com.cookyuu.ecms_server.global.exception.auth.ValidateEmailException;
-import com.cookyuu.ecms_server.global.exception.auth.ValidatePasswordException;
-import com.cookyuu.ecms_server.global.exception.auth.ValidatePhoneNumberException;
-import com.cookyuu.ecms_server.global.exception.auth.ValidateUserIdException;
+import com.cookyuu.ecms_server.global.exception.auth.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,43 +20,70 @@ public class ValidateUtils {
     String phoneNumberRegex = "^\\d{3}-\\d{3,4}-\\d{4}$";
     /* 유저아이디 : 공백X, 알파벳으로 시작, 6~14자리 */
     String userIdRegex = "^(?!.*\\s)[a-zA-Z][a-zA-Z0-9._-]{5,13}$";
+    /* 비즈니스 번호 : 3자리 - 2자리 - 5자리 숫자 */
+    String businessNumRegex = "^\\d{3}-\\d{2}-\\d{5}$";
 
     public void isAvailableEmailFormat(String email) {
-        log.debug("[ValidEmailFormat] validate email format. email : {}", email);
+        log.debug("[ValidEmailFormat] Validate email format. email : {}", email);
 
         Pattern pattern = Pattern.compile(emailRegex);
         Matcher matcher = pattern.matcher(email);
         if (!matcher.matches()) {
-            throw new ValidateEmailException(ResultCode.VALID_EMAIL_FORMAT);
+            throw new ValidationException(ResultCode.VALID_EMAIL_FORMAT);
         }
     }
 
     public void isAvailablePhoneNumberFormat(String phoneNumber) {
-        log.debug("[ValidPhoneNumberFormat] validate phoneNumber format. phone number : {}", phoneNumber);
-
         Pattern pattern = Pattern.compile(phoneNumberRegex);
         Matcher matcher = pattern.matcher(phoneNumber);
         if (!matcher.matches()) {
-            throw new ValidatePhoneNumberException(ResultCode.VALID_PHONENUMBER_FORMAT);
+            throw new ValidationException(ResultCode.VALID_PHONENUMBER_FORMAT);
         }
+        log.debug("[ValidPhoneNumberFormat] Validate phoneNumber format. OK!!,  phone number : {} ", phoneNumber);
     }
 
     public void isAvailablePasswordFormat(String password) {
-        log.debug("[ValidPasswordFormat] validate password format. ");
-
+        log.debug("[ValidPasswordFormat] Validate password format. ");
         Pattern pattern = Pattern.compile(passwordRegex);
         Matcher matcher = pattern.matcher(password);
         if (!matcher.matches()) {
-            throw new ValidatePasswordException();
+            throw new ValidationException(ResultCode.VALID_PASSWORD_FORMAT);
         }
     }
 
     public void isAvailableUserIdFormat(String userId) {
-        log.debug("[ValidUserIdFormat] validate userId format. userId : {}", userId);
         Pattern pattern = Pattern.compile(userIdRegex);
         Matcher matcher = pattern.matcher(userId);
         if (!matcher.matches()) {
-            throw new ValidateUserIdException(ResultCode.VALID_LOGINID_FORMAT);
+            throw new ValidationException(ResultCode.VALID_LOGINID_FORMAT);
         }
+        log.info("[ValidUserIdFormat] Validate userId format. OK!!, userId : {}", userId);
+    }
+
+    public void isAvailableBusinessNumber(String businessNumber) {
+
+        Pattern pattern = Pattern.compile(businessNumRegex);
+        Matcher matcher = pattern.matcher(businessNumber);
+        if (!matcher.matches()) {
+            log.error("[ValidBusinessNumFormat] This business number format is unAvailable. business number : {}", businessNumber);
+            throw new ValidationException(ResultCode.VALID_BUSINESSNUM_FORMAT);
+        }
+        log.info("[ValidBusinessNumFormat] Validate business number format. OK!!");
+         chkBusinessNum(businessNumber);
+    }
+
+    public void chkBusinessNum(String businessNumber) {
+        businessNumber.replace("-", "");
+        int sum = 0;
+        String chkNo = "137137135";
+        for (int i = 0; i < chkNo.length(); i++) {
+            sum += (businessNumber.charAt(i)-'0') * (chkNo.charAt(i)-'0');
+        }
+        sum += ((businessNumber.charAt(8)-'0') * 5)/10;
+        if ((businessNumber.charAt(9)-'0' != (10-sum%10)%10)) {
+            log.error("[CheckBusinessNumber] This Business number is unAvailable. BusinessNum : {}", businessNumber);
+            throw new ValidationException(ResultCode.VALID_BUSINESSNUM_FORMAT);
+        }
+        log.debug("[CheckBusinessNumber] Validate business number. is Available. OK!!");
     }
 }
