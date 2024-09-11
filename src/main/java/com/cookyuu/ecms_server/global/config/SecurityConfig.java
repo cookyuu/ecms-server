@@ -30,7 +30,7 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     private static final String[] AUTH_WHITELIST = {
-            "/api/v1/auth/**"
+            "/api/v1/auth/**", "/api/v1/seller/registration"
     };
     private static final String[] AUTH_ADMIN = {
 
