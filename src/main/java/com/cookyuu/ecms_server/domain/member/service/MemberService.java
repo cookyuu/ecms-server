@@ -51,7 +51,6 @@ public class MemberService {
         }
     }
 
-
     public Member findMemberById(Long id) {
         return memberRepository.findById(id).orElseThrow(() -> new ECMSMemberException(ResultCode.MEMBER_NOT_FOUND));
     }

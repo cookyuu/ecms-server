@@ -1,5 +1,6 @@
 package com.cookyuu.ecms_server.domain.seller.entity;
 
+import com.cookyuu.ecms_server.domain.member.entity.RoleType;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
@@ -22,7 +23,6 @@ public class Seller extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
     private String businessName;
     private String businessNumber;
@@ -30,8 +30,28 @@ public class Seller extends BaseTimeEntity {
     private String businessContactTelNum;
     private String businessContactEmail;
 
+    private String loginId;
+    private String password;
+    @Enumerated(EnumType.STRING)
+    private RoleType role;
+
     @OneToMany(mappedBy = "seller")
     private List<Product> products = new ArrayList<>();
     @OneToMany(mappedBy = "seller")
     private List<Order> orders = new ArrayList<>();
+
+    public static Seller of(String loginId, String password, String name, String businessName, String businessNumber, String businessAddress,
+                             String businessContactTelNum, String businessContactEmail) {
+        return Seller.builder()
+                .loginId(loginId)
+                .password(password)
+                .name(name)
+                .businessName(businessName)
+                .businessNumber(businessNumber)
+                .businessAddress(businessAddress)
+                .businessContactTelNum(businessContactTelNum)
+                .businessContactEmail(businessContactEmail)
+                .role(RoleType.SELLER)
+                .build();
+    }
 }
