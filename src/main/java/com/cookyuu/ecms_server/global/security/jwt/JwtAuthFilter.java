@@ -1,8 +1,8 @@
 package com.cookyuu.ecms_server.global.security.jwt;
 
+import com.cookyuu.ecms_server.domain.member.entity.RoleType;
 import com.cookyuu.ecms_server.global.dto.RedisKeyCode;
 import com.cookyuu.ecms_server.global.dto.ResultCode;
-import com.cookyuu.ecms_server.global.exception.ECMSAppException;
 import com.cookyuu.ecms_server.global.exception.auth.ValidateJwtTokenException;
 import com.cookyuu.ecms_server.global.utils.JwtUtils;
 import com.cookyuu.ecms_server.global.utils.RedisUtils;
@@ -35,16 +35,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             log.info("[ValidateJwtToken] Authorization Code : {}", authorizationHeader);
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 String accessToken = jwtUtils.getAccessToken(authorizationHeader);
+                RoleType role = RoleType.valueOf(jwtUtils.getRole(accessToken));
                 jwtUtils.validateToken(accessToken);
-                Long memberId = jwtUtils.getMemberId(accessToken);
-                jwtUtils.isLogoutToken(memberId, accessToken);
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(memberId.toString());
+                Long id = jwtUtils.getId(accessToken);
+                jwtUtils.isLogoutToken(id, accessToken);
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(id.toString(), role);
                 if (userDetails != null) {
                     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                             new UsernamePasswordAuthenticationToken(userDetails, accessToken, userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
                 }
-                String logoutToken = redisUtils.getData(RedisKeyCode.LOGOUT_TOKEN.getSeparator()+memberId);
+                String logoutToken = redisUtils.getData(RedisKeyCode.LOGOUT_TOKEN.getSeparator()+ id);
                 if (accessToken.equals(logoutToken)) {
                     throw new ValidateJwtTokenException(ResultCode.JWT_ALREADY_LOGOUT);
                 }
