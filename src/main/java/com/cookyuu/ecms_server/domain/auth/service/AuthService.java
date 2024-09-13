@@ -5,6 +5,7 @@ import com.cookyuu.ecms_server.domain.auth.dto.LoginDto;
 import com.cookyuu.ecms_server.domain.auth.dto.SignupDto;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
+import com.cookyuu.ecms_server.domain.seller.service.SellerService;
 import com.cookyuu.ecms_server.global.dto.CookieCode;
 import com.cookyuu.ecms_server.global.dto.RedisKeyCode;
 import com.cookyuu.ecms_server.global.utils.*;
@@ -28,6 +29,7 @@ public class AuthService {
     private String accessTokenExp;
 
     private final MemberService memberService;
+    private final SellerService sellerService;
     private final ValidateUtils validateUtils;
     private final AuthUtils authUtils;
     private final JwtUtils jwtUtils;
@@ -59,7 +61,23 @@ public class AuthService {
         Cookie cookie = cookieUtils.setCookieExpire(CookieCode.REFRESH_TOKEN, refreshToken, refreshTokenExp);
         response.addCookie(cookie);
 
-        redisUtils.setDataExpire(RedisKeyCode.REFRESH_TOKEN.getSeparator() + userInfo.getMemberId(), refreshToken, Long.parseLong(refreshTokenExp)/1000);
+        redisUtils.setDataExpire(RedisKeyCode.REFRESH_TOKEN.getSeparator() + userInfo.getId(), refreshToken, Long.parseLong(refreshTokenExp)/1000);
+        return LoginDto.Response.builder()
+                .accessToken(accessToken)
+                .build();
+    }
+
+    @Transactional
+    public LoginDto.Response loginSeller(LoginDto.Request request, HttpServletResponse response) {
+        JWTUserInfo userInfo = sellerService.checkLoginCredentials(request.getLoginId(), request.getPassword());
+
+        log.info("[SellerLogin] Create Access/Refresh token ");
+        String accessToken = jwtUtils.createAccessToken((userInfo));
+        String refreshToken = jwtUtils.createRefreshToken(userInfo);
+        Cookie cookie = cookieUtils.setCookieExpire(CookieCode.REFRESH_TOKEN, refreshToken, refreshTokenExp);
+        response.addCookie(cookie);
+
+        redisUtils.setDataExpire(RedisKeyCode.REFRESH_TOKEN.getSeparator() + userInfo.getId(), refreshToken, Long.parseLong(refreshTokenExp)/1000);
         return LoginDto.Response.builder()
                 .accessToken(accessToken)
                 .build();
@@ -89,6 +107,5 @@ public class AuthService {
         memberService.checkDuplicatePhoneNumber(phoneNumber);
         validateUtils.isAvailablePhoneNumberFormat(phoneNumber);
     }
-
 
 }

@@ -8,7 +8,6 @@ import com.cookyuu.ecms_server.global.exception.auth.ValidateJwtTokenException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -45,10 +44,10 @@ public class JwtUtils {
     }
 
     private String createToken(JWTUserInfo member, long expiredTime) {
-        log.debug("[CreateJwtToken] Claims (member id :{}, loginId : {}, role : {}) ", member.getMemberId(), member.getLoginId(), member.getRole());
+        log.debug("[CreateJwtToken] Claims (member id :{}, loginId : {}, role : {}) ", member.getId(), member.getLoginId(), member.getRole());
 
         Claims claims = Jwts.claims();
-        claims.put("memberId", member.getMemberId());
+        claims.put("memberId", member.getId());
         claims.put("loginId", member.getLoginId());
         claims.put("role", member.getRole());
 
@@ -62,7 +61,7 @@ public class JwtUtils {
                 .compact();
     }
 
-    public Long getMemberId(String token) {
+    public Long getId(String token) {
         return parseClaims(token).get("memberId", Long.class);
     }
 
