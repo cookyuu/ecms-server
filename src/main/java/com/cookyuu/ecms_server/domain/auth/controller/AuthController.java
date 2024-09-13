@@ -36,6 +36,12 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(ResultCode.NORMAL_LOGIN_SUCCESS, res));
     }
 
+    @PostMapping("/login/seller")
+    public ResponseEntity<ApiResponse<LoginDto.Response>> loginSeller(@RequestBody LoginDto.Request request, HttpServletResponse response) {
+        LoginDto.Response res = authService.loginSeller(request, response);
+        return ResponseEntity.ok(ApiResponse.success(ResultCode.SELLER_LOGIN_SUCCESS, res));
+    }
+
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Object>> logoutNormal(@AuthenticationPrincipal UserDetails user, HttpServletRequest request, HttpServletResponse response) {
         authService.logoutNormal(user, request, response);

@@ -22,6 +22,7 @@ public enum ResultCode {
     // AUTH - SUCCESS
     NORMAL_LOGIN_SUCCESS(HttpStatus.OK, "0000", "일반 로그인 성공."),
     OAUTH_LOGIN_SUCCESS(HttpStatus.OK, "0000", "SNS 로그인 성공."),
+    SELLER_LOGIN_SUCCESS(HttpStatus.OK, "0000", "판매자 로그인 성공."),
     LOGOUT_SUCCESS(HttpStatus.OK, "0000", "로그아웃 성공."),
     SIGNUP_SUCCESS(HttpStatus.CREATED,"0000" ,"회원가입 성공" ),
 
@@ -44,8 +45,8 @@ public enum ResultCode {
     VALID_EMAIL_FORMAT(HttpStatus.BAD_REQUEST, "M-002", "이메일 유효성 검증 실패. 잘못된 이메일 형식입니다."),
     VALID_PHONENUMBER_DUPLICATE(HttpStatus.BAD_REQUEST,"M-003", "핸드폰 번호 유효성 검증 실패. 이미 등록된 핸드폰 번호입니다."),
     VALID_PHONENUMBER_FORMAT(HttpStatus.BAD_REQUEST, "M-004", "핸드폰 번호 유효성 검증 실패. 잘못된 형식의 핸드폰 번호입니다."),
-    VALID_LOGINID_DUPLICATE(HttpStatus.BAD_REQUEST,"M-005", "유저 아이디 유효성 검증 실패. 이미 등록된 아이디입니다."),
-    VALID_LOGINID_FORMAT(HttpStatus.BAD_REQUEST, "M-006", "유저 아이디 유효성 검증 실패. 잘못된 아이디 형식입니다."),
+    VALID_LOGINID_DUPLICATE(HttpStatus.BAD_REQUEST,"M-005", "로그인 아이디 유효성 검증 실패. 이미 등록된 아이디입니다."),
+    VALID_LOGINID_FORMAT(HttpStatus.BAD_REQUEST, "M-006", "로그인 아이디 유효성 검증 실패. 잘못된 아이디 형식입니다."),
     VALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "M-007", "패스워드 유효성 검증 실패. 잘못된 패스워드 형식입니다."),
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "M-008", "해당 유저를 찾을 수 없습니다."),
 

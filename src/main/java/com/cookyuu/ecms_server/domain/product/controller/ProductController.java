@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/product")
-//@PreAuthorize("hasRole('ROLE_SELLER') or hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasRole('ROLE_SELLER') or hasRole('ROLE_ADMIN')")
 public class ProductController {
     private final ProductService productService;
 
