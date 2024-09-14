@@ -37,7 +37,7 @@ public class ProductService {
                 category,
                 seller);
         Product product = productRepository.save(registerProduct);
-        log.info("[RegisterProduct] Product registration OK!!");
+        log.info("[RegisterProduct] Product registration OK!");
         return product.getId();
     }
 
@@ -55,7 +55,7 @@ public class ProductService {
         } else {
             product.updateInfo(productInfo.getName(), productInfo.getDescription(), productInfo.getPrice(), productInfo.getStockQuantity(), null);
         }
-        log.info("[UpdateProduct] Product update OK!!, productId : {}", productId);
+        log.info("[UpdateProduct] Product update OK!, productId : {}", productId);
     }
 
     @Transactional
@@ -69,7 +69,7 @@ public class ProductService {
             throw new ECMSProductException(ResultCode.ALREADY_DELETED_PRODUCT);
         }
         product.delete();
-        log.info("[DeleteProduct] Product delete OK!!, ProductId : {}", productId);
+        log.info("[DeleteProduct] Product delete OK!, ProductId : {}", productId);
     }
 
     public Product findProductById(Long id) {
