@@ -21,15 +21,22 @@ public class ProductController {
     private Long id;
 
     @PostMapping("/registration")
-    public ResponseEntity<ApiResponse<Object>> registerProduct(@AuthenticationPrincipal UserDetails user, @RequestBody RegisterProductDto.Request productInfo) {
-        productService.registerProduct(user, productInfo);
-        return ResponseEntity.ok(ApiResponse.success());
+    public ResponseEntity<ApiResponse<RegisterProductDto.Response>> registerProduct(@AuthenticationPrincipal UserDetails user, @RequestBody RegisterProductDto.Request productInfo) {
+        Long productId = productService.registerProduct(user, productInfo);
+        return ResponseEntity.ok(
+                ApiResponse.success(RegisterProductDto.Response.builder().productId(productId).build()));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> updateProduct(@PathVariable("id") Long productId, @AuthenticationPrincipal UserDetails user, @RequestBody UpdateProductDto.Request productInfo) {
         productService.updateProduct(productId, user, productInfo);
-        return ResponseEntity.ok(ApiResponse.success(ResultCode.PRODUCT_UPDATE_SUCCESS));
+        return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    @DeleteMapping()
+    public ResponseEntity<ApiResponse<Object>> deleteProduct(@RequestParam("id") Long productId, @AuthenticationPrincipal UserDetails user) {
+        productService.deleteProduct(productId, user);
+        return ResponseEntity.ok(ApiResponse.success());
     }
 
 }

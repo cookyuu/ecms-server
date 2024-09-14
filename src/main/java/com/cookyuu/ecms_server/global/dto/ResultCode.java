@@ -61,9 +61,8 @@ public enum ResultCode {
     // Product - ERROR
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "P-001", "해당 상품을 찾을 수 없습니다."),
     PRODUCT_OWNER_UNMATCHED(HttpStatus.BAD_REQUEST,"P-002", "상품에 대한 권한이 없습니다. 해당 상품의 판매자가 아닙니다." ),
+    ALREADY_DELETED_PRODUCT(HttpStatus.BAD_REQUEST, "P-003" ,"이미 삭제된 상품입니다." ),
 
-    // Product - SUCCESS
-    PRODUCT_UPDATE_SUCCESS(HttpStatus.OK, "0000", "상품 정보 수정 완료"),
     // Utils
     REDIS_COMMON_EXP(HttpStatus.INTERNAL_SERVER_ERROR,"U-001","Redis Exception 발생. ");
 
