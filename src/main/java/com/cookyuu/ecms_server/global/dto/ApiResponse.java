@@ -8,14 +8,14 @@ import java.util.List;
 
 @Getter
 public class ApiResponse<T> {
-    private final ResultCode code;
+    private final String code;
     private final String message;
     private final T data;
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private final PageResponse page;
 
     private ApiResponse(ResultCode code, String message, T data, PageResponse page) {
-        this.code = code;
+        this.code = code.getCode();
         this.message = message;
         this.data = data;
         this.page = page;

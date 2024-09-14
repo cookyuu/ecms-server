@@ -18,4 +18,12 @@ public class RegisterProductDto {
         private Integer stockQuantity;
         private String categoryName;
     }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class Response {
+    private Long productId;
+    }
 }

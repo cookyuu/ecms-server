@@ -18,7 +18,7 @@ public enum ResultCode {
     NOT_FOUND(HttpStatus.NOT_FOUND,"C-007", "데이터를 찾을 수 없습니다."),
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "C-008", "잘못된 요청입니다."),
     BAD_CREDENTIAL(HttpStatus.UNAUTHORIZED, "C-009", "자격 증명에 실패했습니다."),
-
+    REQUEST_DATA_ISNULL(HttpStatus.BAD_REQUEST,"C-010" , "요청 데이터가 모두 NULL 입니다."),
     // AUTH - SUCCESS
     NORMAL_LOGIN_SUCCESS(HttpStatus.OK, "0000", "일반 로그인 성공."),
     OAUTH_LOGIN_SUCCESS(HttpStatus.OK, "0000", "SNS 로그인 성공."),
@@ -57,6 +57,11 @@ public enum ResultCode {
     SELLER_NOT_FOUND(HttpStatus.NOT_FOUND, "S-001", "해당 판매자를 찾을 수 없습니다."),
     VALID_BUSINESSNUM_FORMAT(HttpStatus.BAD_REQUEST,"S-002" ,"사업자등록번호 유효성 검증 실패. 잘못된 형식의 사업자등록번호입니다." ),
     VALID_BUSINESSNUM_DUPLICATE(HttpStatus.BAD_REQUEST,"S-003" ,"사업자등록번호 유효성 검증 실패. 이미 등록된 사업자 등록번호입니다." ),
+
+    // Product - ERROR
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "P-001", "해당 상품을 찾을 수 없습니다."),
+    PRODUCT_OWNER_UNMATCHED(HttpStatus.BAD_REQUEST,"P-002", "상품에 대한 권한이 없습니다. 해당 상품의 판매자가 아닙니다." ),
+    ALREADY_DELETED_PRODUCT(HttpStatus.BAD_REQUEST, "P-003" ,"이미 삭제된 상품입니다." ),
 
     // Utils
     REDIS_COMMON_EXP(HttpStatus.INTERNAL_SERVER_ERROR,"U-001","Redis Exception 발생. ");
