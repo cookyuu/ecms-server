@@ -9,7 +9,7 @@ public class ECMSCategoryException extends ECMSAppException {
         super(ResultCode.CATEGORY_NOT_FOUND);
     }
 
-    protected ECMSCategoryException(ResultCode resultCode) {
+    public ECMSCategoryException(ResultCode resultCode) {
         super(resultCode);
     }
 
