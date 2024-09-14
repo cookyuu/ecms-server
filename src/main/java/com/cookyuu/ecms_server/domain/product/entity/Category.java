@@ -37,4 +37,9 @@ public class Category extends BaseTimeEntity {
     public static Category of(String name, Category parentCategory) {
         return  Category.builder().name(name).parent(parentCategory).build();
     }
+
+    public void update(String name, Category parent) {
+        this.name = StringUtils.isEmpty(name) ? this.name : name;
+        this.parent = parent==null ? this.parent : parent;
+    }
 }
