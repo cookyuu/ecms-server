@@ -8,6 +8,7 @@ import java.util.List;
 
 @Getter
 public class ApiResponse<T> {
+    private final ResultCode resultCode;
     private final String code;
     private final String message;
     private final T data;
@@ -15,6 +16,7 @@ public class ApiResponse<T> {
     private final PageResponse page;
 
     private ApiResponse(ResultCode code, String message, T data, PageResponse page) {
+        this.resultCode = code;
         this.code = code.getCode();
         this.message = message;
         this.data = data;
@@ -89,6 +91,15 @@ public class ApiResponse<T> {
                 resultCode,
                 resultCode.getMessage(),
                 null,
+                null
+        );
+    }
+
+    public static<T> ApiResponse<T> created(T data) {
+        return new ApiResponse<>(
+                ResultCode.CREATED,
+                ResultCode.CREATED.getMessage(),
+                data,
                 null
         );
     }

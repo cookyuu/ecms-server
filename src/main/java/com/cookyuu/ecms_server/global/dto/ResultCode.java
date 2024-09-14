@@ -52,6 +52,7 @@ public enum ResultCode {
 
     // Category - ERROR
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CA-001", "해당 카테고리를 찾을 수 없습니다."),
+    CATEGORY_NAME_DUPLICATED(HttpStatus.BAD_REQUEST, "CA-002", "이미 등록된 카테고리명입니다."),
 
     // Seller - ERROR
     SELLER_NOT_FOUND(HttpStatus.NOT_FOUND, "S-001", "해당 판매자를 찾을 수 없습니다."),
