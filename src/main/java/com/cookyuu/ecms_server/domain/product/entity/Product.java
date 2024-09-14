@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,4 +56,12 @@ public class Product extends BaseTimeEntity {
                 .build();
     }
 
+    public void updateInfo(String name, String description, Integer price, Integer stockQuantity, Category category) {
+        this.name = StringUtils.isEmpty(name) ? this.name : name;
+        this.description = StringUtils.isEmpty(description) ? this.description : description;
+        this.price = price==null ? this.price : price;
+        this.stockQuantity = stockQuantity==null ? this.stockQuantity : stockQuantity;
+        this.category = category==null ? this.category : category;
+
+    }
 }
