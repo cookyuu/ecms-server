@@ -42,6 +42,13 @@ public class CategoryService {
         log.info("[UpdateCategory] Update category OK!");
     }
 
+    @Transactional
+    public void deleteCategory(Long categoryId) {
+        Category category = findById(categoryId);
+        categoryRepository.delete(category);
+        log.info("[DeleteCategory] Delete category OK!, category Name : {}", category.getName());
+    }
+
     public Category findByName(String name) {
         Category category = categoryRepository.findByName(name).orElseThrow(ECMSCategoryException::new);
         log.info("[FindCategoryByName] Find category OK!, category Id : {}", category.getId());
@@ -53,7 +60,6 @@ public class CategoryService {
         log.info("[FindCategoryByName] Find category OK!, category Name : {}", category.getName());
         return category;
     }
-
     private void chkCategoryNameDuplicated(String name) {
         if (categoryRepository.existsByName(name)) {
             throw new ECMSCategoryException(ResultCode.CATEGORY_NAME_DUPLICATED);
