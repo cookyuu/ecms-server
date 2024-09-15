@@ -9,6 +9,7 @@ public enum ResultCode {
     // Common - SUCCESS
     SUCCESS(HttpStatus.OK,"0000","성공!"),
     CREATED(HttpStatus.CREATED,"0000", "성공!"),
+
     // Common - ERROR
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST,"C-001", "잘못된 요청값입니다."),
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "C-002", "허용되지 않은 HTTP 메서드입니다."),
@@ -19,6 +20,7 @@ public enum ResultCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "C-008", "잘못된 요청입니다."),
     BAD_CREDENTIAL(HttpStatus.UNAUTHORIZED, "C-009", "자격 증명에 실패했습니다."),
     REQUEST_DATA_ISNULL(HttpStatus.BAD_REQUEST,"C-010" , "요청 데이터가 모두 NULL 입니다."),
+
     // AUTH - SUCCESS
     NORMAL_LOGIN_SUCCESS(HttpStatus.OK, "0000", "일반 로그인 성공."),
     OAUTH_LOGIN_SUCCESS(HttpStatus.OK, "0000", "SNS 로그인 성공."),
@@ -28,6 +30,7 @@ public enum ResultCode {
 
     // AUTH - ERROR
     ALREADY_LOGOUT_USER(HttpStatus.BAD_REQUEST,"A-001", "이미 로그아웃된 유저입니다. 다시 로그인해주세요."),
+    CONFIRM_PASSWORD_UNMATCHED(HttpStatus.BAD_REQUEST, "A-002", "확인용 패스워드가 일치하지 않습니다. 동일한 패스워드를 입력해주세요." ),
 
     // JWT - ERROR
     JWT_SECURE_EXP(HttpStatus.FORBIDDEN, "J-001", "토큰 보안 오류 발생. "),

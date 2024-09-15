@@ -19,7 +19,7 @@ public class ValidateUtils {
     /* 핸드폰번호 : 앞3자리 - 중간 3or4자리 - 마지막 4자리 */
     String phoneNumberRegex = "^\\d{3}-\\d{3,4}-\\d{4}$";
     /* 유저아이디 : 공백X, 알파벳으로 시작, 6~14자리 */
-    String userIdRegex = "^(?!.*\\s)[a-zA-Z][a-zA-Z0-9._-]{5,13}$";
+    String loginIdRegex = "^(?!.*\\s)[a-zA-Z][a-zA-Z0-9._-]{5,13}$";
     /* 비즈니스 번호 : 3자리 - 2자리 - 5자리 숫자 */
     String businessNumRegex = "^\\d{3}-\\d{2}-\\d{5}$";
 
@@ -37,6 +37,7 @@ public class ValidateUtils {
         Pattern pattern = Pattern.compile(phoneNumberRegex);
         Matcher matcher = pattern.matcher(phoneNumber);
         if (!matcher.matches()) {
+            log.error("[ValidPhoneNumber] This Phone Number format is unAvailable, PhoneNumber : {}", phoneNumber);
             throw new ValidationException(ResultCode.VALID_PHONENUMBER_FORMAT);
         }
         log.debug("[ValidPhoneNumberFormat] Validate phoneNumber format. OK!!,  phone number : {} ", phoneNumber);
@@ -47,17 +48,19 @@ public class ValidateUtils {
         Pattern pattern = Pattern.compile(passwordRegex);
         Matcher matcher = pattern.matcher(password);
         if (!matcher.matches()) {
+            log.error("[ValidPhoneNumber] This Password format is unAvailable");
             throw new ValidationException(ResultCode.VALID_PASSWORD_FORMAT);
         }
     }
 
-    public void isAvailableUserIdFormat(String userId) {
-        Pattern pattern = Pattern.compile(userIdRegex);
-        Matcher matcher = pattern.matcher(userId);
+    public void isAvailableLoginIdFormat(String loginId) {
+        Pattern pattern = Pattern.compile(loginIdRegex);
+        Matcher matcher = pattern.matcher(loginId);
         if (!matcher.matches()) {
+            log.error("[ValidPhoneNumber] This Login ID format is unAvailable. LoginId : {}", loginId);
             throw new ValidationException(ResultCode.VALID_LOGINID_FORMAT);
         }
-        log.info("[ValidUserIdFormat] Validate userId format. OK!!, userId : {}", userId);
+        log.info("[ValidUserIdFormat] Validate userId format. OK!!, LoginId : {}", loginId);
     }
 
     public void isAvailableBusinessNumber(String businessNumber) {
@@ -65,7 +68,7 @@ public class ValidateUtils {
         Pattern pattern = Pattern.compile(businessNumRegex);
         Matcher matcher = pattern.matcher(businessNumber);
         if (!matcher.matches()) {
-            log.error("[ValidBusinessNumFormat] This business number format is unAvailable. business number : {}", businessNumber);
+            log.error("[ValidBusinessNumFormat] This Business Number format is unAvailable. Business number : {}", businessNumber);
             throw new ValidationException(ResultCode.VALID_BUSINESSNUM_FORMAT);
         }
         log.info("[ValidBusinessNumFormat] Validate business number format. OK!!");

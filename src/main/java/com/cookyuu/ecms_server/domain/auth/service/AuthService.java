@@ -99,7 +99,7 @@ public class AuthService {
 
     protected void validateProfileInfo(String loginId, String email, String phoneNumber) {
         memberService.checkDuplicateLoginId(loginId);
-        validateUtils.isAvailableUserIdFormat(loginId);
+        validateUtils.isAvailableLoginIdFormat(loginId);
 
         memberService.checkDuplicateEmail(email);
         validateUtils.isAvailableEmailFormat(email);
