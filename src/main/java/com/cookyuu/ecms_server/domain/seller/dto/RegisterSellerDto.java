@@ -2,6 +2,7 @@ package com.cookyuu.ecms_server.domain.seller.dto;
 
 import com.cookyuu.ecms_server.domain.member.entity.RoleType;
 import com.cookyuu.ecms_server.domain.seller.entity.Seller;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,6 +15,7 @@ public class RegisterSellerDto {
     @NoArgsConstructor
     public static class Request {
         private String loginId;
+        @NotNull
         private String password;
         private String name;
         private String businessName;

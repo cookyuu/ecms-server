@@ -4,6 +4,7 @@ import com.cookyuu.ecms_server.domain.seller.dto.RegisterSellerDto;
 import com.cookyuu.ecms_server.domain.seller.dto.UpdateSellerDto;
 import com.cookyuu.ecms_server.domain.seller.service.SellerService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,13 +19,13 @@ public class SellerController {
     private final SellerService sellerService;
 
     @PostMapping("/registration")
-    public ResponseEntity<ApiResponse<RegisterSellerDto.Response>> registerSeller(@RequestBody RegisterSellerDto.Request sellerInfo) {
+    public ResponseEntity<ApiResponse<RegisterSellerDto.Response>> registerSeller(@Valid @RequestBody RegisterSellerDto.Request sellerInfo) {
         RegisterSellerDto.Response res = sellerService.registerSeller(sellerInfo);
         return ResponseEntity.ok(ApiResponse.created(res));
     }
 
     @PutMapping("/info")
-    public ResponseEntity<ApiResponse<Object>> updateSellerInfo(@AuthenticationPrincipal UserDetails user, @RequestBody UpdateSellerDto.Request sellerInfo) {
+    public ResponseEntity<ApiResponse<Object>> updateSellerInfo(@AuthenticationPrincipal UserDetails user,@Valid @RequestBody UpdateSellerDto.Request sellerInfo) {
         sellerService.updateSellerInfo(user, sellerInfo);
         return ResponseEntity.ok(ApiResponse.success());
     }

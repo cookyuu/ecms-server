@@ -30,10 +30,12 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     private static final String[] AUTH_WHITELIST = {
-            "/api/v1/auth/**", "/api/v1/seller/registration"
+        "/api/v1/auth/**", "/api/v1/seller/registration"
     };
     private static final String[] AUTH_ADMIN = {
-
+    };
+    private static final String[] AUTH_SELLER = {
+        "api/v1/product/registration", "/api/v1/product", "/api/v1/seller/info"
     };
     private static final String[] AUTH_USER = {
 
@@ -59,6 +61,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorize -> authorize
                 .requestMatchers(AUTH_WHITELIST).permitAll()
                 .requestMatchers(AUTH_ADMIN).hasRole("ADMIN")
+                .requestMatchers(AUTH_SELLER).hasRole("SELLER")
                 .requestMatchers(AUTH_USER).hasRole("USER")
                 .anyRequest().authenticated());
 
