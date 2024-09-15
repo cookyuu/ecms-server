@@ -30,6 +30,7 @@ public enum ResultCode {
 
     // AUTH - ERROR
     ALREADY_LOGOUT_USER(HttpStatus.BAD_REQUEST,"A-001", "이미 로그아웃된 유저입니다. 다시 로그인해주세요."),
+    CONFIRM_PASSWORD_UNMATCHED(HttpStatus.BAD_REQUEST, "A-002", "확인용 패스워드가 일치하지 않습니다. 동일한 패스워드를 입력해주세요." ),
 
     // JWT - ERROR
     JWT_SECURE_EXP(HttpStatus.FORBIDDEN, "J-001", "토큰 보안 오류 발생. "),

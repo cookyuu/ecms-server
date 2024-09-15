@@ -6,13 +6,16 @@ import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.seller.dto.RegisterSellerDto;
 import com.cookyuu.ecms_server.domain.seller.dto.UpdateSellerDto;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +41,14 @@ public class Seller extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private RoleType role;
 
+    @ColumnDefault("false")
+    @Column(columnDefinition = "TINYINT(1)")
+    private boolean isDeleted;
+
+    @Column
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-mm-dd HH:mm:ss", timezone = "Asia/Seoul")
+    private LocalDateTime deletedAt;
+
     @OneToMany(mappedBy = "seller")
     private List<Product> products = new ArrayList<>();
     @OneToMany(mappedBy = "seller")
@@ -49,5 +60,10 @@ public class Seller extends BaseTimeEntity {
         this.businessAddress = StringUtils.isEmpty(sellerInfo.getBusinessAddress()) ? this.businessAddress : sellerInfo.getBusinessAddress();
         this.businessContactTelNum = StringUtils.isEmpty(sellerInfo.getBusinessContactTelNum()) ? this.businessContactTelNum : sellerInfo.getBusinessContactTelNum();
         this.businessContactEmail = StringUtils.isEmpty(sellerInfo.getBusinessContactEmail()) ? this.businessContactEmail : sellerInfo.getBusinessContactEmail();
+    }
+
+    public void delete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
     }
 }

@@ -1,5 +1,6 @@
 package com.cookyuu.ecms_server.domain.seller.controller;
 
+import com.cookyuu.ecms_server.domain.seller.dto.DeleteSellerDto;
 import com.cookyuu.ecms_server.domain.seller.dto.RegisterSellerDto;
 import com.cookyuu.ecms_server.domain.seller.dto.UpdateSellerDto;
 import com.cookyuu.ecms_server.domain.seller.service.SellerService;
@@ -25,8 +26,14 @@ public class SellerController {
     }
 
     @PutMapping("/info")
-    public ResponseEntity<ApiResponse<Object>> updateSellerInfo(@AuthenticationPrincipal UserDetails user,@Valid @RequestBody UpdateSellerDto.Request sellerInfo) {
+    public ResponseEntity<ApiResponse<Object>> updateSellerInfo(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody UpdateSellerDto.Request sellerInfo) {
         sellerService.updateSellerInfo(user, sellerInfo);
+        return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    @DeleteMapping()
+    public ResponseEntity<ApiResponse<Object>> deleteSeller(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody DeleteSellerDto.Request sellerInfo) {
+        sellerService.deleteSeller(user, sellerInfo);
         return ResponseEntity.ok(ApiResponse.success());
     }
 }
