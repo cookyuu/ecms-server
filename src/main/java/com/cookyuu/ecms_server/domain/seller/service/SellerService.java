@@ -1,9 +1,10 @@
 package com.cookyuu.ecms_server.domain.seller.service;
 
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
-import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.seller.dto.RegisterSellerDto;
+import com.cookyuu.ecms_server.domain.seller.dto.UpdateSellerDto;
 import com.cookyuu.ecms_server.domain.seller.entity.Seller;
+import com.cookyuu.ecms_server.domain.seller.mapper.SellerRegistrationMapper;
 import com.cookyuu.ecms_server.domain.seller.repository.SellerRepository;
 import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.exception.auth.UserLoginException;
@@ -12,6 +13,7 @@ import com.cookyuu.ecms_server.global.utils.AuthUtils;
 import com.cookyuu.ecms_server.global.utils.ValidateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,13 +30,25 @@ public class SellerService {
     }
 
     @Transactional
-    public void registerSeller (RegisterSellerDto.Request sellerInfo) {
+    public RegisterSellerDto.Response registerSeller (RegisterSellerDto.Request sellerInfo) {
         validateRegistrationSeller(sellerInfo);
-        Seller seller = Seller.of(sellerInfo.getLoginId(), validateAndEncryptPassword(sellerInfo.getPassword()), sellerInfo.getName(),
-                sellerInfo.getBusinessName(), sellerInfo.getBusinessNumber(), sellerInfo.getBusinessAddress(), sellerInfo.getBusinessContactTelNum(),
-                sellerInfo.getBusinessContactEmail());
-        sellerRepository.save(seller);
+        Seller registerSeller = SellerRegistrationMapper.toEntity(sellerInfo, validateAndEncryptPassword(sellerInfo.getPassword()));
+        Seller seller = sellerRepository.save(registerSeller);
         log.info("[RegisterSeller] Register seller, OK!!");
+        return SellerRegistrationMapper.toDto(seller);
+    }
+
+    @Transactional
+    public void updateSellerInfo(UserDetails user, UpdateSellerDto.Request sellerInfo) {
+        Seller seller = findSellerById(Long.parseLong(user.getUsername()));
+        String reqPw = validateAndEncryptPassword(sellerInfo.getPassword());
+        String jwtPw = user.getPassword();
+        if (!reqPw.equals(jwtPw)) {
+            throw new ECMSSellerException(ResultCode.AUTH_PASSWORD_UNMATCHED);
+        }
+        sellerInfo.chkAllNull();
+        seller.updateInfo(sellerInfo);
+        log.info("[UpdateSellerInfo] Update seller personal info OK!, SellerId : {}", seller.getId());
     }
 
     private void validateRegistrationSeller(RegisterSellerDto.Request sellerInfo){
