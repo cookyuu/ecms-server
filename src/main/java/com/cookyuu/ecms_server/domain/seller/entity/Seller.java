@@ -3,7 +3,10 @@ package com.cookyuu.ecms_server.domain.seller.entity;
 import com.cookyuu.ecms_server.domain.member.entity.RoleType;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
+import com.cookyuu.ecms_server.domain.seller.dto.RegisterSellerDto;
+import com.cookyuu.ecms_server.domain.seller.dto.UpdateSellerDto;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
+import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -40,18 +43,11 @@ public class Seller extends BaseTimeEntity {
     @OneToMany(mappedBy = "seller")
     private List<Order> orders = new ArrayList<>();
 
-    public static Seller of(String loginId, String password, String name, String businessName, String businessNumber, String businessAddress,
-                             String businessContactTelNum, String businessContactEmail) {
-        return Seller.builder()
-                .loginId(loginId)
-                .password(password)
-                .name(name)
-                .businessName(businessName)
-                .businessNumber(businessNumber)
-                .businessAddress(businessAddress)
-                .businessContactTelNum(businessContactTelNum)
-                .businessContactEmail(businessContactEmail)
-                .role(RoleType.SELLER)
-                .build();
+    public void updateInfo(UpdateSellerDto.Request sellerInfo) {
+        this.name = StringUtils.isEmpty(sellerInfo.getName()) ? this.name : sellerInfo.getName();
+        this.businessName = StringUtils.isEmpty(sellerInfo.getBusinessName()) ? this.businessName : sellerInfo.getBusinessName();
+        this.businessAddress = StringUtils.isEmpty(sellerInfo.getBusinessAddress()) ? this.businessAddress : sellerInfo.getBusinessAddress();
+        this.businessContactTelNum = StringUtils.isEmpty(sellerInfo.getBusinessContactTelNum()) ? this.businessContactTelNum : sellerInfo.getBusinessContactTelNum();
+        this.businessContactEmail = StringUtils.isEmpty(sellerInfo.getBusinessContactEmail()) ? this.businessContactEmail : sellerInfo.getBusinessContactEmail();
     }
 }
