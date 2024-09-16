@@ -1,16 +1,18 @@
 package com.cookyuu.ecms_server.domain.cart.service;
 
-import com.cookyuu.ecms_server.domain.cart.dto.AddCartItemDto;
+import com.cookyuu.ecms_server.domain.cart.dto.UpdateCartItemDto;
 import com.cookyuu.ecms_server.domain.cart.entity.Cart;
 import com.cookyuu.ecms_server.domain.cart.entity.CartItem;
-import com.cookyuu.ecms_server.domain.cart.mapper.AddCartItemMapper;
+import com.cookyuu.ecms_server.domain.cart.mapper.UpdateCartItemMapper;
 import com.cookyuu.ecms_server.domain.cart.repository.CartItemRepository;
 import com.cookyuu.ecms_server.domain.cart.repository.CartRepository;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
+import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSCartException;
+import com.cookyuu.ecms_server.global.exception.domain.ECMSCartItemException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,16 +35,21 @@ public class CartService {
     }
 
     @Transactional
-    public void addCartItem(UserDetails user, AddCartItemDto.Request cartItemInfo) {
+    public void updateCartItem(UserDetails user, UpdateCartItemDto.Request cartItemInfo) {
         Member member = memberService.findMemberById(Long.parseLong(user.getUsername()));
         Product product = productService.findProductById(cartItemInfo.getProductId());
         Cart cart = cartRepository.findByMemberId(member.getId()).orElseThrow(ECMSCartException::new);
+        if (cartItemInfo.getQuantity() < 1) {
+            log.error("[UpdateCartItem] CartItem quantity is too less, Quantity : {}", cartItemInfo.getQuantity());
+            throw new ECMSCartItemException(ResultCode.BAD_REQUEST, "카트에 담길 상품의 수량은 1이상 이여야합니다.");
+        }
         if (cartItemRepository.existsByCartAndProduct(cart, product)) {
-            CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product);
-            cartItem.addQuantity(cartItemInfo.getQuantity());
+            CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product).orElseThrow(ECMSCartItemException::new);
+            cartItem.updateQuantity(cartItemInfo.getQuantity());
         } else {
-            CartItem cartItem = AddCartItemMapper.toEntity(cartItemInfo, product, cart);
+            CartItem cartItem = UpdateCartItemMapper.toEntity(cartItemInfo, product, cart);
             cartItemRepository.save(cartItem);
         }
+        log.info("[UpdateCartItem] Update cart item product quantity OK!, CartId : {}, productId : {}", cart.getId(), product.getId());
     }
 }
