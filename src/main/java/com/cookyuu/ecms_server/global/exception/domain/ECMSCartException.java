@@ -3,29 +3,29 @@ package com.cookyuu.ecms_server.global.exception.domain;
 import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.exception.ECMSAppException;
 
-public class ECMSSellerException extends ECMSAppException {
+public class ECMSCartException extends ECMSAppException {
 
-    public ECMSSellerException() {
-        super(ResultCode.SELLER_NOT_FOUND);
+    public ECMSCartException() {
+        super(ResultCode.CART_NOT_FOUND);
     }
 
-    public ECMSSellerException(ResultCode resultCode) {
+    public ECMSCartException(ResultCode resultCode) {
         super(resultCode);
     }
 
-    protected ECMSSellerException(ResultCode resultCode, String customMsg) {
+    protected ECMSCartException(ResultCode resultCode, String customMsg) {
         super(resultCode, customMsg);
     }
 
-    protected ECMSSellerException(ResultCode resultCode, Object data, String[] args) {
+    protected ECMSCartException(ResultCode resultCode, Object data, String[] args) {
         super(resultCode, data, args);
     }
 
-    protected ECMSSellerException(ResultCode resultCode, Throwable t) {
+    protected ECMSCartException(ResultCode resultCode, Throwable t) {
         super(resultCode, t);
     }
 
-    protected ECMSSellerException(ResultCode resultCode, Throwable t, String customMsg) {
+    protected ECMSCartException(ResultCode resultCode, Throwable t, String customMsg) {
         super(resultCode, t, customMsg);
     }
 }
