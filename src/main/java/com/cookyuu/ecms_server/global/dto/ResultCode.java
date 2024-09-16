@@ -69,6 +69,8 @@ public enum ResultCode {
 
     // Cart - ERROR
     CART_NOT_FOUND(HttpStatus.NOT_FOUND, "CT-001", "유저의 카트정보를 찾을 수 없습니다."),
+    CARTITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "CT-002","카트에 등록된 해당 상품을 찾을 없습니다." ),
+
     // Utils
     REDIS_COMMON_EXP(HttpStatus.INTERNAL_SERVER_ERROR,"U-001","Redis Exception 발생. ");
 

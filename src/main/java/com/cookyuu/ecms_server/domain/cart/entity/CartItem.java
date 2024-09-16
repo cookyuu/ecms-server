@@ -33,7 +33,7 @@ public class CartItem extends BaseTimeEntity {
     @JoinColumn(name = "product_id")
     private Product product;
 
-    public void addQuantity(Integer quantity) {
-        this.quantity += quantity;
+    public void updateQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 }
