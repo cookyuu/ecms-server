@@ -3,6 +3,7 @@ package com.cookyuu.ecms_server.domain.auth.service;
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
 import com.cookyuu.ecms_server.domain.auth.dto.LoginDto;
 import com.cookyuu.ecms_server.domain.auth.dto.SignupDto;
+import com.cookyuu.ecms_server.domain.cart.service.CartService;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.domain.seller.service.SellerService;
@@ -30,6 +31,7 @@ public class AuthService {
 
     private final MemberService memberService;
     private final SellerService sellerService;
+    private final CartService cartService;
     private final ValidateUtils validateUtils;
     private final AuthUtils authUtils;
     private final JwtUtils jwtUtils;
@@ -46,9 +48,11 @@ public class AuthService {
         String address = request.getAddress();
 
         validateProfileInfo(loginId, email, phoneNumber);
-        Member member = Member.of(name, email, loginId, validateAndEncryptPassword(password), phoneNumber, address);
+        Member registerMember = Member.of(name, email, loginId, validateAndEncryptPassword(password), phoneNumber, address);
 
-        memberService.save(member);
+        Member member = memberService.save(registerMember);
+
+        cartService.makeCart(member);
     }
 
     @Transactional
