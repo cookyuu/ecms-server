@@ -39,6 +39,7 @@ public class CartService {
     public void updateCartItem(UserDetails user, UpdateCartItemDto.Request cartItemInfo) {
         Member member = memberService.findMemberById(Long.parseLong(user.getUsername()));
         Product product = productService.findProductById(cartItemInfo.getProductId());
+        product.isDeleted();
         Cart cart = cartRepository.findByMemberId(member.getId()).orElseThrow(ECMSCartException::new);
         if (cartItemInfo.getQuantity() < 1) {
             log.error("[UpdateCartItem] CartItem quantity is too less, Quantity : {}", cartItemInfo.getQuantity());
