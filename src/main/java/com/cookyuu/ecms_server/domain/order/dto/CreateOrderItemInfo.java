@@ -1,17 +1,24 @@
 package com.cookyuu.ecms_server.domain.order.dto;
 
+import com.cookyuu.ecms_server.domain.product.entity.Product;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-public class CreateOrderItemDto {
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+public class CreateOrderItemInfo {
+    @NotNull
+    private Long productId;
+    @NotNull
+    private Integer price;
+    @NotNull
+    private Integer quantity;
+    private Product product;
 
-    @Getter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    public static class Request {
-        private Long productId;
-        private Integer price;
-        private Integer quantity;
+    public void addProduct(Product product) {
+        this.product = product;
     }
 }

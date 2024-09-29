@@ -64,7 +64,16 @@ public class CartService {
         log.info("[DeleteCartItem] Delete cart item OK!, CartId : {}, ProductId : {}", cart.getId(), product.getId());
     }
 
+    public void deleteCartItem(Cart cart, Product product) {
+        CartItem cartItem = findCartItemByCartAndProduct(cart, product);
+        cartItemRepository.delete(cartItem);
+    }
+
     private CartItem findCartItemByCartAndProduct(Cart cart, Product product) {
         return cartItemRepository.findByCartAndProduct(cart, product).orElseThrow(ECMSCartItemException::new);
+    }
+
+    public Cart findCartByMemberId(Long id) {
+        return cartRepository.findByMemberId(id).orElseThrow(ECMSCartException::new);
     }
 }
