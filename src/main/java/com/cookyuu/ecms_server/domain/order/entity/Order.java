@@ -8,7 +8,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.parameters.P;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,19 +29,27 @@ public class Order extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
+    private String cancelReason;
+    private LocalDateTime canceledAt;
+
     @ManyToOne
     @JoinColumn(name = "buyer_id")
-    private Member member;
+    private Member buyer;
 
     @OneToMany(mappedBy = "order")
     private List<OrderLine> orderLines = new ArrayList<>();
 
     @Builder
-    public Order (Integer totalPrice, String orderNumber, OrderStatus status, Member member, List<OrderLine> orderLines) {
+    public Order (Integer totalPrice, String orderNumber, OrderStatus status, Member buyer, List<OrderLine> orderLines) {
         this.totalPrice = totalPrice;
         this.orderNumber = orderNumber;
         this.status = status;
-        this.member = member;
+        this.buyer = buyer;
         this.orderLines = orderLines;
+    }
+
+    public void cancelReq(String cancelReason) {
+        this.cancelReason = cancelReason;
+        this.status = OrderStatus.CANCEL_WAIT;
     }
 }
