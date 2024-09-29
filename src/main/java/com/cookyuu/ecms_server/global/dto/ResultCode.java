@@ -73,13 +73,15 @@ public enum ResultCode {
     CARTITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "CT-002","카트에 등록된 해당 상품을 찾을 없습니다."),
 
     // Order - SUCCESS
-    ORDER_CANCEL_REQ_SUCCESS(HttpStatus.OK, "0000", "주문 취소 요청이 완료되었습니다."),
+    ORDER_CANCEL_SUCCESS(HttpStatus.OK, "0000", "주문 취소가 정상 처리되었습니다."),
     ORDER_REVISE_SUCCESS(HttpStatus.OK, "0000", "주문 정보 변경이 완료되었습니다."),
 
     // Order - ERROR
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O-001", "주문 정보를 찾을 수 없습니다."),
     ORDER_PROCESS_FAIL(HttpStatus.BAD_REQUEST,"O-001" , "주문 처리에 실패했습니다."),
     ORDER_CANCEL_FAIL(HttpStatus.BAD_REQUEST, "O-002", "주문 취소에 실패했습니다."),
+    ALREADY_CANCELED_ORDER(HttpStatus.BAD_REQUEST,"O-003","이미 취소된 주문입니다."),
+
     // Utils
     REDIS_COMMON_EXP(HttpStatus.INTERNAL_SERVER_ERROR,"U-001","Redis Exception 발생. ");
 
