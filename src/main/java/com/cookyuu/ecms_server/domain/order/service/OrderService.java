@@ -90,23 +90,26 @@ public class OrderService {
 
     @Transactional
     public ResultCode cancelOrder(UserDetails user, CancelOrderDto.Request cancelInfo) {
-        Order order = (Order) orderRepository.findByOrderNumber(cancelInfo.getOrderNumber()).orElseThrow(ECMSOrderException::new);
+        Order order = findOrderByOrderNumber(cancelInfo.getOrderNumber());
+        order.isCanceled();
         checkBuyerOfOrder(Long.parseLong(user.getUsername()), order);
         boolean isPossibleCancel = OrderStatus.isPossibleOrderCancel(order.getStatus());
         if (isPossibleCancel) {
-            order.cancelReq(cancelInfo.getCancelReason());
+            order.getOrderLines().forEach(orderLine -> orderLine.getProduct().addQuantity(orderLine.getQuantity()));
+            order.cancel(cancelInfo.getCancelReason());
             log.info("[Order::Cancel] Cancel request of Order OK!, orderNumber : {}", order.getOrderNumber());
         } else {
             log.info("[Order::Cancel] Can not cancel order, order status is {}", order.getStatus());
             throw new ECMSOrderException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
         }
         log.debug("[Order::Cancel] Order cancel request is OK!");
-        return ResultCode.ORDER_CANCEL_REQ_SUCCESS;
+        return ResultCode.ORDER_CANCEL_SUCCESS;
     }
 
     @Transactional
     public ResultCode reviseOrder(UserDetails user, ReviseOrderDto.Request reviseOrderInfo) {
-        Order order = (Order) orderRepository.findByOrderNumber(reviseOrderInfo.getOrderNumber()).orElseThrow(ECMSOrderException::new);
+        Order order = findOrderByOrderNumber(reviseOrderInfo.getOrderNumber());
+        order.isCanceled();
         boolean isPossibleRevise = OrderStatus.isPossibleOrderRevise(order.getStatus());
         if (!isPossibleRevise) {
             log.info("[Order::Revise] Can not revise order, order status is {}", order.getStatus());
@@ -197,5 +200,9 @@ public class OrderService {
             sb.append(random);
         }
         return sb.toString();
+    }
+
+    private Order findOrderByOrderNumber(String orderNumber) {
+        return (Order) orderRepository.findByOrderNumber(orderNumber).orElseThrow(ECMSOrderException::new);
     }
 }

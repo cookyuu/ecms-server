@@ -1,7 +1,9 @@
 package com.cookyuu.ecms_server.domain.order.entity;
 
 import com.cookyuu.ecms_server.domain.member.entity.Member;
+import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
+import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -28,6 +30,7 @@ public class Order extends BaseTimeEntity {
     private OrderStatus status;
 
     private String cancelReason;
+    private boolean isCanceled;
     private LocalDateTime canceledAt;
 
     @ManyToOne
@@ -46,13 +49,22 @@ public class Order extends BaseTimeEntity {
         this.orderLines = orderLines;
     }
 
-    public void cancelReq(String cancelReason) {
+    public void cancel(String cancelReason) {
         this.cancelReason = cancelReason;
-        this.status = OrderStatus.CANCEL_WAIT;
+        this.status = OrderStatus.CANCELED;
+        this.isCanceled = true;
+        this.canceledAt = LocalDateTime.now();
     }
 
     public void reviseOrder(int totalPrice) {
         this.status = OrderStatus.ORDER_COMPLETE;
         this.totalPrice = totalPrice;
     }
+
+    public void isCanceled() {
+        if (isCanceled) {
+            throw new ECMSOrderException(ResultCode.ALREADY_CANCELED_ORDER);
+        }
+    }
+
 }
