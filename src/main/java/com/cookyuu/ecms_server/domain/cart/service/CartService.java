@@ -39,6 +39,7 @@ public class CartService {
     public void updateCartItem(UserDetails user, UpdateCartItemDto.Request cartItemInfo) {
         Member member = memberService.findMemberById(Long.parseLong(user.getUsername()));
         Product product = productService.findProductById(cartItemInfo.getProductId());
+        product.isDeleted();
         Cart cart = cartRepository.findByMemberId(member.getId()).orElseThrow(ECMSCartException::new);
         if (cartItemInfo.getQuantity() < 1) {
             log.error("[UpdateCartItem] CartItem quantity is too less, Quantity : {}", cartItemInfo.getQuantity());
@@ -64,7 +65,16 @@ public class CartService {
         log.info("[DeleteCartItem] Delete cart item OK!, CartId : {}, ProductId : {}", cart.getId(), product.getId());
     }
 
+    public void deleteCartItem(Cart cart, Product product) {
+        CartItem cartItem = findCartItemByCartAndProduct(cart, product);
+        cartItemRepository.delete(cartItem);
+    }
+
     private CartItem findCartItemByCartAndProduct(Cart cart, Product product) {
         return cartItemRepository.findByCartAndProduct(cart, product).orElseThrow(ECMSCartItemException::new);
+    }
+
+    public Cart findCartByMemberId(Long id) {
+        return cartRepository.findByMemberId(id).orElseThrow(ECMSCartException::new);
     }
 }

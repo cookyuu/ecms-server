@@ -31,7 +31,7 @@ public class Member extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private RoleType role;
 
-    @OneToMany(mappedBy = "member")
+    @OneToMany(mappedBy = "buyer")
     private List<Order> orders = new ArrayList<>();
     @OneToMany(mappedBy = "member")
     private List<Review> reviews = new ArrayList<>();

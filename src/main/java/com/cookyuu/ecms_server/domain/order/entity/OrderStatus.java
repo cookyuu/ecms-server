@@ -1,5 +1,20 @@
 package com.cookyuu.ecms_server.domain.order.entity;
 
+import java.util.Arrays;
+import java.util.List;
+
 public enum OrderStatus {
-    WAIT, SHIPPING, COMPLETE
+    ORDER_COMPLETE, PAYMENT_WAIT ,PAYMENT_COMPLETE, SHIPPING, COMPLETE, CANCELED;
+
+    public static boolean isPossibleOrderCancel(OrderStatus status) {
+        OrderStatus[] statuses = {ORDER_COMPLETE, PAYMENT_WAIT, PAYMENT_COMPLETE};
+        List<OrderStatus> cancelPossibleStatusList = Arrays.asList(statuses);
+        return cancelPossibleStatusList.contains(status);
+    }
+
+    public static boolean isPossibleOrderRevise(OrderStatus status) {
+        OrderStatus[] statuses = {ORDER_COMPLETE, PAYMENT_WAIT};
+        List<OrderStatus> revisePossibleStatusList = Arrays.asList(statuses);
+        return revisePossibleStatusList.contains(status);
+    }
 }

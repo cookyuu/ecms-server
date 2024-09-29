@@ -9,6 +9,7 @@ public enum RedisKeyCode {
     AUTH_EMAIL("auth:email:")
     ,AUTH_PHONE("auth:phone:")
     ,LOGOUT_TOKEN("logout:token:")
-    ,REFRESH_TOKEN("refresh:token:");
+    ,REFRESH_TOKEN("refresh:token:")
+    ,ORDER_NUMBER("order:number:");
     String separator;
 }
