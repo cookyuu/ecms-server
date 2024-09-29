@@ -33,9 +33,9 @@ auth:
   jwt:
     secret: TESTECMSSECRETKEYISJWTTESTTESTECMSSECRETKEYISJWTTEST
     access:
-      exp: 180000 # 30분 : 1000*60*30
+      exp: 30 # 30분 : 1000*60*30
     refresh:
-      exp: 604800000 # 7일 : 1000*60*60*24*7
+      exp: 10080 # 7일 : 1000*60*60*24*7 24 * 60 * 7 420 * 24 = 1680 + 8400 = 10080
 
 logging:
   level:

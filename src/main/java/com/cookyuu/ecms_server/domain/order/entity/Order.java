@@ -1,13 +1,16 @@
 package com.cookyuu.ecms_server.domain.order.entity;
 
 import com.cookyuu.ecms_server.domain.member.entity.Member;
-import com.cookyuu.ecms_server.domain.seller.entity.Seller;
+import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
+import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,19 +23,48 @@ public class Order extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Integer totalAmount;
+    private Integer totalPrice;
+    private String orderNumber;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
-    @ManyToOne
-    @JoinColumn(name = "buyer_id")
-    private Member member;
+    private String cancelReason;
+    private boolean isCanceled;
+    private LocalDateTime canceledAt;
 
     @ManyToOne
-    @JoinColumn(name = "seller_id")
-    private Seller seller;
+    @JoinColumn(name = "buyer_id")
+    private Member buyer;
 
     @OneToMany(mappedBy = "order")
     private List<OrderLine> orderLines = new ArrayList<>();
+
+    @Builder
+    public Order (Integer totalPrice, String orderNumber, OrderStatus status, Member buyer, List<OrderLine> orderLines) {
+        this.totalPrice = totalPrice;
+        this.orderNumber = orderNumber;
+        this.status = status;
+        this.buyer = buyer;
+        this.orderLines = orderLines;
+    }
+
+    public void cancel(String cancelReason) {
+        this.cancelReason = cancelReason;
+        this.status = OrderStatus.CANCELED;
+        this.isCanceled = true;
+        this.canceledAt = LocalDateTime.now();
+    }
+
+    public void reviseOrder(int totalPrice) {
+        this.status = OrderStatus.ORDER_COMPLETE;
+        this.totalPrice = totalPrice;
+    }
+
+    public void isCanceled() {
+        if (isCanceled) {
+            throw new ECMSOrderException(ResultCode.ALREADY_CANCELED_ORDER);
+        }
+    }
+
 }

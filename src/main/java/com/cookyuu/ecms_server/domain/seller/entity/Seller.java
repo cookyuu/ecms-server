@@ -51,8 +51,6 @@ public class Seller extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "seller")
     private List<Product> products = new ArrayList<>();
-    @OneToMany(mappedBy = "seller")
-    private List<Order> orders = new ArrayList<>();
 
     public void updateInfo(UpdateSellerDto.Request sellerInfo) {
         this.name = StringUtils.isEmpty(sellerInfo.getName()) ? this.name : sellerInfo.getName();

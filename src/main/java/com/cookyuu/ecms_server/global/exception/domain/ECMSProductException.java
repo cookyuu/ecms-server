@@ -13,7 +13,7 @@ public class ECMSProductException extends ECMSAppException {
         super(resultCode);
     }
 
-    protected ECMSProductException(ResultCode resultCode, String customMsg) {
+    public ECMSProductException(ResultCode resultCode, String customMsg) {
         super(resultCode, customMsg);
     }
 
