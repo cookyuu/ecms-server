@@ -74,8 +74,10 @@ public enum ResultCode {
 
     // Order - SUCCESS
     ORDER_CANCEL_REQ_SUCCESS(HttpStatus.OK, "0000", "주문 취소 요청이 완료되었습니다."),
+    ORDER_REVISE_SUCCESS(HttpStatus.OK, "0000", "주문 정보 변경이 완료되었습니다."),
 
     // Order - ERROR
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O-001", "주문 정보를 찾을 수 없습니다."),
     ORDER_PROCESS_FAIL(HttpStatus.BAD_REQUEST,"O-001" , "주문 처리에 실패했습니다."),
     ORDER_CANCEL_FAIL(HttpStatus.BAD_REQUEST, "O-002", "주문 취소에 실패했습니다."),
     // Utils

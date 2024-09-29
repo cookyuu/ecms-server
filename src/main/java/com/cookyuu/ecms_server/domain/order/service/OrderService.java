@@ -5,14 +5,13 @@ import com.cookyuu.ecms_server.domain.cart.entity.CartItem;
 import com.cookyuu.ecms_server.domain.cart.service.CartService;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
-import com.cookyuu.ecms_server.domain.order.dto.CancelOrderDto;
-import com.cookyuu.ecms_server.domain.order.dto.CreateOrderDto;
-import com.cookyuu.ecms_server.domain.order.dto.CreateOrderItemInfo;
-import com.cookyuu.ecms_server.domain.order.dto.OrderNumberCode;
+import com.cookyuu.ecms_server.domain.order.dto.*;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
+import com.cookyuu.ecms_server.domain.order.entity.OrderLine;
 import com.cookyuu.ecms_server.domain.order.entity.OrderStatus;
 import com.cookyuu.ecms_server.domain.order.mapper.CreateOrderLineMapper;
 import com.cookyuu.ecms_server.domain.order.mapper.CreateOrderMapper;
+import com.cookyuu.ecms_server.domain.order.mapper.ReviseOrderLineMapper;
 import com.cookyuu.ecms_server.domain.order.repository.OrderLineRepository;
 import com.cookyuu.ecms_server.domain.order.repository.OrderRepository;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
@@ -29,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static com.cookyuu.ecms_server.global.dto.ResultCode.ORDER_PROCESS_FAIL;
 
@@ -50,6 +50,7 @@ public class OrderService {
         int totalPrice = 0;
         for (CreateOrderItemInfo orderItemInfo : orderInfo.getOrderItemList()) {
             Product product = productService.findProductById(orderItemInfo.getProductId());
+            product.isDeleted();
             int quantity = orderItemInfo.getQuantity();
             int price = orderItemInfo.getPrice();
             totalPrice += (quantity*price);
@@ -58,6 +59,7 @@ public class OrderService {
             comparePriceAndCurrentPrice(price, product.getPrice(), product.getId());
             updateCartWithOrderItems(cart, product, orderItemInfo);
             orderItemInfo.addProduct(product);
+            product.subQuantity(quantity);
         }
         String orderNumber = createOrderNumber(OrderNumberCode.NORMAL_ORDER, OrderNumberCode.NO_COOPON);
         log.info("[Order::CreateOrder] Create order number, Order Number : {}", orderNumber);
@@ -100,6 +102,38 @@ public class OrderService {
         }
         log.debug("[Order::Cancel] Order cancel request is OK!");
         return ResultCode.ORDER_CANCEL_REQ_SUCCESS;
+    }
+
+    @Transactional
+    public ResultCode reviseOrder(UserDetails user, ReviseOrderDto.Request reviseOrderInfo) {
+        Order order = (Order) orderRepository.findByOrderNumber(reviseOrderInfo.getOrderNumber()).orElseThrow(ECMSOrderException::new);
+        boolean isPossibleRevise = OrderStatus.isPossibleOrderRevise(order.getStatus());
+        if (!isPossibleRevise) {
+            log.info("[Order::Revise] Can not revise order, order status is {}", order.getStatus());
+            throw new ECMSOrderException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
+        }
+
+        List<OrderLine> orderLines = order.getOrderLines();
+        checkBuyerOfOrder(Long.parseLong(user.getUsername()), order);
+        orderLines.forEach(orderLine -> orderLine.getProduct().addQuantity(orderLine.getQuantity()));
+        orderLineRepository.deleteAll(orderLines);
+
+        int totalPrice = 0;
+        for (ReviseOrderItemInfo orderItemInfo : reviseOrderInfo.getOrderItemList()) {
+            Product product = productService.findProductById(orderItemInfo.getProductId());
+            int quantity = orderItemInfo.getQuantity();
+            int price = orderItemInfo.getPrice();
+            totalPrice += (quantity*price);
+            log.info("[Order::Revise] Compare product price, productId : {}", product.getId());
+            compareQuantityAndStockQuantity(quantity, product.getStockQuantity());
+            comparePriceAndCurrentPrice(price, product.getPrice(), product.getId());
+            orderItemInfo.addProduct(product);
+        }
+        orderLineRepository.saveAll(ReviseOrderLineMapper.toEntityList(reviseOrderInfo.getOrderItemList(), order));
+        order.reviseOrder(totalPrice);
+        log.info("[Order::Revise] Revise order info is OK!, orderNumber : {}", order.getOrderNumber());
+
+        return ResultCode.ORDER_REVISE_SUCCESS;
     }
 
     private void checkBuyerOfOrder(Long reqUserId, Order order) {
