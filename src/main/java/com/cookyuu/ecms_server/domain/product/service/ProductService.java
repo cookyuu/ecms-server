@@ -65,9 +65,7 @@ public class ProductService {
         if (!isProductOwnedBySeller(product, sellerId)) {
             throw new ECMSSellerException(ResultCode.PRODUCT_OWNER_UNMATCHED);
         }
-        if (product.isDeleted()) {
-            throw new ECMSProductException(ResultCode.ALREADY_DELETED_PRODUCT);
-        }
+        product.isDeleted();
         product.delete();
         log.info("[DeleteProduct] Product delete OK!, ProductId : {}", productId);
     }

@@ -5,7 +5,10 @@ import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.order.entity.OrderLine;
 import com.cookyuu.ecms_server.domain.review.entity.Review;
 import com.cookyuu.ecms_server.domain.seller.entity.Seller;
+import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
+import com.cookyuu.ecms_server.global.exception.ECMSAppException;
+import com.cookyuu.ecms_server.global.exception.domain.ECMSProductException;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -79,5 +82,19 @@ public class Product extends BaseTimeEntity {
     public void delete() {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
+    }
+
+    public void subQuantity(int quantity) {
+        this.stockQuantity -= quantity;
+    }
+
+    public void addQuantity(int quantity) {
+        this.stockQuantity += quantity;
+    }
+
+    public void isDeleted() {
+        if (isDeleted) {
+            throw new ECMSProductException(ResultCode.ALREADY_DELETED_PRODUCT, "이미 삭제된 상품입니다. productId : " + id);
+        }
     }
 }
