@@ -26,8 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
     @Value("${auth.jwt.refresh.exp}")
     private String refreshTokenExp;
-    @Value("${auth.jwt.refresh.exp}")
+    @Value("${auth.jwt.access.exp}")
     private String accessTokenExp;
+
+    private final int minute = 60;
 
     private final MemberService memberService;
     private final SellerService sellerService;
@@ -65,7 +67,7 @@ public class AuthService {
         Cookie cookie = cookieUtils.setCookieExpire(CookieCode.REFRESH_TOKEN, refreshToken, refreshTokenExp);
         response.addCookie(cookie);
 
-        redisUtils.setDataExpire(RedisKeyCode.REFRESH_TOKEN.getSeparator() + userInfo.getId(), refreshToken, Long.parseLong(refreshTokenExp)/1000);
+        redisUtils.setDataExpire(RedisKeyCode.REFRESH_TOKEN.getSeparator() + userInfo.getId(), refreshToken, Long.parseLong(refreshTokenExp)*minute);
         return LoginDto.Response.builder()
                 .accessToken(accessToken)
                 .build();
@@ -81,7 +83,7 @@ public class AuthService {
         Cookie cookie = cookieUtils.setCookieExpire(CookieCode.REFRESH_TOKEN, refreshToken, refreshTokenExp);
         response.addCookie(cookie);
 
-        redisUtils.setDataExpire(RedisKeyCode.REFRESH_TOKEN.getSeparator() + userInfo.getId(), refreshToken, Long.parseLong(refreshTokenExp)/1000);
+        redisUtils.setDataExpire(RedisKeyCode.REFRESH_TOKEN.getSeparator() + userInfo.getId(), refreshToken, Long.parseLong(refreshTokenExp)*minute);
         return LoginDto.Response.builder()
                 .accessToken(accessToken)
                 .build();
@@ -91,7 +93,7 @@ public class AuthService {
     public void logoutNormal(UserDetails user, HttpServletRequest request, HttpServletResponse response) {
         String memberId = user.getUsername();
         String accessToken = jwtUtils.getAccessToken(request.getHeader("Authorization"));
-        redisUtils.setDataExpire(RedisKeyCode.LOGOUT_TOKEN.getSeparator()+memberId, accessToken, Long.parseLong(accessTokenExp)/1000);
+        redisUtils.setDataExpire(RedisKeyCode.LOGOUT_TOKEN.getSeparator()+memberId, accessToken, Long.parseLong(accessTokenExp)*minute);
         redisUtils.deleteData(RedisKeyCode.REFRESH_TOKEN.getSeparator()+memberId);
         cookieUtils.removeCookie("refresh_token", response);
     }
