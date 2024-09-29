@@ -20,7 +20,7 @@ public class CreateOrderMapper {
                 .totalPrice(orderInfo.getTotalPrice())
                 .orderNumber(orderInfo.getOrderNumber())
                 .status(OrderStatus.ORDER_COMPLETE)
-                .member(orderInfo.getBuyer())
+                .buyer(orderInfo.getBuyer())
                 .build();
     }
 }

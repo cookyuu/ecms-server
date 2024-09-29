@@ -1,16 +1,15 @@
 package com.cookyuu.ecms_server.domain.order.controller;
 
+import com.cookyuu.ecms_server.domain.order.dto.CancelOrderDto;
 import com.cookyuu.ecms_server.domain.order.dto.CreateOrderDto;
 import com.cookyuu.ecms_server.domain.order.service.OrderService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
+import com.cookyuu.ecms_server.global.dto.ResultCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -37,9 +36,14 @@ public class OrderController {
     * 8. 반품 및 교환
     */
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<ApiResponse<CreateOrderDto.Response>> createOrder(@AuthenticationPrincipal UserDetails user, @RequestBody CreateOrderDto.Request orderInfo) {
         CreateOrderDto.Response res = orderService.createOrder(user, orderInfo);
         return ResponseEntity.ok(ApiResponse.success(res));
+    }
+
+    @PostMapping("/cancel")
+    public ResponseEntity<ApiResponse<ResultCode>> cancelOrder(@AuthenticationPrincipal UserDetails user, @RequestBody CancelOrderDto.Request cancelInfo) {
+        return ResponseEntity.ok(ApiResponse.success(orderService.cancelOrder(user, cancelInfo)));
     }
 }

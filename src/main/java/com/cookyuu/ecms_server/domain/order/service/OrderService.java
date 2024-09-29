@@ -5,10 +5,12 @@ import com.cookyuu.ecms_server.domain.cart.entity.CartItem;
 import com.cookyuu.ecms_server.domain.cart.service.CartService;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
+import com.cookyuu.ecms_server.domain.order.dto.CancelOrderDto;
 import com.cookyuu.ecms_server.domain.order.dto.CreateOrderDto;
 import com.cookyuu.ecms_server.domain.order.dto.CreateOrderItemInfo;
 import com.cookyuu.ecms_server.domain.order.dto.OrderNumberCode;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
+import com.cookyuu.ecms_server.domain.order.entity.OrderStatus;
 import com.cookyuu.ecms_server.domain.order.mapper.CreateOrderLineMapper;
 import com.cookyuu.ecms_server.domain.order.mapper.CreateOrderMapper;
 import com.cookyuu.ecms_server.domain.order.repository.OrderLineRepository;
@@ -82,6 +84,30 @@ public class OrderService {
             log.error("[Order::Error] Transaction failed, rollback Redis key. Order Number : {}", orderNumber);
             throw e;
         }
+    }
+
+    @Transactional
+    public ResultCode cancelOrder(UserDetails user, CancelOrderDto.Request cancelInfo) {
+        Order order = (Order) orderRepository.findByOrderNumber(cancelInfo.getOrderNumber()).orElseThrow(ECMSOrderException::new);
+        checkBuyerOfOrder(Long.parseLong(user.getUsername()), order);
+        boolean isPossibleCancel = OrderStatus.isPossibleOrderCancel(order.getStatus());
+        if (isPossibleCancel) {
+            order.cancelReq(cancelInfo.getCancelReason());
+            log.info("[Order::Cancel] Cancel request of Order OK!, orderNumber : {}", order.getOrderNumber());
+        } else {
+            log.info("[Order::Cancel] Can not cancel order, order status is {}", order.getStatus());
+            throw new ECMSOrderException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
+        }
+        log.debug("[Order::Cancel] Order cancel request is OK!");
+        return ResultCode.ORDER_CANCEL_REQ_SUCCESS;
+    }
+
+    private void checkBuyerOfOrder(Long reqUserId, Order order) {
+        if (!order.getBuyer().getId().equals(reqUserId)) {
+            log.info("[Order::Cancel] Unmatched Order's buyer Info and request User Info, buyerId : {}, reqUserId : {}", order.getBuyer().getId(), reqUserId);
+            throw new ECMSOrderException(ResultCode.ORDER_CANCEL_FAIL, "주문자의 정보가 일치하지 않습니다.");
+        }
+        log.info("[Order::Cancel] Match buyer id and request user id OK!");
     }
 
     private void compareQuantityAndStockQuantity(int quantity, Integer stockQuantity) {
