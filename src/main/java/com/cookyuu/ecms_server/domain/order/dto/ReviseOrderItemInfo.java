@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CreateOrderItemInfo {
+public class ReviseOrderItemInfo {
     @NotNull
     private Long productId;
     @NotNull

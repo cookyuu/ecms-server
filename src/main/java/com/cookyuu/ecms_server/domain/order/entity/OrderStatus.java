@@ -7,8 +7,14 @@ public enum OrderStatus {
     ORDER_COMPLETE, PAYMENT_WAIT ,PAYMENT_COMPLETE, SHIPPING, COMPLETE, CANCEL_WAIT, CANCELED;
 
     public static boolean isPossibleOrderCancel(OrderStatus status) {
-        OrderStatus[] statuses = {OrderStatus.ORDER_COMPLETE, OrderStatus.PAYMENT_WAIT, OrderStatus.PAYMENT_COMPLETE};
+        OrderStatus[] statuses = {ORDER_COMPLETE, PAYMENT_WAIT, PAYMENT_COMPLETE};
         List<OrderStatus> cancelPossibleStatusList = Arrays.asList(statuses);
         return cancelPossibleStatusList.contains(status);
+    }
+
+    public static boolean isPossibleOrderRevise(OrderStatus status) {
+        OrderStatus[] statuses = {ORDER_COMPLETE, PAYMENT_WAIT};
+        List<OrderStatus> revisePossibleStatusList = Arrays.asList(statuses);
+        return revisePossibleStatusList.contains(status);
     }
 }

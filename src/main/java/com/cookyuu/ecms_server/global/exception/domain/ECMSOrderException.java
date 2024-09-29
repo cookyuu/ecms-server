@@ -6,7 +6,7 @@ import com.cookyuu.ecms_server.global.exception.ECMSAppException;
 public class ECMSOrderException extends ECMSAppException {
 
     public ECMSOrderException() {
-        super(ResultCode.ORDER_PROCESS_FAIL);
+        super(ResultCode.ORDER_NOT_FOUND);
     }
 
     public ECMSOrderException(ResultCode resultCode) {

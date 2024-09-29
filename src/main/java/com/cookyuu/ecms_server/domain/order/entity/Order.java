@@ -1,14 +1,12 @@
 package com.cookyuu.ecms_server.domain.order.entity;
 
 import com.cookyuu.ecms_server.domain.member.entity.Member;
-import com.cookyuu.ecms_server.domain.seller.entity.Seller;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.parameters.P;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -51,5 +49,10 @@ public class Order extends BaseTimeEntity {
     public void cancelReq(String cancelReason) {
         this.cancelReason = cancelReason;
         this.status = OrderStatus.CANCEL_WAIT;
+    }
+
+    public void reviseOrder(int totalPrice) {
+        this.status = OrderStatus.ORDER_COMPLETE;
+        this.totalPrice = totalPrice;
     }
 }

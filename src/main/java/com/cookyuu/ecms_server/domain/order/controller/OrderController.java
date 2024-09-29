@@ -2,6 +2,7 @@ package com.cookyuu.ecms_server.domain.order.controller;
 
 import com.cookyuu.ecms_server.domain.order.dto.CancelOrderDto;
 import com.cookyuu.ecms_server.domain.order.dto.CreateOrderDto;
+import com.cookyuu.ecms_server.domain.order.dto.ReviseOrderDto;
 import com.cookyuu.ecms_server.domain.order.service.OrderService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
 import com.cookyuu.ecms_server.global.dto.ResultCode;
@@ -45,5 +46,10 @@ public class OrderController {
     @PostMapping("/cancel")
     public ResponseEntity<ApiResponse<ResultCode>> cancelOrder(@AuthenticationPrincipal UserDetails user, @RequestBody CancelOrderDto.Request cancelInfo) {
         return ResponseEntity.ok(ApiResponse.success(orderService.cancelOrder(user, cancelInfo)));
+    }
+
+    @PutMapping
+    public ResponseEntity<ApiResponse<ResultCode>> reviseOrderInfo(@AuthenticationPrincipal UserDetails user, @RequestBody ReviseOrderDto.Request reviceInfo) {
+        return ResponseEntity.ok(ApiResponse.success(orderService.reviseOrder(user, reviceInfo)));
     }
 }
