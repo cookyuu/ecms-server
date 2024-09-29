@@ -1,5 +1,5 @@
 package com.cookyuu.ecms_server.domain.order.entity;
 
 public enum OrderStatus {
-    WAIT, SHIPPING, COMPLETE
+    ORDER_COMPLETE, PAYMENT_WAIT ,PAYMENT_COMPLETE, SHIPPING, COMPLETE
 }

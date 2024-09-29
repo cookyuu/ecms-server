@@ -3,29 +3,29 @@ package com.cookyuu.ecms_server.global.exception.domain;
 import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.exception.ECMSAppException;
 
-public class ECMSSellerException extends ECMSAppException {
+public class ECMSOrderException extends ECMSAppException {
 
-    public ECMSSellerException() {
-        super(ResultCode.SELLER_NOT_FOUND);
+    public ECMSOrderException() {
+        super(ResultCode.ORDER_PROCESS_FAIL);
     }
 
-    public ECMSSellerException(ResultCode resultCode) {
+    public ECMSOrderException(ResultCode resultCode) {
         super(resultCode);
     }
 
-    protected ECMSSellerException(ResultCode resultCode, String customMsg) {
+    public ECMSOrderException(ResultCode resultCode, String customMsg) {
         super(resultCode, customMsg);
     }
 
-    protected ECMSSellerException(ResultCode resultCode, Object data, String[] args) {
+    protected ECMSOrderException(ResultCode resultCode, Object data, String[] args) {
         super(resultCode, data, args);
     }
 
-    protected ECMSSellerException(ResultCode resultCode, Throwable t) {
+    protected ECMSOrderException(ResultCode resultCode, Throwable t) {
         super(resultCode, t);
     }
 
-    protected ECMSSellerException(ResultCode resultCode, Throwable t, String customMsg) {
+    protected ECMSOrderException(ResultCode resultCode, Throwable t, String customMsg) {
         super(resultCode, t, customMsg);
     }
 }

@@ -52,7 +52,7 @@ public class JwtUtils {
         claims.put("role", member.getRole());
 
         ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime tokenValidity = now.plusSeconds(expiredTime);
+        ZonedDateTime tokenValidity = now.plusMinutes(expiredTime);
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(Date.from(now.toInstant()))

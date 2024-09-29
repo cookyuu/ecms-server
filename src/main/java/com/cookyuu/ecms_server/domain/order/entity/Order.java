@@ -5,6 +5,7 @@ import com.cookyuu.ecms_server.domain.seller.entity.Seller;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -20,7 +21,8 @@ public class Order extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Integer totalAmount;
+    private Integer totalPrice;
+    private String orderNumber;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
@@ -29,10 +31,15 @@ public class Order extends BaseTimeEntity {
     @JoinColumn(name = "buyer_id")
     private Member member;
 
-    @ManyToOne
-    @JoinColumn(name = "seller_id")
-    private Seller seller;
-
     @OneToMany(mappedBy = "order")
     private List<OrderLine> orderLines = new ArrayList<>();
+
+    @Builder
+    public Order (Integer totalPrice, String orderNumber, OrderStatus status, Member member, List<OrderLine> orderLines) {
+        this.totalPrice = totalPrice;
+        this.orderNumber = orderNumber;
+        this.status = status;
+        this.member = member;
+        this.orderLines = orderLines;
+    }
 }

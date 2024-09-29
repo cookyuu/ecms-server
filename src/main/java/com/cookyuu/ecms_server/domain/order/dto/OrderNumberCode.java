@@ -3,7 +3,7 @@ package com.cookyuu.ecms_server.domain.order.dto;
 import lombok.Getter;
 
 @Getter
-public enum OrderCode {
+public enum OrderNumberCode {
     // ORDER
     NORMAL_ORDER("N"),
 
@@ -11,7 +11,7 @@ public enum OrderCode {
     NO_COOPON("N");
     private String code;
 
-    OrderCode(String code) {
+    OrderNumberCode(String code) {
         this.code = code;
     }
 }
