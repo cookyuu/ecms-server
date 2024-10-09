@@ -74,4 +74,8 @@ public class Order extends BaseTimeEntity {
     public void failPayment() {
         this.status = OrderStatus.PAYMENT_FAIL;
     }
+
+    public void cancelPayment() {
+        this.status = OrderStatus.PAYMENT_CANCEL;
+    }
 }

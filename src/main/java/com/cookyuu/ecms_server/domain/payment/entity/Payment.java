@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @Builder
@@ -20,6 +22,8 @@ public class Payment extends BaseTimeEntity {
     private String paymentNumber;
     private String orderNumber;
     private Integer amount;
+    private String cancelReason;
+    private LocalDateTime canceledAt;
 
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
@@ -27,4 +31,10 @@ public class Payment extends BaseTimeEntity {
     private PaymentStatus status;
 
     private String paymentFailMsg;
+
+    public void cancel(String cancelReason) {
+        this.status = PaymentStatus.CANCEL;
+        this.cancelReason = cancelReason;
+        this.canceledAt = LocalDateTime.now();
+    }
 }
