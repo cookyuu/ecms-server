@@ -49,6 +49,11 @@ public class Member extends BaseTimeEntity {
         this.address = address;
         this.role = role;
     }
+
+    public boolean compareMemberId(Long memberId) {
+        return this.id.equals(memberId);
+    }
+
     public static Member of(String name, String email, String loginId, String password, String phoneNumber, String address) {
         return Member.builder()
                 .name(name)

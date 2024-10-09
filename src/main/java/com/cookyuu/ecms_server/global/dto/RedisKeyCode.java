@@ -10,6 +10,8 @@ public enum RedisKeyCode {
     ,AUTH_PHONE("auth:phone:")
     ,LOGOUT_TOKEN("logout:token:")
     ,REFRESH_TOKEN("refresh:token:")
-    ,ORDER_NUMBER("order:number:");
+    ,ORDER_NUMBER("order:number:")
+    ,PAYMENT_NUMBER("payment:number:");
+
     String separator;
 }
