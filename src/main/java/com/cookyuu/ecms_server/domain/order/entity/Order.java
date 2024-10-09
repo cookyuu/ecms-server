@@ -67,4 +67,15 @@ public class Order extends BaseTimeEntity {
         }
     }
 
+    public void successPayment() {
+        this.status = OrderStatus.PAYMENT_COMPLETE;
+    }
+
+    public void failPayment() {
+        this.status = OrderStatus.PAYMENT_FAIL;
+    }
+
+    public void cancelPayment() {
+        this.status = OrderStatus.PAYMENT_CANCEL;
+    }
 }

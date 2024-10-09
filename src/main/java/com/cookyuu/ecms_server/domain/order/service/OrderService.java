@@ -202,7 +202,7 @@ public class OrderService {
         return sb.toString();
     }
 
-    private Order findOrderByOrderNumber(String orderNumber) {
+    public Order findOrderByOrderNumber(String orderNumber) {
         return (Order) orderRepository.findByOrderNumber(orderNumber).orElseThrow(ECMSOrderException::new);
     }
 }
