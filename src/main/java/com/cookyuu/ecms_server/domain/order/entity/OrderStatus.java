@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum OrderStatus {
-    ORDER_COMPLETE, PAYMENT_FAIL, PAYMENT_COMPLETE, SHIPPING, COMPLETE, CANCELED;
+    ORDER_COMPLETE, PAYMENT_FAIL, PAYMENT_COMPLETE, PAYMENT_CANCEL, SHIPPING, COMPLETE, CANCELED;
 
     public static boolean isPossibleOrderCancel(OrderStatus status) {
         OrderStatus[] statuses = {ORDER_COMPLETE, PAYMENT_FAIL, PAYMENT_COMPLETE};

@@ -87,6 +87,7 @@ public enum ResultCode {
     PAYMENT_PRICE_UNMATCHED(HttpStatus.BAD_REQUEST, "P-002", "결제 금액이 주문 금액과 일치하지 않습니다."),
     PAYMENT_BUYER_UNMATCHED(HttpStatus.FORBIDDEN, "P-003", "해당 주문의 주문자와 결제자가 일치하지 않습니다."),
     PAYMENT_IMPOSSIBLE_STATUS(HttpStatus.BAD_REQUEST,"P-004", "결제 할 수 없는 주문 상태입니다."),
+    PAYMENT_IMPOSSIBLE_STATUS_CANCEL(HttpStatus.BAD_REQUEST,"P-004", "결제 취소를 할 수 없는 주문 상태입니다."),
     // Utils
     REDIS_COMMON_EXP(HttpStatus.INTERNAL_SERVER_ERROR,"U-001","Redis Exception 발생. ");
 
