@@ -9,5 +9,4 @@ class EcmsServerApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
