@@ -10,7 +10,6 @@ import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.domain.order.entity.OrderLine;
 import com.cookyuu.ecms_server.domain.order.entity.OrderStatus;
 import com.cookyuu.ecms_server.domain.order.mapper.CreateOrderLineMapper;
-import com.cookyuu.ecms_server.domain.order.mapper.CreateOrderMapper;
 import com.cookyuu.ecms_server.domain.order.mapper.ReviseOrderLineMapper;
 import com.cookyuu.ecms_server.domain.order.repository.OrderLineRepository;
 import com.cookyuu.ecms_server.domain.order.repository.OrderRepository;
@@ -76,11 +75,11 @@ public class OrderService {
             orderInfo.addTotalPrice(totalPrice);
             orderInfo.addBuyer(buyer);
             orderInfo.addOrderNumber(orderNumber);
-
-            Order order = orderRepository.save(CreateOrderMapper.toEntity(orderInfo));
+            Order order = orderRepository.save(orderInfo.toEntity());
+//            Order order = orderRepository.save(CreateOrderMapper.toEntity(orderInfo));
             log.debug("[Order::CreateOrder] Save order info.");
             orderLineRepository.saveAll(CreateOrderLineMapper.toEntityList(orderInfo.getOrderItemList(), order));
-            return CreateOrderMapper.toDto(order);
+            return CreateOrderDto.Response.toDto(order);
         } catch (Exception e) {
             redisUtils.deleteData(RedisKeyCode.ORDER_NUMBER.getSeparator() + orderNumber);
             log.error("[Order::Error] Transaction failed, rollback Redis key. Order Number : {}", orderNumber);
