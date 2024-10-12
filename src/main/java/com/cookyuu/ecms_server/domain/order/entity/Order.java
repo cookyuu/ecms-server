@@ -33,6 +33,11 @@ public class Order extends BaseTimeEntity {
     private boolean isCanceled;
     private LocalDateTime canceledAt;
 
+    private String destination;
+    private String destinationDetail;
+    private String recipientName;
+    private String recipientPhoneNumber;
+
     @ManyToOne
     @JoinColumn(name = "buyer_id")
     private Member buyer;
@@ -41,12 +46,16 @@ public class Order extends BaseTimeEntity {
     private List<OrderLine> orderLines = new ArrayList<>();
 
     @Builder
-    public Order (Integer totalPrice, String orderNumber, OrderStatus status, Member buyer, List<OrderLine> orderLines) {
+    public Order (Integer totalPrice, String orderNumber, OrderStatus status, Member buyer, List<OrderLine> orderLines, String destination, String destinationDetail, String recipientName, String recipientPhoneNumber) {
         this.totalPrice = totalPrice;
         this.orderNumber = orderNumber;
         this.status = status;
         this.buyer = buyer;
         this.orderLines = orderLines;
+        this.destination = destination;
+        this.destinationDetail = destinationDetail;
+        this.recipientName = recipientName;
+        this.recipientPhoneNumber = recipientPhoneNumber;
     }
 
     public void cancel(String cancelReason) {
