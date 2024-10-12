@@ -1,6 +1,7 @@
 package com.cookyuu.ecms_server.domain.order.entity;
 
 import com.cookyuu.ecms_server.domain.member.entity.Member;
+import com.cookyuu.ecms_server.domain.shipment.entity.Shipment;
 import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
@@ -33,6 +34,11 @@ public class Order extends BaseTimeEntity {
     private boolean isCanceled;
     private LocalDateTime canceledAt;
 
+    private String destination;
+    private String destinationDetail;
+    private String recipientName;
+    private String recipientPhoneNumber;
+
     @ManyToOne
     @JoinColumn(name = "buyer_id")
     private Member buyer;
@@ -40,13 +46,21 @@ public class Order extends BaseTimeEntity {
     @OneToMany(mappedBy = "order")
     private List<OrderLine> orderLines = new ArrayList<>();
 
+    @OneToOne
+    @JoinColumn(name = "shipment_id")
+    private Shipment shipment;
+
     @Builder
-    public Order (Integer totalPrice, String orderNumber, OrderStatus status, Member buyer, List<OrderLine> orderLines) {
+    public Order (Integer totalPrice, String orderNumber, OrderStatus status, Member buyer, List<OrderLine> orderLines, String destination, String destinationDetail, String recipientName, String recipientPhoneNumber) {
         this.totalPrice = totalPrice;
         this.orderNumber = orderNumber;
         this.status = status;
         this.buyer = buyer;
         this.orderLines = orderLines;
+        this.destination = destination;
+        this.destinationDetail = destinationDetail;
+        this.recipientName = recipientName;
+        this.recipientPhoneNumber = recipientPhoneNumber;
     }
 
     public void cancel(String cancelReason) {
