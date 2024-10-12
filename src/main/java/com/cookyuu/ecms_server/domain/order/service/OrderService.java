@@ -76,11 +76,11 @@ public class OrderService {
             orderInfo.addTotalPrice(totalPrice);
             orderInfo.addBuyer(buyer);
             orderInfo.addOrderNumber(orderNumber);
-
-            Order order = orderRepository.save(CreateOrderMapper.toEntity(orderInfo));
+            Order order = orderRepository.save(orderInfo.toEntity());
+//            Order order = orderRepository.save(CreateOrderMapper.toEntity(orderInfo));
             log.debug("[Order::CreateOrder] Save order info.");
             orderLineRepository.saveAll(CreateOrderLineMapper.toEntityList(orderInfo.getOrderItemList(), order));
-            return CreateOrderMapper.toDto(order);
+            return CreateOrderDto.Response.toDto(order);
         } catch (Exception e) {
             redisUtils.deleteData(RedisKeyCode.ORDER_NUMBER.getSeparator() + orderNumber);
             log.error("[Order::Error] Transaction failed, rollback Redis key. Order Number : {}", orderNumber);
