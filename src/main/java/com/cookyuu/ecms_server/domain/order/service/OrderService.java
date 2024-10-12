@@ -10,7 +10,6 @@ import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.domain.order.entity.OrderLine;
 import com.cookyuu.ecms_server.domain.order.entity.OrderStatus;
 import com.cookyuu.ecms_server.domain.order.mapper.CreateOrderLineMapper;
-import com.cookyuu.ecms_server.domain.order.mapper.CreateOrderMapper;
 import com.cookyuu.ecms_server.domain.order.mapper.ReviseOrderLineMapper;
 import com.cookyuu.ecms_server.domain.order.repository.OrderLineRepository;
 import com.cookyuu.ecms_server.domain.order.repository.OrderRepository;

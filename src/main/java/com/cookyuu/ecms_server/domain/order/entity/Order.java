@@ -1,6 +1,7 @@
 package com.cookyuu.ecms_server.domain.order.entity;
 
 import com.cookyuu.ecms_server.domain.member.entity.Member;
+import com.cookyuu.ecms_server.domain.shipment.entity.Shipment;
 import com.cookyuu.ecms_server.global.dto.ResultCode;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
@@ -44,6 +45,10 @@ public class Order extends BaseTimeEntity {
 
     @OneToMany(mappedBy = "order")
     private List<OrderLine> orderLines = new ArrayList<>();
+
+    @OneToOne
+    @JoinColumn(name = "shipment_id")
+    private Shipment shipment;
 
     @Builder
     public Order (Integer totalPrice, String orderNumber, OrderStatus status, Member buyer, List<OrderLine> orderLines, String destination, String destinationDetail, String recipientName, String recipientPhoneNumber) {
