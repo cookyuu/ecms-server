@@ -3,8 +3,11 @@ package com.cookyuu.ecms_server.domain.shipment.service;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.domain.order.service.OrderService;
 import com.cookyuu.ecms_server.domain.shipment.dto.CreateShipmentDto;
+import com.cookyuu.ecms_server.domain.shipment.dto.UpdateShipmentDto;
 import com.cookyuu.ecms_server.domain.shipment.entity.Shipment;
+import com.cookyuu.ecms_server.domain.shipment.entity.ShipmentStatus;
 import com.cookyuu.ecms_server.domain.shipment.repository.ShipmentRepository;
+import com.cookyuu.ecms_server.global.exception.domain.ECMSShipmentException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -39,6 +42,24 @@ public class ShipmentService {
         return CreateShipmentDto.Response.builder()
                 .shipmentNumber(shipmentNumber)
                 .build();
+    }
+
+    @Transactional
+    public void beginShipment(UpdateShipmentDto.Request shipmentInfo) {
+        Shipment shipment = findShipmentByShipmentNumber(shipmentInfo.getShipmentNumber());
+        shipment.checkStatus(ShipmentStatus.COLLECTION);
+        shipment.begin(shipmentInfo.getLocation());
+    }
+
+    @Transactional
+    public void updateLocation(UpdateShipmentDto.Request shipmentInfo) {
+        Shipment shipment = findShipmentByShipmentNumber(shipmentInfo.getShipmentNumber());
+        shipment.checkStatus(ShipmentStatus.IN_DELIVERY);
+        shipment.updateLocation(shipmentInfo.getLocation());
+    }
+
+    private Shipment findShipmentByShipmentNumber(String shipmentNumber) {
+        return shipmentRepository.findByShipmentNumber(shipmentNumber).orElseThrow(ECMSShipmentException::new);
     }
 
     private String createShipmentNumber() {
