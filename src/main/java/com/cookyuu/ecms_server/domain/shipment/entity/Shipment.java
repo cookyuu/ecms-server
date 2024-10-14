@@ -4,6 +4,7 @@ import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,9 +23,18 @@ public class Shipment extends BaseTimeEntity {
 
     private String shipmentNumber;
     private String currentLocation;
-    private LocalDateTime shippedAt;
+    private ShipmentStatus status;
     private LocalDateTime arrivedAt;
+    private String orderNumber;
 
     @OneToOne(mappedBy = "shipment")
     private Order order;
+
+    @Builder
+     public Shipment (String shipmentNumber, ShipmentStatus status, Order order, String orderNumber) {
+         this.shipmentNumber = shipmentNumber;
+         this.status = status;
+         this.order = order;
+         this.orderNumber = orderNumber;
+     }
 }
