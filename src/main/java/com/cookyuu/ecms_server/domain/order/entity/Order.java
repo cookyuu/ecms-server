@@ -81,8 +81,19 @@ public class Order extends BaseTimeEntity {
         }
     }
 
+    public void isPaymentComplete() {
+        if (!this.status.equals(OrderStatus.PAYMENT_COMPLETE)) {
+            throw new ECMSOrderException(ResultCode.ORDER_STATUS_ERROR);
+        }
+    }
+
     public void successPayment() {
         this.status = OrderStatus.PAYMENT_COMPLETE;
+    }
+
+    public void successShipment(Shipment shipment) {
+        this.status = OrderStatus.SHIPPING;
+        this.shipment = shipment;
     }
 
     public void failPayment() {

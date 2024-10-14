@@ -80,6 +80,7 @@ public enum ResultCode {
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O-001", "주문 정보를 찾을 수 없습니다."),
     ORDER_PROCESS_FAIL(HttpStatus.BAD_REQUEST,"O-001" , "주문 처리에 실패했습니다."),
     ORDER_CANCEL_FAIL(HttpStatus.BAD_REQUEST, "O-002", "주문 취소에 실패했습니다."),
+    ORDER_STATUS_ERROR(HttpStatus.BAD_REQUEST, "O-003", "해당 작업을 할 수 있는 주문 상태가 아닙니다."),
     ALREADY_CANCELED_ORDER(HttpStatus.BAD_REQUEST,"O-003","이미 취소된 주문입니다."),
 
     // Payment - ERROR
@@ -88,6 +89,11 @@ public enum ResultCode {
     PAYMENT_BUYER_UNMATCHED(HttpStatus.FORBIDDEN, "P-003", "해당 주문의 주문자와 결제자가 일치하지 않습니다."),
     PAYMENT_IMPOSSIBLE_STATUS(HttpStatus.BAD_REQUEST,"P-004", "결제 할 수 없는 주문 상태입니다."),
     PAYMENT_IMPOSSIBLE_STATUS_CANCEL(HttpStatus.BAD_REQUEST,"P-004", "결제 취소를 할 수 없는 주문 상태입니다."),
+
+    // Shipment - ERROR
+    SHIPMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "SP-001", "배송 정보를 찾을 수 없습니다."),
+    SHIPMENT_STATUS_UNMATCHED(HttpStatus.BAD_REQUEST, "SP-002", "요청한 작업을 할 수 있는 배송 상태가 아닙니다."),
+
     // Utils
     REDIS_COMMON_EXP(HttpStatus.INTERNAL_SERVER_ERROR,"U-001","Redis Exception 발생. ");
 
