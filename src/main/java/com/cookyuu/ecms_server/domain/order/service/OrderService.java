@@ -76,7 +76,6 @@ public class OrderService {
             orderInfo.addBuyer(buyer);
             orderInfo.addOrderNumber(orderNumber);
             Order order = orderRepository.save(orderInfo.toEntity());
-//            Order order = orderRepository.save(CreateOrderMapper.toEntity(orderInfo));
             log.debug("[Order::CreateOrder] Save order info.");
             orderLineRepository.saveAll(CreateOrderLineMapper.toEntityList(orderInfo.getOrderItemList(), order));
             return CreateOrderDto.Response.toDto(order);
