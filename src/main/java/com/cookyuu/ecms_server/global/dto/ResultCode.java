@@ -92,6 +92,7 @@ public enum ResultCode {
 
     // Shipment - ERROR
     SHIPMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "SP-001", "배송 정보를 찾을 수 없습니다."),
+    SHIPMENT_STATUS_UNMATCHED(HttpStatus.BAD_REQUEST, "SP-002", "요청한 작업을 할 수 있는 배송 상태가 아닙니다."),
 
     // Utils
     REDIS_COMMON_EXP(HttpStatus.INTERNAL_SERVER_ERROR,"U-001","Redis Exception 발생. ");
