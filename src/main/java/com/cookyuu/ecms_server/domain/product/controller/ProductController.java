@@ -2,9 +2,9 @@ package com.cookyuu.ecms_server.domain.product.controller;
 
 import com.cookyuu.ecms_server.domain.product.dto.RegisterProductDto;
 import com.cookyuu.ecms_server.domain.product.dto.UpdateProductDto;
+import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -37,6 +37,11 @@ public class ProductController {
     public ResponseEntity<ApiResponse<Object>> deleteProduct(@RequestParam("id") Long productId, @AuthenticationPrincipal UserDetails user) {
         productService.deleteProduct(productId, user);
         return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    @GetMapping("/{productId}")
+    public ResponseEntity<Product> getProductById(@PathVariable(name = "productId") Long productId) {
+        return ResponseEntity.ok(productService.findProductById(productId));
     }
 
 }

@@ -39,7 +39,7 @@ public class OrderController {
 
     @PostMapping
     public ResponseEntity<ApiResponse<CreateOrderDto.Response>> createOrder(@AuthenticationPrincipal UserDetails user, @RequestBody CreateOrderDto.Request orderInfo) {
-        CreateOrderDto.Response res = orderService.createOrder(user, orderInfo);
+        CreateOrderDto.Response res = orderService.createOrder(Long.parseLong(user.getUsername()), orderInfo);
         return ResponseEntity.ok(ApiResponse.success(res));
     }
 

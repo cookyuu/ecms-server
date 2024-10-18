@@ -43,8 +43,8 @@ public class OrderService {
     private final RedisUtils redisUtils;
 
     @Transactional
-    public CreateOrderDto.Response createOrder(UserDetails user, CreateOrderDto.Request orderInfo) {
-        Member buyer = memberService.findMemberById(Long.parseLong(user.getUsername()));
+    public CreateOrderDto.Response createOrder(Long userId, CreateOrderDto.Request orderInfo) {
+        Member buyer = memberService.findMemberById(userId);
         Cart cart = cartService.findCartByMemberId(buyer.getId());
         int totalPrice = 0;
         for (CreateOrderItemInfo orderItemInfo : orderInfo.getOrderItemList()) {
