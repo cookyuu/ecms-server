@@ -25,6 +25,12 @@ public class CreateOrderDto {
         private String orderNumber;
         private Member buyer;
 
+        @Builder
+        public Request (List<CreateOrderItemInfo> orderItemList, OrderShipmentInfo shipmentInfo) {
+            this.orderItemList = orderItemList;
+            this.shipmentInfo = shipmentInfo;
+        }
+
         public void addTotalPrice (int totalPrice) {
             this.totalPrice = totalPrice;
         }
