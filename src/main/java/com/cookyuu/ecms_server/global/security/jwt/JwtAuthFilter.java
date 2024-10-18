@@ -36,6 +36,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 String accessToken = jwtUtils.getAccessToken(authorizationHeader);
                 RoleType role = RoleType.valueOf(jwtUtils.getRole(accessToken));
+                log.debug("[ValidateJwtToken] Role Type : {}", role);
                 jwtUtils.validateToken(accessToken);
                 Long id = jwtUtils.getId(accessToken);
                 jwtUtils.isLogoutToken(id, accessToken);

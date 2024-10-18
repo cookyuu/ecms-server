@@ -32,7 +32,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     public UserDetails loadUserByUsername(String id, RoleType role) {
         JWTUserInfo userInfo = new JWTUserInfo();
-        if (role.equals(RoleType.USER)) {
+        if (role.equals(RoleType.USER) || role.equals(RoleType.ADMIN)) {
             Member member = memberRepository.findById(Long.parseLong(id))
                     .orElseThrow(() -> new UsernameNotFoundException("[ValidateJwtToken] Can not find member. No exists"));
             userInfo.of(member);
