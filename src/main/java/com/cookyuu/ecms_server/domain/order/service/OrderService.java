@@ -43,8 +43,8 @@ public class OrderService {
     private final RedisUtils redisUtils;
 
     @Transactional
-    public CreateOrderDto.Response createOrder(UserDetails user, CreateOrderDto.Request orderInfo) {
-        Member buyer = memberService.findMemberById(Long.parseLong(user.getUsername()));
+    public CreateOrderDto.Response createOrder(Long userId, CreateOrderDto.Request orderInfo) {
+        Member buyer = memberService.findMemberById(userId);
         Cart cart = cartService.findCartByMemberId(buyer.getId());
         int totalPrice = 0;
         for (CreateOrderItemInfo orderItemInfo : orderInfo.getOrderItemList()) {
@@ -62,7 +62,7 @@ public class OrderService {
         }
         String orderNumber = createOrderNumber(OrderNumberCode.NORMAL_ORDER, OrderNumberCode.NO_COOPON);
         log.info("[Order::CreateOrder] Create order number, Order Number : {}", orderNumber);
-
+        log.info("44444444444444");
         while (redisUtils.getData(RedisKeyCode.ORDER_NUMBER.getSeparator()+orderNumber) != null) {
             orderNumber = createOrderNumber(OrderNumberCode.NORMAL_ORDER, OrderNumberCode.NO_COOPON);
             log.debug("[Order::CreateOrder] Created order number is duplicated, Order Number : {}", orderNumber);
