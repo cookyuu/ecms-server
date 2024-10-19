@@ -5,14 +5,9 @@ import com.cookyuu.ecms_server.domain.order.dto.CreateOrderItemInfo;
 import com.cookyuu.ecms_server.domain.order.dto.OrderShipmentInfo;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.DisplayNameGeneration;
-import org.junit.jupiter.api.DisplayNameGenerator;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.ArrayList;
@@ -21,8 +16,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
+@Slf4j
 @SpringBootTest
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class OrderServiceTest {
@@ -41,10 +35,13 @@ class OrderServiceTest {
         ExecutorService executor = Executors.newFixedThreadPool(numThreads);
         CountDownLatch latch = new CountDownLatch(numThreads);
 
-        Long userId = 1L;
+        Long userId = 3L;
+        Long productId = 10L;
+
+        Product beforeProduct = productService.findProductById(productId);
         List<CreateOrderItemInfo> reqItemList = new ArrayList<>();
         CreateOrderItemInfo reqItem = CreateOrderItemInfo.builder()
-                .productId(2L)
+                .productId(productId)
                 .price(10000)
                 .quantity(1)
                 .build();
@@ -64,18 +61,19 @@ class OrderServiceTest {
         for (int i = 0; i < numThreads; i += 1) {
             executor.submit(() -> {
                 try {
+                    log.info("[Order::Test] Concurrency Test, count : {}", latch.getCount());
                     orderService.createOrder(userId, request);
                 } finally {
                     latch.countDown();
                 }
             });
         }
-
         latch.await();
         executor.shutdown();
 
         // Then
-        Product product = productService.findProductById(2L);
-        assertThat(product.getStockQuantity().equals(0));
+        Product afterProduct = productService.findProductById(productId);
+        Assertions.assertEquals(beforeProduct.getStockQuantity()-numThreads, afterProduct.getStockQuantity());
+
     }
 }
