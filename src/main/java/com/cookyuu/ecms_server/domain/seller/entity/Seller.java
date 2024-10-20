@@ -50,6 +50,7 @@ public class Seller extends BaseTimeEntity {
     private LocalDateTime deletedAt;
 
     @OneToMany(mappedBy = "seller")
+    @Builder.Default
     private List<Product> products = new ArrayList<>();
 
     public void updateInfo(UpdateSellerDto.Request sellerInfo) {

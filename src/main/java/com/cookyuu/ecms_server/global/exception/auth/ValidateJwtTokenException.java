@@ -1,6 +1,6 @@
 package com.cookyuu.ecms_server.global.exception.auth;
 
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.ECMSAppException;
 
 public class ValidateJwtTokenException extends ECMSAppException {

@@ -3,15 +3,13 @@ package com.cookyuu.ecms_server.domain.member.service;
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.repository.MemberRepository;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.auth.UserLoginException;
 import com.cookyuu.ecms_server.global.exception.auth.ValidationException;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSMemberException;
 import com.cookyuu.ecms_server.global.utils.AuthUtils;
-import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Service;
 
 @Slf4j
