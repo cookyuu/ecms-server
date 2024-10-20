@@ -3,7 +3,7 @@ package com.cookyuu.ecms_server.domain.product.service;
 import com.cookyuu.ecms_server.domain.product.dto.CategoryInfoDto;
 import com.cookyuu.ecms_server.domain.product.entity.Category;
 import com.cookyuu.ecms_server.domain.product.repository.CategoryRepository;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSCategoryException;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;

@@ -1,7 +1,7 @@
 package com.cookyuu.ecms_server.global.security.jwt;
 
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

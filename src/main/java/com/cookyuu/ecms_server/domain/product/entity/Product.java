@@ -1,13 +1,11 @@
 package com.cookyuu.ecms_server.domain.product.entity;
 
 import com.cookyuu.ecms_server.domain.cart.entity.CartItem;
-import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.order.entity.OrderLine;
 import com.cookyuu.ecms_server.domain.review.entity.Review;
 import com.cookyuu.ecms_server.domain.seller.entity.Seller;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
-import com.cookyuu.ecms_server.global.exception.ECMSAppException;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSProductException;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -53,10 +51,15 @@ public class Product extends BaseTimeEntity {
     private Seller seller;
 
     @OneToMany(mappedBy = "product")
+    @Builder.Default
     private List<OrderLine> orderLines = new ArrayList<>();
+
     @OneToMany(mappedBy = "product")
+    @Builder.Default
     private List<Review> reviews = new ArrayList<>();
+
     @OneToMany(mappedBy = "product")
+    @Builder.Default
     private List<CartItem> cartItems = new ArrayList<>();
 
     public static Product of(String name, String description, Integer price, Integer stockQuantity, Category category, Seller seller) {

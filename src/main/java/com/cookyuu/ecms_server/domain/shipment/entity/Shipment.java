@@ -1,7 +1,7 @@
 package com.cookyuu.ecms_server.domain.shipment.entity;
 
 import com.cookyuu.ecms_server.domain.order.entity.Order;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSShipmentException;
 import jakarta.persistence.*;

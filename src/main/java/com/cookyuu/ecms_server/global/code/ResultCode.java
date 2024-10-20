@@ -1,4 +1,4 @@
-package com.cookyuu.ecms_server.global.dto;
+package com.cookyuu.ecms_server.global.code;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

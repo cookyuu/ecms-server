@@ -15,12 +15,13 @@ import com.cookyuu.ecms_server.domain.order.repository.OrderLineRepository;
 import com.cookyuu.ecms_server.domain.order.repository.OrderRepository;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
-import com.cookyuu.ecms_server.global.dto.RedisKeyCode;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.RedisKeyCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
 import com.cookyuu.ecms_server.global.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,7 +30,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static com.cookyuu.ecms_server.global.dto.ResultCode.ORDER_PROCESS_FAIL;
+import static com.cookyuu.ecms_server.global.code.ResultCode.ORDER_PROCESS_FAIL;
 
 @Slf4j
 @Service
@@ -137,6 +138,11 @@ public class OrderService {
         return ResultCode.ORDER_REVISE_SUCCESS;
     }
 
+    @Transactional(readOnly = true)
+    public Page<SearchOrderDto.Response> searchOrderList(SearchOrderDto.Request searchInfo) {
+        return orderRepository.searchPageOrderByCreatedAtDesc(searchInfo);
+    }
+
     private void checkBuyerOfOrder(Long reqUserId, Order order) {
         if (!order.getBuyer().getId().equals(reqUserId)) {
             log.info("[Order::Cancel] Unmatched Order's buyer Info and request User Info, buyerId : {}, reqUserId : {}", order.getBuyer().getId(), reqUserId);
@@ -169,7 +175,6 @@ public class OrderService {
             cartItem.updateQuantity(cartItem.getQuantity() - orderItemInfo.getQuantity());
         }
     }
-
     private void comparePriceAndCurrentPrice(int price, Integer currentPrice, Long productId) {
         if (currentPrice == null) {
             log.error("[Order::Error] Product price has not been set yet, productId : {}", productId);
@@ -203,4 +208,5 @@ public class OrderService {
     public Order findOrderByOrderNumber(String orderNumber) {
         return (Order) orderRepository.findByOrderNumber(orderNumber).orElseThrow(ECMSOrderException::new);
     }
+
 }

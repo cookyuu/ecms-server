@@ -11,7 +11,7 @@ import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSCartException;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSCartItemException;
 import lombok.RequiredArgsConstructor;

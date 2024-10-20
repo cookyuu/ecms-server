@@ -1,6 +1,6 @@
 package com.cookyuu.ecms_server.global.utils;
 
-import com.cookyuu.ecms_server.global.dto.CookieCode;
+import com.cookyuu.ecms_server.global.code.CookieCode;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;

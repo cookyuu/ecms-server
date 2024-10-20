@@ -1,6 +1,6 @@
 package com.cookyuu.ecms_server.global.utils;
 
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.auth.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
