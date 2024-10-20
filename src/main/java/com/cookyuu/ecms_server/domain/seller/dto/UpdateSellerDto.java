@@ -1,6 +1,6 @@
 package com.cookyuu.ecms_server.domain.seller.dto;
 
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSProductException;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

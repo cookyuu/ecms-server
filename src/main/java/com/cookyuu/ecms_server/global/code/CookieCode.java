@@ -1,4 +1,4 @@
-package com.cookyuu.ecms_server.global.dto;
+package com.cookyuu.ecms_server.global.code;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

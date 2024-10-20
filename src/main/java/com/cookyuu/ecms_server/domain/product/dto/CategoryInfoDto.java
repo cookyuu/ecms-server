@@ -1,6 +1,6 @@
 package com.cookyuu.ecms_server.domain.product.dto;
 
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSCategoryException;
 import io.micrometer.common.util.StringUtils;
 import lombok.AllArgsConstructor;

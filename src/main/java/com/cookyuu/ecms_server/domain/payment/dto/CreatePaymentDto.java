@@ -3,7 +3,7 @@ package com.cookyuu.ecms_server.domain.payment.dto;
 import com.cookyuu.ecms_server.domain.payment.entity.Payment;
 import com.cookyuu.ecms_server.domain.payment.entity.PaymentMethod;
 import com.cookyuu.ecms_server.domain.payment.entity.PaymentStatus;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

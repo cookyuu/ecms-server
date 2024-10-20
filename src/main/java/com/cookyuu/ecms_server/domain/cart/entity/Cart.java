@@ -27,5 +27,6 @@ public class Cart extends BaseTimeEntity {
     private Member member;
 
     @OneToMany(mappedBy = "cart")
+    @Builder.Default
     private List<CartItem> cartItems = new ArrayList<>();
 }
