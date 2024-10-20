@@ -1,5 +1,6 @@
 package com.cookyuu.ecms_server.global.dto;
 
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Getter;
 import org.springframework.data.domain.Page;

@@ -3,7 +3,7 @@ package com.cookyuu.ecms_server.domain.auth.service;
 import com.cookyuu.ecms_server.domain.auth.dto.SignupDto;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.auth.*;
 import com.cookyuu.ecms_server.global.utils.AuthUtils;
 import com.cookyuu.ecms_server.global.utils.ValidateUtils;

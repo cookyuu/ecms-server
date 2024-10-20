@@ -1,7 +1,7 @@
 package com.cookyuu.ecms_server.global.exception;
 
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.context.annotation.Primary;

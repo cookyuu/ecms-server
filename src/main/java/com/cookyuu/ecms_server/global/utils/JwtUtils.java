@@ -1,8 +1,8 @@
 package com.cookyuu.ecms_server.global.utils;
 
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
-import com.cookyuu.ecms_server.global.dto.RedisKeyCode;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.RedisKeyCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.auth.UserLoginException;
 import com.cookyuu.ecms_server.global.exception.auth.ValidateJwtTokenException;
 import io.jsonwebtoken.*;

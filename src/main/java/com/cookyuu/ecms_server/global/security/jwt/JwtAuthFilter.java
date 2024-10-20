@@ -1,8 +1,8 @@
 package com.cookyuu.ecms_server.global.security.jwt;
 
 import com.cookyuu.ecms_server.domain.member.entity.RoleType;
-import com.cookyuu.ecms_server.global.dto.RedisKeyCode;
-import com.cookyuu.ecms_server.global.dto.ResultCode;
+import com.cookyuu.ecms_server.global.code.RedisKeyCode;
+import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.auth.ValidateJwtTokenException;
 import com.cookyuu.ecms_server.global.utils.JwtUtils;
 import com.cookyuu.ecms_server.global.utils.RedisUtils;
