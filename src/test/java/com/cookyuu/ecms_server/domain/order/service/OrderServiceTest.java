@@ -5,7 +5,6 @@ import com.cookyuu.ecms_server.domain.order.dto.CreateOrderItemInfo;
 import com.cookyuu.ecms_server.domain.order.dto.OrderShipmentInfo;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
-import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +15,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-@Slf4j
 @SpringBootTest
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class OrderServiceTest {
@@ -61,7 +59,6 @@ class OrderServiceTest {
         for (int i = 0; i < numThreads; i += 1) {
             executor.submit(() -> {
                 try {
-                    log.info("[Order::Test] Concurrency Test, count : {}", latch.getCount());
                     orderService.createOrder(userId, request);
                 } finally {
                     latch.countDown();
