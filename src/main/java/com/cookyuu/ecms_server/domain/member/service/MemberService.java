@@ -12,6 +12,7 @@ import com.cookyuu.ecms_server.global.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -22,6 +23,11 @@ public class MemberService {
 
     public Member save(Member member) {
         return memberRepository.save(member);
+    }
+
+    @Transactional(readOnly = true)
+    public MemberDetailDto getMemberDetail(String loginId) {
+        return memberRepository.getMemberDetail(loginId);
     }
 
     public JWTUserInfo checkLoginCredentials(String loginId, String password) {
@@ -54,9 +60,5 @@ public class MemberService {
 
     public Member findMemberById(Long id) {
         return memberRepository.findById(id).orElseThrow(() -> new ECMSMemberException(ResultCode.MEMBER_NOT_FOUND));
-    }
-
-    public MemberDetailDto getMemberDetail(Long memberId) {
-        return memberRepository.getMemberDetail(memberId);
     }
 }

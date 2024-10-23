@@ -14,8 +14,8 @@ public class MemberSearchRepositoryImpl implements MemberSearchRepository {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public MemberDetailDto getMemberDetail(Long id) {
-       return (MemberDetailDto) queryFactory.select(Projections.constructor(MemberDetailDto.class,
+    public MemberDetailDto getMemberDetail(String loginId) {
+       return queryFactory.select(Projections.constructor(MemberDetailDto.class,
                 member.id,
                 member.name,
                 member.email,
@@ -23,10 +23,10 @@ public class MemberSearchRepositoryImpl implements MemberSearchRepository {
                 member.phoneNumber,
                 member.address,
                 member.role
-        )).from(member).where(memberIdEq(id)).fetchJoin().fetch();
+        )).from(member).where(memberLoginIdEq(loginId)).fetch().get(0);
     }
 
-    private BooleanExpression memberIdEq(Long id) {
-        return member.id.eq(id);
+    private BooleanExpression memberLoginIdEq(String loginId) {
+        return member.loginId.eq(loginId);
     }
 }
