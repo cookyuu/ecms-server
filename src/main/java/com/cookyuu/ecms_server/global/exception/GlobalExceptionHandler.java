@@ -1,12 +1,13 @@
 package com.cookyuu.ecms_server.global.exception;
 
-import com.cookyuu.ecms_server.global.dto.ApiResponse;
 import com.cookyuu.ecms_server.global.code.ResultCode;
+import com.cookyuu.ecms_server.global.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import java.io.IOException;
-import java.nio.file.AccessDeniedException;
 import java.sql.SQLException;
 import java.time.format.DateTimeParseException;
 import java.util.NoSuchElementException;
@@ -136,7 +136,7 @@ public class GlobalExceptionHandler {
      return new ResponseEntity<>(response, ResultCode.INTERNAL_SERVER_ERROR.getStatus());
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleException(WebRequest request, Exception e) {
         log.error("[Exception] ", e);
         var response = ApiResponse.failure(ResultCode.INTERNAL_SERVER_ERROR, e.getMessage());

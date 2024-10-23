@@ -1,6 +1,7 @@
 package com.cookyuu.ecms_server.domain.member.service;
 
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
+import com.cookyuu.ecms_server.domain.member.dto.MemberDetailDto;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.repository.MemberRepository;
 import com.cookyuu.ecms_server.global.code.ResultCode;
@@ -53,5 +54,9 @@ public class MemberService {
 
     public Member findMemberById(Long id) {
         return memberRepository.findById(id).orElseThrow(() -> new ECMSMemberException(ResultCode.MEMBER_NOT_FOUND));
+    }
+
+    public MemberDetailDto getMemberDetail(Long memberId) {
+        return memberRepository.getMemberDetail(memberId);
     }
 }
