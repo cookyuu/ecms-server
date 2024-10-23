@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import static com.cookyuu.ecms_server.domain.member.entity.QMember.member;
 
 @RequiredArgsConstructor
-public class MemberSearchRepositoryImpl implements MemberSearchRepository {
+public class MemberCustomRepositoryImpl implements MemberCustomRepository {
 
     private final JPAQueryFactory queryFactory;
 
