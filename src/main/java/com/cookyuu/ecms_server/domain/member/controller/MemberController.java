@@ -16,9 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
     private final MemberService memberService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<MemberDetailDto>> getMemberDetail(@PathVariable(name = "id") Long memberId) {
-        MemberDetailDto res = memberService.getMemberDetail(memberId);
+
+    @GetMapping("{loginId}")
+    public ResponseEntity<ApiResponse<MemberDetailDto>> getMemberDetail(@PathVariable(name = "loginId") String loginId) {
+        MemberDetailDto res = memberService.getMemberDetail(loginId);
         return ResponseEntity.ok(ApiResponse.success(res));
     }
 
