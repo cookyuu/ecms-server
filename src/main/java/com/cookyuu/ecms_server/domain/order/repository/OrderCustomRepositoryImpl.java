@@ -25,7 +25,7 @@ import static com.cookyuu.ecms_server.domain.order.entity.SearchOption.*;
 import static com.cookyuu.ecms_server.domain.shipment.entity.QShipment.shipment;
 
 @RequiredArgsConstructor
-public class OrderSearchRepositoryImpl implements OrderSearchRepository{
+public class OrderCustomRepositoryImpl implements OrderCustomRepository {
 
     private final JPAQueryFactory queryFactory;
 
