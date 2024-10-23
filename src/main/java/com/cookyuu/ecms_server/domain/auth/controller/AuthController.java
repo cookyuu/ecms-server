@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -42,6 +43,7 @@ public class AuthController {
         return ResponseEntity.ok(ApiResponse.success(ResultCode.SELLER_LOGIN_SUCCESS, res));
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_SELLER','ROLE_ADMIN')")
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<Object>> logoutNormal(@AuthenticationPrincipal UserDetails user, HttpServletRequest request, HttpServletResponse response) {
         authService.logoutNormal(user, request, response);

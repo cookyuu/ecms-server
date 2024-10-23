@@ -20,6 +20,7 @@ public class ProductController {
     private final ProductService productService;
     private Long id;
 
+    @PreAuthorize("hasRole('ROLE_SELLER')")
     @PostMapping("/registration")
     public ResponseEntity<ApiResponse<RegisterProductDto.Response>> registerProduct(@AuthenticationPrincipal UserDetails user, @RequestBody RegisterProductDto.Request productInfo) {
         Long productId = productService.registerProduct(user, productInfo);
@@ -27,12 +28,14 @@ public class ProductController {
                 ApiResponse.success(RegisterProductDto.Response.builder().productId(productId).build()));
     }
 
+    @PreAuthorize("hasRole('ROLE_SELLER')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> updateProduct(@PathVariable("id") Long productId, @AuthenticationPrincipal UserDetails user, @RequestBody UpdateProductDto.Request productInfo) {
         productService.updateProduct(productId, user, productInfo);
         return ResponseEntity.ok(ApiResponse.success());
     }
 
+    @PreAuthorize("hasRole('ROLE_SELLER')")
     @DeleteMapping()
     public ResponseEntity<ApiResponse<Object>> deleteProduct(@RequestParam("id") Long productId, @AuthenticationPrincipal UserDetails user) {
         productService.deleteProduct(productId, user);
