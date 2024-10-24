@@ -1,9 +1,6 @@
 package com.cookyuu.ecms_server.domain.order.controller;
 
-import com.cookyuu.ecms_server.domain.order.dto.CancelOrderDto;
-import com.cookyuu.ecms_server.domain.order.dto.CreateOrderDto;
-import com.cookyuu.ecms_server.domain.order.dto.ReviseOrderDto;
-import com.cookyuu.ecms_server.domain.order.dto.SearchOrderDto;
+import com.cookyuu.ecms_server.domain.order.dto.*;
 import com.cookyuu.ecms_server.domain.order.service.OrderService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
 import com.cookyuu.ecms_server.global.code.ResultCode;
@@ -54,5 +51,13 @@ public class OrderController {
                 .build();
         Page<SearchOrderDto.Response> resOrderList = orderService.searchOrderList(req);
         return ResponseEntity.ok(ApiResponse.success(resOrderList));
+    }
+
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_SELLER','ROLE_ADMIN')")
+    @GetMapping
+    public ResponseEntity<ApiResponse<OrderDetailDto>> getOrderDetail(@AuthenticationPrincipal UserDetails user, @RequestParam(name = "orderNumber") String orderNumber) {
+        // 해당 order가 User의 것인지 확인
+        OrderDetailDto res = orderService.getOrderDetail(user, orderNumber);
+        return ResponseEntity.ok(ApiResponse.success(res));
     }
 }

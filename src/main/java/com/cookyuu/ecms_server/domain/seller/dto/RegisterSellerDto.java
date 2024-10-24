@@ -14,6 +14,7 @@ public class RegisterSellerDto {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Request {
+        @NotNull
         private String loginId;
         @NotNull
         private String password;

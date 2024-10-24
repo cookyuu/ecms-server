@@ -1,15 +1,16 @@
 package com.cookyuu.ecms_server.domain.order.repository;
 
+import com.cookyuu.ecms_server.domain.order.dto.OrderDetailDto;
 import com.cookyuu.ecms_server.domain.order.dto.SearchOrderDto;
-import com.cookyuu.ecms_server.domain.order.entity.OrderStatus;
-import com.cookyuu.ecms_server.domain.order.entity.SearchOption;
-import com.cookyuu.ecms_server.domain.order.entity.SortType;
+import com.cookyuu.ecms_server.domain.order.entity.*;
 import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
+import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.ListPath;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import io.micrometer.common.util.StringUtils;
@@ -17,11 +18,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.support.PageableExecutionUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.cookyuu.ecms_server.domain.member.entity.QMember.member;
 import static com.cookyuu.ecms_server.domain.order.entity.QOrder.order;
+import static com.cookyuu.ecms_server.domain.order.entity.QOrderLine.orderLine;
 import static com.cookyuu.ecms_server.domain.order.entity.SearchOption.*;
+import static com.cookyuu.ecms_server.domain.product.entity.QProduct.product;
+import static com.cookyuu.ecms_server.domain.seller.entity.QSeller.seller;
 import static com.cookyuu.ecms_server.domain.shipment.entity.QShipment.shipment;
 
 @RequiredArgsConstructor
@@ -31,9 +36,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
 
     @Override
     public Page<SearchOrderDto.Response> searchPageOrderByCreatedAtDesc(SearchOrderDto.Request request) {
-
         OrderSpecifier orderSpecifier = createOrderSpecifier(request.getSortType());
-
         List<SearchOrderDto.Response> content = queryFactory
                 .select(Projections.constructor(SearchOrderDto.Response.class,
                         order.id.as("orderId"),
@@ -46,7 +49,8 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
                         order.recipientPhoneNumber,
                         member.loginId.as("buyerLoginId"),
                         shipment.shipmentNumber
-                ))
+                        )
+                )
                 .from(order)
                 .leftJoin(order.buyer, member)
                 .leftJoin(order.shipment, shipment)
@@ -63,6 +67,40 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
 
         return PageableExecutionUtils.getPage(content, request.getPageable(), countQuery::fetchOne);
     }
+
+    @Override
+    public OrderDetailDto getOrderDetail(String orderNumber) {
+        return queryFactory
+                .select(Projections.constructor(OrderDetailDto.class,
+                        order.orderNumber,
+                        order.totalPrice,
+                        order.status,
+                        order.destination,
+                        order.destinationDetail,
+                        order.recipientName,
+                        order.recipientPhoneNumber,
+                        member.id.as("buyerId"),
+                        member.loginId.as("buyerLoginId"),
+                        shipment.shipmentNumber,
+                        Projections.list(
+                                Projections.constructor(OrderDetailDto.OrderLineInfo.class,
+                                        orderLine.product.id.as("productId"),
+                                        orderLine.product.name.as("productName"),
+                                        orderLine.quantity,
+                                        orderLine.price,
+                                        orderLine.product.seller.id.as("sellerId")
+                                )
+                        )
+                ))
+                .from(order)
+                .leftJoin(order.buyer, member)
+                .leftJoin(order.shipment, shipment)
+                .leftJoin(order.orderLines, orderLine)
+                .where(orderNumberEq(orderNumber))
+                .distinct()
+                .fetch().get(0);
+    }
+
     private BooleanExpression optionEq(String option, String keyword) {
         if (StringUtils.isBlank(option)) {
             return null;
@@ -73,6 +111,10 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
             case STATUS -> order.status.eq(OrderStatus.valueOf(keyword));
             default -> null;
         };
+    }
+
+    private BooleanExpression orderNumberEq(String orderNumber) {
+        return order.orderNumber.eq(orderNumber);
     }
 
     private OrderSpecifier createOrderSpecifier(SortType sortType) {
@@ -95,4 +137,5 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
         }
         throw new ECMSOrderException(ResultCode.BAD_REQUEST, "[Order::Search] 검색 할 수 없는 옵션입니다. Option : " + option);
     }
+
 }

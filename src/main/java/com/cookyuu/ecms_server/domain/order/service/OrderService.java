@@ -4,6 +4,7 @@ import com.cookyuu.ecms_server.domain.cart.entity.Cart;
 import com.cookyuu.ecms_server.domain.cart.entity.CartItem;
 import com.cookyuu.ecms_server.domain.cart.service.CartService;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
+import com.cookyuu.ecms_server.domain.member.entity.RoleType;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.domain.order.dto.*;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
@@ -91,7 +92,7 @@ public class OrderService {
     public ResultCode cancelOrder(UserDetails user, CancelOrderDto.Request cancelInfo) {
         Order order = findOrderByOrderNumber(cancelInfo.getOrderNumber());
         order.isCanceled();
-        checkBuyerOfOrder(Long.parseLong(user.getUsername()), order);
+        checkBuyerOfOrder(Long.parseLong(user.getUsername()), order.getBuyer().getId());
         boolean isPossibleCancel = OrderStatus.isPossibleOrderCancel(order.getStatus());
         if (isPossibleCancel) {
             order.getOrderLines().forEach(orderLine -> orderLine.getProduct().addQuantity(orderLine.getQuantity()));
@@ -116,7 +117,7 @@ public class OrderService {
         }
 
         List<OrderLine> orderLines = order.getOrderLines();
-        checkBuyerOfOrder(Long.parseLong(user.getUsername()), order);
+        checkBuyerOfOrder(Long.parseLong(user.getUsername()), order.getBuyer().getId());
         orderLines.forEach(orderLine -> orderLine.getProduct().addQuantity(orderLine.getQuantity()));
         orderLineRepository.deleteAll(orderLines);
 
@@ -143,12 +144,43 @@ public class OrderService {
         return orderRepository.searchPageOrderByCreatedAtDesc(searchInfo);
     }
 
-    private void checkBuyerOfOrder(Long reqUserId, Order order) {
-        if (!order.getBuyer().getId().equals(reqUserId)) {
-            log.info("[Order::Cancel] Unmatched Order's buyer Info and request User Info, buyerId : {}, reqUserId : {}", order.getBuyer().getId(), reqUserId);
+    /*
+    * UserDetail로 권한 체크 로직 필요
+    *
+    */
+    @Transactional(readOnly = true)
+    public OrderDetailDto getOrderDetail(UserDetails user, String orderNumber) {
+        String jwtRole = user.getAuthorities().stream().findFirst().get().getAuthority();
+        log.info("[Order::getDetail] ROLE : {}", jwtRole);
+        OrderDetailDto orderDetailInfo = getOrderDetailBy(orderNumber);
+        if (jwtRole.equals("ROLE_"+RoleType.USER.name())) {
+            Long buyerId = orderDetailInfo.getBuyerId();
+            checkBuyerOfOrder(Long.parseLong(user.getUsername()), buyerId);
+        } else if (jwtRole.equals("ROLE_"+RoleType.SELLER.name())) {
+            Long sellerId = orderDetailInfo.getOrderLines().get(0).getSellerId();
+            checkSellerOfOrder(Long.parseLong(user.getUsername()), sellerId);
+        }
+        return orderDetailInfo;
+    }
+
+    private OrderDetailDto getOrderDetailBy(String orderNumber) {
+        return orderRepository.getOrderDetail(orderNumber);
+    }
+
+    private void checkBuyerOfOrder(Long reqUserId, Long buyerId) {
+        if (!buyerId.equals(reqUserId)) {
+            log.info("[Order::BuyerMatch] Unmatched Order's buyer Info and request User Info, buyerId : {}, reqUserId : {}", buyerId, reqUserId);
             throw new ECMSOrderException(ResultCode.ORDER_CANCEL_FAIL, "주문자의 정보가 일치하지 않습니다.");
         }
-        log.info("[Order::Cancel] Match buyer id and request user id OK!");
+        log.info("[Order::BuyerMatch] Match buyer id and request user id OK!");
+    }
+
+    private void checkSellerOfOrder(long reqUserId, Long sellerId) {
+        if (!sellerId.equals(reqUserId)) {
+            log.info("[Order::SellerMatch] Unmatched Order Product Seller and request User, sellerId : {}, reqUserId : {}", sellerId, reqUserId);
+            throw new ECMSOrderException(ResultCode.ORDER_CANCEL_FAIL, "주문 상품 판매자의 정보가 일치하지 않습니다.");
+        }
+        log.info("[Order::SellerMatch] Match seller id and request user id OK!");
     }
 
     private void compareQuantityAndStockQuantity(int quantity, Integer stockQuantity) {
@@ -162,7 +194,6 @@ public class OrderService {
         }
         log.info("[Order::CompareStockQuantity] This product ");
     }
-
     private void updateCartWithOrderItems(Cart cart, Product product, CreateOrderItemInfo orderItemInfo) {
         CartItem cartItem = findCartItemByCartAndProduct(cart, product);
         log.debug("[Order::UpdateCart]");
@@ -175,6 +206,7 @@ public class OrderService {
             cartItem.updateQuantity(cartItem.getQuantity() - orderItemInfo.getQuantity());
         }
     }
+
     private void comparePriceAndCurrentPrice(int price, Integer currentPrice, Long productId) {
         if (currentPrice == null) {
             log.error("[Order::Error] Product price has not been set yet, productId : {}", productId);
@@ -206,7 +238,6 @@ public class OrderService {
     }
 
     public Order findOrderByOrderNumber(String orderNumber) {
-        return (Order) orderRepository.findByOrderNumber(orderNumber).orElseThrow(ECMSOrderException::new);
+        return orderRepository.findByOrderNumber(orderNumber).orElseThrow(ECMSOrderException::new);
     }
-
 }
