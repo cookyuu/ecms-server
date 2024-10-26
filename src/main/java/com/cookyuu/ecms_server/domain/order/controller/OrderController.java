@@ -36,8 +36,8 @@ public class OrderController {
 
     @PutMapping
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<ApiResponse<ResultCode>> reviseOrderInfo(@AuthenticationPrincipal UserDetails user, @RequestBody ReviseOrderDto.Request reviceInfo) {
-        return ResponseEntity.ok(ApiResponse.success(orderService.reviseOrder(user, reviceInfo)));
+    public ResponseEntity<ApiResponse<ResultCode>> reviseOrderInfo(@AuthenticationPrincipal UserDetails user, @RequestBody ReviseOrderDto.Request reviseInfo) {
+        return ResponseEntity.ok(ApiResponse.success(orderService.reviseOrder(user, reviseInfo)));
     }
 
     @GetMapping("/search")
@@ -56,7 +56,6 @@ public class OrderController {
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_SELLER','ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<ApiResponse<OrderDetailDto>> getOrderDetail(@AuthenticationPrincipal UserDetails user, @RequestParam(name = "orderNumber") String orderNumber) {
-        // 해당 order가 User의 것인지 확인
         OrderDetailDto res = orderService.getOrderDetail(user, orderNumber);
         return ResponseEntity.ok(ApiResponse.success(res));
     }

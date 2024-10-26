@@ -10,6 +10,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -119,6 +120,10 @@ public class JwtUtils {
         } catch (Exception e) {
             throw new UserLoginException(ResultCode.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public static String getRoleFromUserDetails(UserDetails user) {
+        return user.getAuthorities().stream().findFirst().get().getAuthority();
     }
 
 }
