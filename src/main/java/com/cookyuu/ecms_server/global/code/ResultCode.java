@@ -78,10 +78,12 @@ public enum ResultCode {
 
     // Order - ERROR
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O-001", "주문 정보를 찾을 수 없습니다."),
-    ORDER_PROCESS_FAIL(HttpStatus.BAD_REQUEST,"O-001" , "주문 처리에 실패했습니다."),
-    ORDER_CANCEL_FAIL(HttpStatus.BAD_REQUEST, "O-002", "주문 취소에 실패했습니다."),
-    ORDER_STATUS_ERROR(HttpStatus.BAD_REQUEST, "O-003", "해당 작업을 할 수 있는 주문 상태가 아닙니다."),
-    ALREADY_CANCELED_ORDER(HttpStatus.BAD_REQUEST,"O-003","이미 취소된 주문입니다."),
+    ORDER_PROCESS_FAIL(HttpStatus.BAD_REQUEST,"O-002" , "주문 처리에 실패했습니다."),
+    ORDER_CANCEL_FAIL(HttpStatus.BAD_REQUEST, "O-003", "주문 취소에 실패했습니다."),
+    ORDER_STATUS_ERROR(HttpStatus.BAD_REQUEST, "O-004", "해당 작업을 할 수 있는 주문 상태가 아닙니다."),
+    ALREADY_CANCELED_ORDER(HttpStatus.BAD_REQUEST,"O-005","이미 취소된 주문입니다."),
+    ORDER_SELLER_UNMATCHED(HttpStatus.FORBIDDEN, "O-006", "해당 주문에 해당하는 상품의 판매자가 아닙니다."),
+    ORDER_BUYER_UNMATCHED(HttpStatus.FORBIDDEN, "O-007", "해당 주문의 구매자가 아닙니다."),
 
     // Payment - ERROR
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "P-001","결제 정보를 찾을 수 없습니다."),

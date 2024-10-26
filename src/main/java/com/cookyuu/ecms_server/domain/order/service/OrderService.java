@@ -19,6 +19,7 @@ import com.cookyuu.ecms_server.domain.product.service.ProductService;
 import com.cookyuu.ecms_server.global.code.RedisKeyCode;
 import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
+import com.cookyuu.ecms_server.global.utils.JwtUtils;
 import com.cookyuu.ecms_server.global.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -144,21 +145,19 @@ public class OrderService {
         return orderRepository.searchPageOrderByCreatedAtDesc(searchInfo);
     }
 
-    /*
-    * UserDetail로 권한 체크 로직 필요
-    *
-    */
     @Transactional(readOnly = true)
     public OrderDetailDto getOrderDetail(UserDetails user, String orderNumber) {
-        String jwtRole = user.getAuthorities().stream().findFirst().get().getAuthority();
-        log.info("[Order::getDetail] ROLE : {}", jwtRole);
+        String jwtRole = JwtUtils.getRoleFromUserDetails(user);
+        log.debug("[Order::getDetail] ROLE : {}", jwtRole);
         OrderDetailDto orderDetailInfo = getOrderDetailBy(orderNumber);
         if (jwtRole.equals("ROLE_"+RoleType.USER.name())) {
-            Long buyerId = orderDetailInfo.getBuyerId();
+            Long buyerId = orderDetailInfo.getOrderInfo().getBuyerId();
             checkBuyerOfOrder(Long.parseLong(user.getUsername()), buyerId);
         } else if (jwtRole.equals("ROLE_"+RoleType.SELLER.name())) {
-            Long sellerId = orderDetailInfo.getOrderLines().get(0).getSellerId();
-            checkSellerOfOrder(Long.parseLong(user.getUsername()), sellerId);
+            boolean isSellerOfOrder = orderDetailInfo.getOrderLines().stream().anyMatch(orderLineInfo -> checkSellerOfOrder(Long.parseLong(user.getUsername()), orderLineInfo.getSellerId()));
+            if (!isSellerOfOrder) {
+                throw new ECMSOrderException(ResultCode.ORDER_SELLER_UNMATCHED);
+            }
         }
         return orderDetailInfo;
     }
@@ -168,19 +167,16 @@ public class OrderService {
     }
 
     private void checkBuyerOfOrder(Long reqUserId, Long buyerId) {
+        log.debug("[Order::BuyerMatch] Unmatched Order's buyer Info and request User Info, buyerId : {}, reqUserId : {}", buyerId, reqUserId);
         if (!buyerId.equals(reqUserId)) {
-            log.info("[Order::BuyerMatch] Unmatched Order's buyer Info and request User Info, buyerId : {}, reqUserId : {}", buyerId, reqUserId);
-            throw new ECMSOrderException(ResultCode.ORDER_CANCEL_FAIL, "주문자의 정보가 일치하지 않습니다.");
+            throw new ECMSOrderException(ResultCode.ORDER_BUYER_UNMATCHED);
         }
         log.info("[Order::BuyerMatch] Match buyer id and request user id OK!");
     }
 
-    private void checkSellerOfOrder(long reqUserId, Long sellerId) {
-        if (!sellerId.equals(reqUserId)) {
-            log.info("[Order::SellerMatch] Unmatched Order Product Seller and request User, sellerId : {}, reqUserId : {}", sellerId, reqUserId);
-            throw new ECMSOrderException(ResultCode.ORDER_CANCEL_FAIL, "주문 상품 판매자의 정보가 일치하지 않습니다.");
-        }
-        log.info("[Order::SellerMatch] Match seller id and request user id OK!");
+    private boolean checkSellerOfOrder(long reqUserId, Long sellerId) {
+        log.debug("[Order::SellerMatch] Unmatched Order's seller Info and request User Info, sellerId : {}, reqUserId : {}", sellerId, reqUserId);
+        return sellerId.equals(reqUserId);
     }
 
     private void compareQuantityAndStockQuantity(int quantity, Integer stockQuantity) {
