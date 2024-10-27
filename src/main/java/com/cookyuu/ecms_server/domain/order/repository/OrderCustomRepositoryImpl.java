@@ -104,43 +104,6 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
                 .build();
     }
 
-
-    /*
-    @Override
-    public OrderDetailDto getOrderDetail(String orderNumber) {
-        List<OrderDetailDto> resList = queryFactory
-                .select(Projections.constructor(OrderDetailDto.class,
-                        order.orderNumber,
-                        order.totalPrice,
-                        order.status,
-                        order.destination,
-                        order.destinationDetail,
-                        order.recipientName,
-                        order.recipientPhoneNumber,
-                        member.id.as("buyerId"),
-                        member.loginId.as("buyerLoginId"),
-                        member.name.as("buyerName"),
-                        shipment.shipmentNumber,
-                        Projections.list(
-                                Projections.constructor(OrderDetailDto.OrderLineInfo.class,
-                                        orderLine.product.id.as("productId"),
-                                        orderLine.product.name.as("productName"),
-                                        orderLine.quantity,
-                                        orderLine.price,
-                                        orderLine.product.seller.id.as("sellerId"),
-                                        orderLine.product.seller.name.as("sellerName")
-                                )
-                        )
-                ))
-                .from(order)
-                .leftJoin(order.buyer, member)
-                .leftJoin(order.shipment, shipment)
-                .leftJoin(order.orderLines, orderLine).fetchJoin()
-                .where(orderNumberEq(orderNumber), isNotCanceled())
-                .fetch();
-        return resList.stream().findFirst().orElse(null);
-    }
-*/
     private BooleanExpression isNotCanceled() {
         return order.isCanceled.eq(false);
     }
