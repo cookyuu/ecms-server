@@ -2,6 +2,7 @@ package com.cookyuu.ecms_server.domain.payment.controller;
 
 import com.cookyuu.ecms_server.domain.payment.dto.CancelPaymentDto;
 import com.cookyuu.ecms_server.domain.payment.dto.CreatePaymentDto;
+import com.cookyuu.ecms_server.domain.payment.dto.PaymentDetailDto;
 import com.cookyuu.ecms_server.domain.payment.service.PaymentService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +11,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -32,6 +35,11 @@ public class PaymentController {
     @DeleteMapping
     public ResponseEntity<ApiResponse<CancelPaymentDto.Response>> cancelPayment(@AuthenticationPrincipal UserDetails user, @RequestBody CancelPaymentDto.Request paymentInfo) {
         return ResponseEntity.ok(ApiResponse.success(paymentService.cancelPayment(user, paymentInfo)));
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<PaymentDetailDto>>> getPaymentDetail(@AuthenticationPrincipal UserDetails user, @RequestParam String paymentNumber) {
+        return ResponseEntity.ok(ApiResponse.success(paymentService.getPaymentDetail(user, paymentNumber)));
 
     }
 

@@ -19,17 +19,19 @@ public class CreatePaymentDto {
         private Integer paymentPrice;
         private String orderNumber;
 
-        public Payment successPayment(String paymentNumber) {
+        public Payment successPayment(Long buyerId, Long sellerId, String paymentNumber) {
             return Payment.builder()
                     .paymentNumber(paymentNumber)
                     .orderNumber(orderNumber)
                     .amount(this.paymentPrice)
                     .paymentMethod(this.paymentMethod)
                     .status(PaymentStatus.COMPLETE)
+                    .buyerId(buyerId)
+                    .sellerId(sellerId)
                     .build();
         }
 
-        public Payment failPayment(String paymentNumber, String failMsg) {
+        public Payment failPayment(Long buyerId, Long sellerId, String paymentNumber, String failMsg) {
             return Payment.builder()
                     .paymentNumber(paymentNumber)
                     .orderNumber(orderNumber)
@@ -37,6 +39,8 @@ public class CreatePaymentDto {
                     .paymentMethod(this.paymentMethod)
                     .status(PaymentStatus.FAIL)
                     .paymentFailMsg(failMsg)
+                    .buyerId(buyerId)
+                    .sellerId(sellerId)
                     .build();
         }
     }
