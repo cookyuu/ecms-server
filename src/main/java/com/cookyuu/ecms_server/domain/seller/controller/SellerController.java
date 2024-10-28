@@ -2,6 +2,7 @@ package com.cookyuu.ecms_server.domain.seller.controller;
 
 import com.cookyuu.ecms_server.domain.seller.dto.DeleteSellerDto;
 import com.cookyuu.ecms_server.domain.seller.dto.RegisterSellerDto;
+import com.cookyuu.ecms_server.domain.seller.dto.SellerDetailDto;
 import com.cookyuu.ecms_server.domain.seller.dto.UpdateSellerDto;
 import com.cookyuu.ecms_server.domain.seller.service.SellerService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
@@ -38,5 +39,11 @@ public class SellerController {
     public ResponseEntity<ApiResponse<Object>> deleteSeller(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody DeleteSellerDto.Request sellerInfo) {
         sellerService.deleteSeller(user, sellerInfo);
         return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    @PreAuthorize("hasRole('ROLE_SELLER')")
+    @GetMapping
+    public ResponseEntity<ApiResponse<SellerDetailDto>> getSellerDetail(@AuthenticationPrincipal UserDetails user) {
+        return ResponseEntity.ok(ApiResponse.success(sellerService.getSellerDetail(Long.parseLong(user.getUsername()))));
     }
 }
