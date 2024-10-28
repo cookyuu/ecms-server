@@ -63,7 +63,6 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
 
     @Override
     public OrderDetailDto getOrderDetail(String orderNumber) {
-
         OrderDetailDto.OrderInfo orderInfo = queryFactory
                 .select(Projections.constructor(OrderDetailDto.OrderInfo.class,
                         order.orderNumber,
