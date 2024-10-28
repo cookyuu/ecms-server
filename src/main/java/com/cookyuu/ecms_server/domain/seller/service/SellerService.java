@@ -3,6 +3,7 @@ package com.cookyuu.ecms_server.domain.seller.service;
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
 import com.cookyuu.ecms_server.domain.seller.dto.DeleteSellerDto;
 import com.cookyuu.ecms_server.domain.seller.dto.RegisterSellerDto;
+import com.cookyuu.ecms_server.domain.seller.dto.SellerDetailDto;
 import com.cookyuu.ecms_server.domain.seller.dto.UpdateSellerDto;
 import com.cookyuu.ecms_server.domain.seller.entity.Seller;
 import com.cookyuu.ecms_server.domain.seller.mapper.SellerRegistrationMapper;
@@ -62,6 +63,11 @@ public class SellerService {
         authUtils.checkPassword(seller.getPassword(), sellerInfo.getPassword());
         seller.delete();
         log.info("[DeleteSeller] Delete Seller Account, Seller Id : {}", seller.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public SellerDetailDto getSellerDetail(Long reqUserId) {
+        return sellerRepository.getSellerDetail(reqUserId);
     }
 
     private void validateSellerPersonalInfo(String loginId, String businessNumber, String telNum, String email) {
