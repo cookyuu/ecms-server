@@ -30,7 +30,8 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authenticationEntryPoint;
 
     private static final String[] AUTH_WHITELIST = {
-        "/api/v1/auth/**", "/api/v1/seller/registration", "/api/v1/order/search", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**"
+        "/api/v1/auth/**", "/api/v1/seller/registration", "/api/v1/order/search", "/swagger-ui/**", "/swagger-resources/**", "/v3/api-docs/**",
+            "/api/v1/product/**"
     };
     private static final String[] AUTH_ADMIN = {
     };
@@ -57,14 +58,6 @@ public class SecurityConfig {
         http.exceptionHandling(exceptionHandler -> exceptionHandler
                 .authenticationEntryPoint(authenticationEntryPoint)
                 .accessDeniedHandler(accessDeniedHandler));
-
-        http.authorizeHttpRequests(authorize -> authorize
-                .requestMatchers(AUTH_WHITELIST).permitAll()
-                .requestMatchers(AUTH_ADMIN).hasRole("ADMIN")
-                .requestMatchers(AUTH_SELLER).hasRole("SELLER")
-                .requestMatchers(AUTH_USER).hasRole("USER")
-                .anyRequest().authenticated());
-
         return http.build();
     }
 }

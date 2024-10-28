@@ -25,10 +25,14 @@ public class Payment extends BaseTimeEntity {
     private String cancelReason;
     private LocalDateTime canceledAt;
 
+    private Long buyerId;
+    private Long sellerId;
+
     @Enumerated(EnumType.STRING)
     private PaymentMethod paymentMethod;
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;
+
 
     private String paymentFailMsg;
 

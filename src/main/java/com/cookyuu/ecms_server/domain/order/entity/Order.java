@@ -39,6 +39,7 @@ public class Order extends BaseTimeEntity {
     private String recipientName;
     private String recipientPhoneNumber;
 
+    private String paymentFailMsg;
     @ManyToOne
     @JoinColumn(name = "buyer_id")
     private Member buyer;
@@ -96,8 +97,9 @@ public class Order extends BaseTimeEntity {
         this.shipment = shipment;
     }
 
-    public void failPayment() {
+    public void failPayment(String paymentFailMsg) {
         this.status = OrderStatus.PAYMENT_FAIL;
+        this.paymentFailMsg = paymentFailMsg;
     }
 
     public void cancelPayment() {
