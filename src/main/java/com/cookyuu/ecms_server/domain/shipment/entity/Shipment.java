@@ -22,7 +22,6 @@ public class Shipment extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String shipmentNumber;
     private String currentLocation;
     private ShipmentStatus status;

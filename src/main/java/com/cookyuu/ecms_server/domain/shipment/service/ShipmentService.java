@@ -3,6 +3,7 @@ package com.cookyuu.ecms_server.domain.shipment.service;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.domain.order.service.OrderService;
 import com.cookyuu.ecms_server.domain.shipment.dto.CreateShipmentDto;
+import com.cookyuu.ecms_server.domain.shipment.dto.ShipmentDetailDto;
 import com.cookyuu.ecms_server.domain.shipment.dto.UpdateShipmentDto;
 import com.cookyuu.ecms_server.domain.shipment.entity.Shipment;
 import com.cookyuu.ecms_server.domain.shipment.entity.ShipmentStatus;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -56,6 +58,11 @@ public class ShipmentService {
         Shipment shipment = findShipmentByShipmentNumber(shipmentInfo.getShipmentNumber());
         shipment.checkStatus(ShipmentStatus.IN_DELIVERY);
         shipment.updateLocation(shipmentInfo.getLocation());
+    }
+
+    @Transactional(readOnly = true)
+    public ShipmentDetailDto getShipmentDetail(String shipmentNumber) {
+        return shipmentRepository.getShipmentDetail(shipmentNumber);
     }
 
     private Shipment findShipmentByShipmentNumber(String shipmentNumber) {
