@@ -1,6 +1,7 @@
 package com.cookyuu.ecms_server.domain.member.service;
 
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
+import com.cookyuu.ecms_server.domain.member.dto.MemberDetailDto;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.repository.MemberRepository;
 import com.cookyuu.ecms_server.global.code.ResultCode;
@@ -11,6 +12,7 @@ import com.cookyuu.ecms_server.global.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -21,6 +23,11 @@ public class MemberService {
 
     public Member save(Member member) {
         return memberRepository.save(member);
+    }
+
+    @Transactional(readOnly = true)
+    public MemberDetailDto getMemberDetail(String loginId) {
+        return memberRepository.getMemberDetail(loginId);
     }
 
     public JWTUserInfo checkLoginCredentials(String loginId, String password) {

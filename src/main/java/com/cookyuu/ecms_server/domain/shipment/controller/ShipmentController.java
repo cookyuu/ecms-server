@@ -1,6 +1,7 @@
 package com.cookyuu.ecms_server.domain.shipment.controller;
 
 import com.cookyuu.ecms_server.domain.shipment.dto.CreateShipmentDto;
+import com.cookyuu.ecms_server.domain.shipment.dto.ShipmentDetailDto;
 import com.cookyuu.ecms_server.domain.shipment.dto.UpdateShipmentDto;
 import com.cookyuu.ecms_server.domain.shipment.service.ShipmentService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
@@ -30,5 +31,10 @@ public class ShipmentController {
     public ResponseEntity<ApiResponse<Void>> updateLocation(@RequestBody UpdateShipmentDto.Request shipmentInfo) {
         shipmentService.updateLocation(shipmentInfo);
         return ResponseEntity.ok(ApiResponse.success());
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<ShipmentDetailDto>> getShipmentDetail(@RequestParam String shipmentNumber) {
+        return ResponseEntity.ok(ApiResponse.success(shipmentService.getShipmentDetail(shipmentNumber)));
     }
 }

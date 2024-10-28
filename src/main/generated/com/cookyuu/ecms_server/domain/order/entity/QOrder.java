@@ -48,6 +48,8 @@ public class QOrder extends EntityPathBase<Order> {
 
     public final StringPath orderNumber = createString("orderNumber");
 
+    public final StringPath paymentFailMsg = createString("paymentFailMsg");
+
     public final StringPath recipientName = createString("recipientName");
 
     public final StringPath recipientPhoneNumber = createString("recipientPhoneNumber");
