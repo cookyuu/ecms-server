@@ -1,6 +1,7 @@
 package com.cookyuu.ecms_server.domain.auth.service;
 
 import com.cookyuu.ecms_server.domain.auth.dto.SignupDto;
+import com.cookyuu.ecms_server.domain.cart.service.CartService;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.global.code.ResultCode;
@@ -27,12 +28,14 @@ class AuthServiceTest {
 
     @Mock
     private MemberService memberService;
+    @Mock
+    private CartService cartService;
     @Spy
     private ValidateUtils validateUtils;
     @Mock
     private AuthUtils authUtils;
 
-    @DisplayName("정상 로그인 테스트")
+    @DisplayName("정상 회원가입 테스트")
     @Test
     void givenNormalInfo_whenSignup_thenReturnTrue() {
         SignupDto.Request request = SignupDto.Request.builder()
