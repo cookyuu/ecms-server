@@ -1,0 +1,46 @@
+version: '3'
+services:
+  database:
+    container_name: ecms-db
+    image: mariadb
+    volumes:
+      - ./mariadb/conf.d:/etc/mysql/conf.d
+      - ./mariadb/data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 0577
+      MYSQL_DATABASE: ecms_db
+      MYSQL_USER: cookyuu
+      MYSQL_PASSWORD: hk1234
+    ports:
+      - "13306:3306"
+    restart: always
+
+  redis:
+    container_name: ecms-redis
+    image: redis
+    hostname: ecms-redis
+    ports:
+      - "6379:6379"
+    restart: always
+
+  core:
+    container_name: ecms-core
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "7777:7777"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mariadb://ecms-db:3306/ecms_db?characterEncoding=UTF-8&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: cookyuu
+      SPRING_DATASOURCE_PASSWORD: hk1234
+    restart: always
+    depends_on:
+      - database
+      - redis
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"

@@ -1,0 +1,11 @@
+groups:
+  - name: ecms_core_up
+    rules:
+      - alert: InstanceDown
+        expr: up{job="my_server"} == 0
+        for: 30m
+        annotations:
+          title: "Instance {{ $labels.instance }} down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 30 minute."
+        labels:
+          severity: "critical"

@@ -8,3 +8,9 @@ spring:
 
   profiles:
     default: local # 기본 환경을 dev로
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "prometheus"
