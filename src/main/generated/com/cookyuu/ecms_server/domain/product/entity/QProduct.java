@@ -48,8 +48,6 @@ public class QProduct extends EntityPathBase<Product> {
 
     public final NumberPath<Integer> price = createNumber("price", Integer.class);
 
-    public final ListPath<com.cookyuu.ecms_server.domain.review.entity.Review, com.cookyuu.ecms_server.domain.review.entity.QReview> reviews = this.<com.cookyuu.ecms_server.domain.review.entity.Review, com.cookyuu.ecms_server.domain.review.entity.QReview>createList("reviews", com.cookyuu.ecms_server.domain.review.entity.Review.class, com.cookyuu.ecms_server.domain.review.entity.QReview.class, PathInits.DIRECT2);
-
     public final com.cookyuu.ecms_server.domain.seller.entity.QSeller seller;
 
     public final NumberPath<Integer> stockQuantity = createNumber("stockQuantity", Integer.class);

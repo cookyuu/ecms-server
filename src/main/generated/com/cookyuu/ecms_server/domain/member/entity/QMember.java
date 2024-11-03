@@ -46,8 +46,6 @@ public class QMember extends EntityPathBase<Member> {
 
     public final StringPath phoneNumber = createString("phoneNumber");
 
-    public final ListPath<com.cookyuu.ecms_server.domain.review.entity.Review, com.cookyuu.ecms_server.domain.review.entity.QReview> reviews = this.<com.cookyuu.ecms_server.domain.review.entity.Review, com.cookyuu.ecms_server.domain.review.entity.QReview>createList("reviews", com.cookyuu.ecms_server.domain.review.entity.Review.class, com.cookyuu.ecms_server.domain.review.entity.QReview.class, PathInits.DIRECT2);
-
     public final EnumPath<RoleType> role = createEnum("role", RoleType.class);
 
     public QMember(String variable) {
