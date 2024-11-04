@@ -1,6 +1,8 @@
 package com.cookyuu.ecms_server.domain.product.service;
 
+import com.cookyuu.ecms_server.domain.order.dto.SearchOrderDto;
 import com.cookyuu.ecms_server.domain.product.dto.RegisterProductDto;
+import com.cookyuu.ecms_server.domain.product.dto.SearchProductDto;
 import com.cookyuu.ecms_server.domain.product.dto.UpdateProductDto;
 import com.cookyuu.ecms_server.domain.product.entity.Category;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
@@ -12,6 +14,7 @@ import com.cookyuu.ecms_server.global.exception.domain.ECMSProductException;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSSellerException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,6 +71,12 @@ public class ProductService {
         product.delete();
         log.info("[DeleteProduct] Product delete OK!, ProductId : {}", productId);
     }
+
+    @Transactional(readOnly = true)
+    public Page<SearchProductDto.Response> searchProductList(SearchProductDto.Request searchInfo) {
+        return productRepository.searchPageOrderByCreatedAtDesc(searchInfo);
+    }
+
 
     public Product findProductById(Long id) {
         return productRepository.findById(id).orElseThrow(ECMSProductException::new);
