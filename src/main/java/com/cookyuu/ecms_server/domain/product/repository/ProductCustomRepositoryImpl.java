@@ -42,7 +42,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                         product.deletedAt,
                         category.id.as("categoryId"),
                         category.name.as("categoryName"),
-                        seller.loginId.as("sellerId"),
+                        seller.id.as("sellerId"),
                         seller.name.as("sellerName")
                         )
                 )
@@ -64,7 +64,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     }
 
 
-    private BooleanExpression isNotCanceled() {
+    private BooleanExpression isNotDeleted() {
         return product.isDeleted.eq(false);
     }
 
