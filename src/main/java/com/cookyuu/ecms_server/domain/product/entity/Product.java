@@ -43,7 +43,7 @@ public class Product extends BaseTimeEntity {
     private LocalDateTime deletedAt;
 
     @ManyToOne
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "category_id")
     private Category category;
     @ManyToOne
     @JoinColumn(name = "seller_id")
