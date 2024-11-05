@@ -101,8 +101,8 @@ public enum ResultCode {
     // Coupon - ERROR
     COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "CP-001", "해당 쿠폰을 찾을 수 없습니다."),
     COUPON_CODE_UNMATCHED(HttpStatus.BAD_REQUEST, "CP-002", "일치하는 쿠폰 코드가 없습니다."),
-    COUPON_EMPTY_PRICE(HttpStatus.BAD_REQUEST, "CP-003", "쿠폰 할인 가격을 입력해주세요");
-
+    COUPON_EMPTY_PRICE(HttpStatus.BAD_REQUEST, "CP-003", "쿠폰 할인 가격을 입력해주세요"),
+    COUPON_SOLD_OUT(HttpStatus.BAD_REQUEST, "CP-004", "쿠폰 재고 소진");
 
     private final HttpStatus status;
     private final String code;
