@@ -4,6 +4,7 @@ import com.cookyuu.ecms_server.domain.order.dto.OrderDetailDto;
 import com.cookyuu.ecms_server.domain.order.dto.SearchOrderDto;
 import com.cookyuu.ecms_server.domain.order.entity.*;
 import com.cookyuu.ecms_server.global.code.ResultCode;
+import com.cookyuu.ecms_server.global.entity.SortType;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
 import com.querydsl.core.types.*;
 import com.querydsl.core.types.Order;

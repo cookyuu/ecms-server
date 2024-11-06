@@ -94,6 +94,7 @@ public class JwtUtils {
                 throw new UserLoginException(ResultCode.ALREADY_LOGOUT_USER);
             }
         } catch (Exception e) {
+            log.error("[CheckRedisCache] ", e);
             throw new UserLoginException(ResultCode.INTERNAL_SERVER_ERROR);
         }
     }

@@ -5,10 +5,8 @@ import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,11 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class MemberController {
     private final MemberService memberService;
 
-
-    @GetMapping("{loginId}")
+    @GetMapping("/{loginId}")
     public ResponseEntity<ApiResponse<MemberDetailDto>> getMemberDetail(@PathVariable(name = "loginId") String loginId) {
         MemberDetailDto res = memberService.getMemberDetail(loginId);
         return ResponseEntity.ok(ApiResponse.success(res));
+    }
+
+    @PreAuthorize("permitAll()")
+    @PutMapping("/role")
+    public ResponseEntity<ApiResponse<String>> updateMemberRole(@RequestParam(name = "role") String role, @RequestParam(name = "loginId") String loginId) {
+        memberService.updateRole(role, loginId);
+        return ResponseEntity.ok(ApiResponse.success("성공"));
     }
 
 }
