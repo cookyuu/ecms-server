@@ -96,7 +96,12 @@ public enum ResultCode {
 
     // Shipment - ERROR
     SHIPMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "SP-001", "배송 정보를 찾을 수 없습니다."),
-    SHIPMENT_STATUS_UNMATCHED(HttpStatus.BAD_REQUEST, "SP-002", "요청한 작업을 할 수 있는 배송 상태가 아닙니다.");
+    SHIPMENT_STATUS_UNMATCHED(HttpStatus.BAD_REQUEST, "SP-002", "요청한 작업을 할 수 있는 배송 상태가 아닙니다."),
+
+    // Coupon - ERROR
+    COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "CP-001","해당 쿠폰을 찾을 수 없습니다." ),
+    COUPON_SOLD_OUT(HttpStatus.BAD_REQUEST, "CP-002", "쿠폰 재고 소진"),
+    COUPON_PRICE_EMPTY(HttpStatus.BAD_REQUEST, "CP-003", "할인 가격을 입력 바랍니다.");
 
     private final HttpStatus status;
     private final String code;
