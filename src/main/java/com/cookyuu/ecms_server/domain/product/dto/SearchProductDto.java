@@ -1,6 +1,5 @@
-package com.cookyuu.ecms_server.domain.order.dto;
+package com.cookyuu.ecms_server.domain.product.dto;
 
-import com.cookyuu.ecms_server.domain.order.entity.OrderStatus;
 import com.cookyuu.ecms_server.global.entity.SortType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,7 +7,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Pageable;
 
-public class SearchOrderDto {
+import java.time.LocalDateTime;
+
+public class SearchProductDto {
 
     @Getter
     @Builder
@@ -26,16 +27,18 @@ public class SearchOrderDto {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Response {
-        private Long orderId;
-        private Integer totalPrice;
-        private String orderNumber;
-        private OrderStatus status;
-        private String destination;
-        private String destinationDetail;
-        private String recipientName;
-        private String recipientPhoneNumber;
-        private String buyerLoginId;
-        private String shipmentNumber;
+        private Long productId;
+        private String productName;
+        private String description;
+        private Integer price;
+        private Integer stockQuantity;
+        private LocalDateTime modifiedAt;
+        private boolean isDeleted;
+        private LocalDateTime deletedAt;
+        private Long categoryId;
+        private String categoryName;
+        private Long sellerId;
+        private String sellerName;
     }
 
 

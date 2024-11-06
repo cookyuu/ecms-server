@@ -1,16 +1,22 @@
 package com.cookyuu.ecms_server.domain.product.controller;
 
+import com.cookyuu.ecms_server.domain.order.dto.SearchOrderDto;
 import com.cookyuu.ecms_server.domain.product.dto.RegisterProductDto;
+import com.cookyuu.ecms_server.domain.product.dto.SearchProductDto;
 import com.cookyuu.ecms_server.domain.product.dto.UpdateProductDto;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,4 +53,17 @@ public class ProductController {
         return ResponseEntity.ok(productService.findProductById(productId));
     }
 
+    @PreAuthorize("permitAll()")
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<SearchProductDto.Response>>> searchProductList(@RequestParam(name = "option", required = false) String option,
+                                                                                          @RequestParam(name = "keyword", required = false) String keyword,
+                                                                                          Pageable pageable) {
+        SearchProductDto.Request req = SearchProductDto.Request.builder()
+                .option(option)
+                .keyword(keyword)
+                .pageable(pageable)
+                .build();
+        Page<SearchProductDto.Response> resProductList = productService.searchProductList(req);
+        return ResponseEntity.ok(ApiResponse.success(resProductList));
+    }
 }

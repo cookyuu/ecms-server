@@ -12,5 +12,5 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberCus
 
     boolean existsByLoginId(String loginId);
 
-    Optional<Object> findByLoginId(String loginId);
+    Optional<Member> findByLoginId(String loginId);
 }
