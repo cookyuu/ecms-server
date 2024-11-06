@@ -1,5 +1,6 @@
 package com.cookyuu.ecms_server.domain.product.service;
 
+import com.cookyuu.ecms_server.domain.order.dto.SearchOrderDto;
 import com.cookyuu.ecms_server.domain.product.dto.RegisterProductDto;
 import com.cookyuu.ecms_server.domain.product.dto.SearchProductDto;
 import com.cookyuu.ecms_server.domain.product.dto.UpdateProductDto;
