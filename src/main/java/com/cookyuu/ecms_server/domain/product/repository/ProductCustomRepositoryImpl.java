@@ -18,6 +18,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 
 import java.util.List;
 
+import static com.cookyuu.ecms_server.domain.order.entity.QOrder.order;
 import static com.cookyuu.ecms_server.domain.product.entity.QCategory.category;
 import static com.cookyuu.ecms_server.domain.product.entity.QProduct.product;
 import static com.cookyuu.ecms_server.domain.product.entity.SearchOption.*;
@@ -33,7 +34,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
         List<SearchProductDto.Response> content = queryFactory
                 .select(Projections.constructor(SearchProductDto.Response.class,
                         product.id.as("productId"),
-                        product.name,
+                        product.name.as("productName"),
                         product.description,
                         product.price,
                         product.stockQuantity,
@@ -47,22 +48,23 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                         )
                 )
                 .from(product)
-                .leftJoin(product.category, category)
                 .leftJoin(product.seller, seller)
+                .leftJoin(product.category, category)
                 .where(optionEq(request.getOption(), request.getKeyword()))
-                .orderBy(createProductSpecifier(request.getSortType()))
+                .where(isNotDeleted())
+                .orderBy(createOrderSpecifier(request.getSortType()))
                 .offset(request.getPageable().getOffset())
                 .limit(request.getPageable().getPageSize())
                 .fetch();
 
         JPAQuery<Long> countQuery = queryFactory
-                .select(product.count())
-                .from(product)
-                .where(optionEq(request.getOption(), request.getKeyword()));
+                .select(order.count())
+                .from(order)
+                .where(optionEq(request.getOption(), request.getKeyword()))
+                .where(isNotDeleted());
 
         return PageableExecutionUtils.getPage(content, request.getPageable(), countQuery::fetchOne);
     }
-
 
     private BooleanExpression isNotDeleted() {
         return product.isDeleted.eq(false);
@@ -74,23 +76,20 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
         }
         return switch (convertToSearchOption(option)) {
             case PRODUCT_NAME -> product.name.contains(keyword);
-            case SELLER_NAME -> product.seller.name.contains(keyword);
-            case CATEGORY_NAME -> product.category.name.eq(keyword);
+            case CATEGORY_NAME -> product.category.name.contains(keyword);
+            case SELLER_NAME ->  product.seller.name.contains(keyword);
+
             default -> null;
         };
     }
 
-    private BooleanExpression productNameEq(String productName) {
-        return product.name.eq(productName);
-    }
-
-    private OrderSpecifier createProductSpecifier(SortType sortType) {
+    private OrderSpecifier createOrderSpecifier(SortType sortType) {
         if (sortType == null) {
-            return new OrderSpecifier<>(Order.DESC, product.modifiedAt);
+            return new OrderSpecifier<>(Order.DESC, product.createdAt);
         }
         return switch(sortType){
-            case DESC -> new OrderSpecifier<>(Order.DESC, product.modifiedAt);
-            case ASC -> new OrderSpecifier<>(Order.ASC, product.modifiedAt);
+            case DESC -> new OrderSpecifier<>(Order.DESC, product.createdAt);
+            case ASC -> new OrderSpecifier<>(Order.ASC, product.createdAt);
         };
     }
 

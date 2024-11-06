@@ -77,7 +77,6 @@ public class ProductService {
         return productRepository.searchPageOrderByCreatedAtDesc(searchInfo);
     }
 
-
     public Product findProductById(Long id) {
         return productRepository.findById(id).orElseThrow(ECMSProductException::new);
     }

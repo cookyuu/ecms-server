@@ -28,7 +28,7 @@ public class SearchProductDto {
     @NoArgsConstructor
     public static class Response {
         private Long productId;
-        private String name;
+        private String productName;
         private String description;
         private Integer price;
         private Integer stockQuantity;

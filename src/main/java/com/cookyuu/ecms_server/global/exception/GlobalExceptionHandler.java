@@ -2,6 +2,7 @@ package com.cookyuu.ecms_server.global.exception;
 
 import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
+import com.cookyuu.ecms_server.global.exception.auth.ValidateJwtTokenException;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.context.annotation.Primary;
@@ -35,6 +36,13 @@ public class GlobalExceptionHandler {
         }
         log.error("[ECMSAppException] {}", errMsg);
         var response = ApiResponse.failure(e.getResultCode(), errMsg);
+        return new ResponseEntity<>(response, e.getResultCode().getStatus());
+    }
+
+    @ExceptionHandler(value = ValidateJwtTokenException.class)
+    public ResponseEntity<ApiResponse<Object>> handleValidateJwtTokenException(WebRequest request, ValidateJwtTokenException e) {
+        log.error("[ValidateJwtTokenException] ", e);
+        var response = ApiResponse.failure(e.getResultCode(), e.getMessage());
         return new ResponseEntity<>(response, e.getResultCode().getStatus());
     }
 

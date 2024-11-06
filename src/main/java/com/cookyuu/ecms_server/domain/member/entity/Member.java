@@ -65,6 +65,10 @@ public class Member extends BaseTimeEntity {
                 .role(RoleType.USER)
                 .build();
     }
+
+    public void updateRole(RoleType roleType) {
+        this.role = roleType;
+    }
 }
 
 

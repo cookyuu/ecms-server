@@ -66,4 +66,17 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success(resProductList));
     }
 
+    @PreAuthorize("permitAll()")
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<SearchProductDto.Response>>> searchProductList(@RequestParam(name = "option", required = false) String option,
+                                                                                          @RequestParam(name = "keyword", required = false) String keyword,
+                                                                                          Pageable pageable) {
+        SearchProductDto.Request req = SearchProductDto.Request.builder()
+                .option(option)
+                .keyword(keyword)
+                .pageable(pageable)
+                .build();
+        Page<SearchProductDto.Response> resProductList = productService.searchProductList(req);
+        return ResponseEntity.ok(ApiResponse.success(resProductList));
+    }
 }
