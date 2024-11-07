@@ -33,6 +33,8 @@ public class QMember extends EntityPathBase<Member> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final ListPath<com.cookyuu.ecms_server.domain.coupon.entity.IssueCoupon, com.cookyuu.ecms_server.domain.coupon.entity.QIssueCoupon> issueCoupons = this.<com.cookyuu.ecms_server.domain.coupon.entity.IssueCoupon, com.cookyuu.ecms_server.domain.coupon.entity.QIssueCoupon>createList("issueCoupons", com.cookyuu.ecms_server.domain.coupon.entity.IssueCoupon.class, com.cookyuu.ecms_server.domain.coupon.entity.QIssueCoupon.class, PathInits.DIRECT2);
+
     public final StringPath loginId = createString("loginId");
 
     //inherited
