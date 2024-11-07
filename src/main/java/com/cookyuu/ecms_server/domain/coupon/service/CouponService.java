@@ -1,6 +1,7 @@
 package com.cookyuu.ecms_server.domain.coupon.service;
 
 import com.cookyuu.ecms_server.domain.coupon.dto.CreateCouponDto;
+import com.cookyuu.ecms_server.domain.coupon.dto.IssueCouponDto;
 import com.cookyuu.ecms_server.domain.coupon.entity.Coupon;
 import com.cookyuu.ecms_server.domain.coupon.entity.CouponCode;
 import com.cookyuu.ecms_server.domain.coupon.repository.CouponRepository;
@@ -31,6 +32,7 @@ public class CouponService {
                 .expiredAt(StringUtils.parseToLocalDateTime(couponInfo.getExpiredAt()))
                 .couponCode(CouponCode.of(couponInfo.getCouponCode()))
                 .couponNumber(couponNumber)
+                .quantity(couponInfo.getQuantity())
                 .discountPrice(isFixPriceCoupon(couponInfo.getCouponCode()) ? isNullDiscountPrice(couponInfo.getDiscountPrice()) : null)
                 .build();
         couponRepository.save(coupon);
@@ -60,5 +62,12 @@ public class CouponService {
             sb.append(random);
         }
         return sb.toString();
+    }
+
+    @Transactional
+    public Coupon issueCoupon(IssueCouponDto.Request couponInfo) {
+        Coupon coupon = couponRepository.findByCouponNumber(couponInfo.getCouponNumber()).orElseThrow(ECMSCouponException::new);
+        coupon.issueCoupon();
+        return coupon;
     }
 }

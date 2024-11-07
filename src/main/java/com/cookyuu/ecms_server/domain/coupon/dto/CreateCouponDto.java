@@ -15,6 +15,7 @@ public class CreateCouponDto {
         private String startAt;
         private String expiredAt;
         private String couponCode;
+        private Integer quantity;
         private Integer discountPrice;
     }
 

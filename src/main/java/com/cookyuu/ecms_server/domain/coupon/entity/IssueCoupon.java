@@ -4,6 +4,7 @@ import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "ecms_issue_coupon")
@@ -30,5 +32,4 @@ public class IssueCoupon extends BaseTimeEntity {
     @ManyToOne
     @JoinColumn(name = "member_id")
     private Member member;
-
 }
