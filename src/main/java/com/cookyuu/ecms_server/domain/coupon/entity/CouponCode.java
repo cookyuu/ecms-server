@@ -1,5 +1,7 @@
 package com.cookyuu.ecms_server.domain.coupon.entity;
 
+import com.cookyuu.ecms_server.global.code.ResultCode;
+import com.cookyuu.ecms_server.global.exception.domain.ECMSCouponException;
 import lombok.Getter;
 
 @Getter
@@ -25,5 +27,14 @@ public enum CouponCode {
     CouponCode(String code, Integer percent) {
         this.code = code;
         this.percent = percent;
+    }
+
+    public static CouponCode of(String code) {
+        for (CouponCode couponCode : CouponCode.values()) {
+            if (couponCode.getCode().equals(code)) {
+                return couponCode;
+            }
+        }
+        throw new ECMSCouponException(ResultCode.COUPON_CODE_UNREGISTRATION);
     }
 }

@@ -20,7 +20,7 @@ public class IssueCoupon extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private boolean isUseAble;
-    private LocalDate expiredAt;
+    private LocalDateTime expiredAt;
     private LocalDateTime couponUsedAt;
 
     @ManyToOne
