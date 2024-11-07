@@ -6,13 +6,16 @@ import com.cookyuu.ecms_server.domain.coupon.entity.CouponCode;
 import com.cookyuu.ecms_server.domain.coupon.repository.CouponRepository;
 import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSCouponException;
+import com.cookyuu.ecms_server.global.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CouponService {
@@ -20,14 +23,18 @@ public class CouponService {
 
     @Transactional
     public CreateCouponDto.Response createCoupon(CreateCouponDto.Request couponInfo) {
-        String couponNumber = makeCouponNumber(CouponCode.valueOf(couponInfo.getCouponCode()));
+        String couponNumber = makeCouponNumber(CouponCode.of(couponInfo.getCouponCode()));
+        log.debug("[Coupon:Create] Make coupon number. OK!, coupon number : {}", couponNumber);
         Coupon coupon = Coupon.builder()
                 .name(couponInfo.getName())
-                .expiredAt(couponInfo.getExpiredAt())
-                .couponCode(CouponCode.valueOf(couponInfo.getCouponCode()))
+                .startAt(StringUtils.parseToLocalDateTime(couponInfo.getStartAt()))
+                .expiredAt(StringUtils.parseToLocalDateTime(couponInfo.getExpiredAt()))
+                .couponCode(CouponCode.of(couponInfo.getCouponCode()))
+                .couponNumber(couponNumber)
                 .discountPrice(isFixPriceCoupon(couponInfo.getCouponCode()) ? isNullDiscountPrice(couponInfo.getDiscountPrice()) : null)
                 .build();
         couponRepository.save(coupon);
+        log.debug("[Coupon:Create] Insert Coupon OK!");
         return CreateCouponDto.Response.builder()
                 .couponNumber(couponNumber)
                 .build();
