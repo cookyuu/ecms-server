@@ -1,6 +1,7 @@
 package com.cookyuu.ecms_server.domain.member.entity;
 
 import com.cookyuu.ecms_server.domain.cart.entity.Cart;
+import com.cookyuu.ecms_server.domain.coupon.entity.IssueCoupon;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -34,6 +35,8 @@ public class Member extends BaseTimeEntity {
     private List<Order> orders = new ArrayList<>();
     @OneToMany(mappedBy = "member")
     private List<Cart> carts = new ArrayList<>();
+    @OneToMany(mappedBy = "member")
+    private List<IssueCoupon> issueCoupons = new ArrayList<>();
 
     @Builder
     public Member(Long id, String name, String email, String loginId, String password, String phoneNumber, String address, RoleType role) {
