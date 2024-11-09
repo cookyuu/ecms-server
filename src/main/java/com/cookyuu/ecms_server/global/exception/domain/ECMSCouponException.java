@@ -13,7 +13,7 @@ public class ECMSCouponException extends ECMSAppException {
         super(resultCode);
     }
 
-    protected ECMSCouponException(ResultCode resultCode, String customMsg) {
+    public ECMSCouponException(ResultCode resultCode, String customMsg) {
         super(resultCode, customMsg);
     }
 

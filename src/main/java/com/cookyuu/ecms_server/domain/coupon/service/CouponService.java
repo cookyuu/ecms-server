@@ -66,8 +66,18 @@ public class CouponService {
 
     @Transactional
     public Coupon issueCoupon(IssueCouponDto.Request couponInfo) {
-        Coupon coupon = couponRepository.findByCouponNumber(couponInfo.getCouponNumber()).orElseThrow(ECMSCouponException::new);
-        coupon.issueCoupon();
+        Coupon coupon = findCouponByCouponNumber(couponInfo.getCouponNumber());
+        coupon.issue();
         return coupon;
+    }
+
+    @Transactional
+    public void issueCouponFail(IssueCouponDto.Request couponInfo) {
+        Coupon coupon = findCouponByCouponNumber(couponInfo.getCouponNumber());
+        coupon.issueFail();
+    }
+
+    public Coupon findCouponByCouponNumber(String couponNumber) {
+        return couponRepository.findByCouponNumber(couponNumber).orElseThrow(ECMSCouponException::new);
     }
 }

@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class IssueCouponService {
     private final IssueCouponRepository issueCouponRepository;
 
-    @Transactional
     public void issueCoupon(Member member, Coupon coupon) {
         IssueCoupon issueCoupon = IssueCoupon.builder()
                 .expiredAt(coupon.getExpiredAt())

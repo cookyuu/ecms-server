@@ -48,10 +48,14 @@ public class Coupon extends BaseTimeEntity {
         this.couponNumber = couponNumber;
     }
 
-    public void issueCoupon() {
+    public void issue() {
         if (this.quantity == 0) {
             throw new ECMSCouponException(ResultCode.COUPON_SOLD_OUT);
         }
+        this.quantity -= 1;
+    }
+
+    public void issueFail() {
         this.quantity -= 1;
     }
 }
