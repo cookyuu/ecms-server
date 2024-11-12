@@ -1,15 +1,17 @@
 package com.cookyuu.ecms_server.domain.coupon.service;
 
 import com.cookyuu.ecms_server.domain.coupon.dto.CreateCouponDto;
-import com.cookyuu.ecms_server.domain.coupon.dto.IssueCouponDto;
 import com.cookyuu.ecms_server.domain.coupon.entity.Coupon;
 import com.cookyuu.ecms_server.domain.coupon.entity.CouponCode;
 import com.cookyuu.ecms_server.domain.coupon.repository.CouponRepository;
+import com.cookyuu.ecms_server.global.code.RedisKeyCode;
 import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSCouponException;
+import com.cookyuu.ecms_server.global.utils.RedisUtils;
 import com.cookyuu.ecms_server.global.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,8 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 public class CouponService {
     private final CouponRepository couponRepository;
+    private final RedisTemplate redisTemplate;
+    private final RedisUtils redisUtils;
 
     @Transactional
     public CreateCouponDto.Response createCoupon(CreateCouponDto.Request couponInfo) {
@@ -36,6 +40,8 @@ public class CouponService {
                 .discountPrice(isFixPriceCoupon(couponInfo.getCouponCode()) ? isNullDiscountPrice(couponInfo.getDiscountPrice()) : null)
                 .build();
         couponRepository.save(coupon);
+        redisUtils.setData(RedisKeyCode.COUPON_COUNT_KEY.getSeparator() + couponNumber, String.valueOf(couponInfo.getQuantity()));
+
         log.debug("[Coupon:Create] Insert Coupon OK!");
         return CreateCouponDto.Response.builder()
                 .couponNumber(couponNumber)
@@ -65,19 +71,24 @@ public class CouponService {
     }
 
     @Transactional
-    public Coupon issueCoupon(IssueCouponDto.Request couponInfo) {
-        Coupon coupon = findCouponByCouponNumber(couponInfo.getCouponNumber());
-        coupon.issue();
-        return coupon;
+    public Coupon findCouponByCouponNumber(String couponNumber) {
+        return couponRepository.findByCouponNumber(couponNumber).orElseThrow(ECMSCouponException::new);
+    }
+
+    public void validateCoupon(String couponNumber) {
+        Coupon coupon = findCouponByCouponNumber(couponNumber);
+        if (coupon.isExpired()) {
+            log.info("[Coupon::Validate] Coupon is expired. couponNumber : {}", couponNumber);
+            throw new ECMSCouponException(ResultCode.COUPON_UNUSABLE, "만료된 쿠폰입니다. ");
+        }
+        if (coupon.getQuantity() == 0) {
+            log.info("[Coupon::Validate] Coupon is sold out, couponNumber : {}", couponNumber);
+            throw new ECMSCouponException(ResultCode.COUPON_SOLD_OUT);
+        }
     }
 
     @Transactional
-    public void issueCouponFail(IssueCouponDto.Request couponInfo) {
-        Coupon coupon = findCouponByCouponNumber(couponInfo.getCouponNumber());
-        coupon.issueFail();
-    }
-
-    public Coupon findCouponByCouponNumber(String couponNumber) {
-        return couponRepository.findByCouponNumber(couponNumber).orElseThrow(ECMSCouponException::new);
+    public void save(Coupon coupon) {
+        couponRepository.save(coupon);
     }
 }

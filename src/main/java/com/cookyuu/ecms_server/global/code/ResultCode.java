@@ -20,7 +20,8 @@ public enum ResultCode {
     BAD_REQUEST(HttpStatus.BAD_REQUEST, "C-008", "잘못된 요청입니다."),
     BAD_CREDENTIAL(HttpStatus.UNAUTHORIZED, "C-009", "자격 증명에 실패했습니다."),
     REQUEST_DATA_ISNULL(HttpStatus.BAD_REQUEST,"C-010" , "요청 데이터가 모두 NULL 입니다."),
-    REDIS_COMMON_EXP(HttpStatus.INTERNAL_SERVER_ERROR,"U-001","Redis Exception 발생. "),
+    REDIS_COMMON_EXP(HttpStatus.INTERNAL_SERVER_ERROR,"C-011","Redis Exception 발생. "),
+    REDISSON_COMMON_EXP(HttpStatus.TOO_MANY_REQUESTS, "C-012", "처리할 요청이 너무 많습니다. 다시 시도해주세요. "),
 
     // AUTH - SUCCESS
     NORMAL_LOGIN_SUCCESS(HttpStatus.OK, "0000", "일반 로그인 성공."),
@@ -102,7 +103,9 @@ public enum ResultCode {
     COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "CP-001","해당 쿠폰을 찾을 수 없습니다." ),
     COUPON_SOLD_OUT(HttpStatus.BAD_REQUEST, "CP-002", "쿠폰 재고 소진"),
     COUPON_PRICE_EMPTY(HttpStatus.BAD_REQUEST, "CP-003", "할인 가격을 입력 바랍니다."),
-    COUPON_CODE_UNREGISTRATION(HttpStatus.BAD_REQUEST, "CP-004","미등록 된 쿠폰 코드입니다.");
+    COUPON_CODE_UNREGISTRATION(HttpStatus.BAD_REQUEST, "CP-004","미등록 된 쿠폰 코드입니다."),
+    COUPON_UNUSABLE(HttpStatus.BAD_REQUEST, "CP-005", "사용 불가능한 쿠폰입니다. "),
+    COUPON_ISSUE_FAIL(HttpStatus.BAD_REQUEST, "CP-006", "쿠폰 발급에 실패했습니다.");
 
 
     private final HttpStatus status;
