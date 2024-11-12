@@ -4,13 +4,11 @@ import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
 import com.cookyuu.ecms_server.global.exception.domain.ECMSCouponException;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,14 +46,14 @@ public class Coupon extends BaseTimeEntity {
         this.couponNumber = couponNumber;
     }
 
-    public void issue() {
+    public void issue(int count) {
         if (this.quantity == 0) {
             throw new ECMSCouponException(ResultCode.COUPON_SOLD_OUT);
         }
-        this.quantity -= 1;
+        this.quantity = count;
     }
 
-    public void issueFail() {
-        this.quantity -= 1;
+    public void issueFail(int count) {
+        this.quantity = count;
     }
 }

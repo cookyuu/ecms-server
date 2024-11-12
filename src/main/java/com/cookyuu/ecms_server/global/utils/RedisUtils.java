@@ -41,6 +41,16 @@ public class RedisUtils {
         }
     }
 
+    public void setData(String key, String value) {
+        try {
+            ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+            valueOperations.set(key, value);
+        } catch (RedisException e) {
+            log.error("[SaveRedisData] ", e);
+            throw new EcmsRedisException(ResultCode.REDIS_COMMON_EXP);
+        }
+    }
+
     // 삭제
     public void deleteData(String key) {
         try {
