@@ -1,8 +1,10 @@
 package com.cookyuu.ecms_server.global.exception;
 
+import com.cookyuu.ecms_server.domain.alert.service.SlackService;
 import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
 import com.cookyuu.ecms_server.global.exception.auth.ValidateJwtTokenException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.context.annotation.Primary;
@@ -24,7 +26,10 @@ import java.util.NoSuchElementException;
 @Primary
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+    private final SlackService slackService;
+
 
     @ExceptionHandler(value = ECMSAppException.class)
     public ResponseEntity<ApiResponse<Object>> handleECMSAppException(WebRequest request, ECMSAppException e) {
@@ -147,6 +152,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleException(WebRequest request, Exception e) {
         log.error("[Exception] ", e);
+        slackService.sendErrorForSlack(e);
         var response = ApiResponse.failure(ResultCode.INTERNAL_SERVER_ERROR, e.getMessage());
         return new ResponseEntity<>(response, ResultCode.INTERNAL_SERVER_ERROR.getStatus());
     }

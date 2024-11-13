@@ -105,7 +105,10 @@ public enum ResultCode {
     COUPON_PRICE_EMPTY(HttpStatus.BAD_REQUEST, "CP-003", "할인 가격을 입력 바랍니다."),
     COUPON_CODE_UNREGISTRATION(HttpStatus.BAD_REQUEST, "CP-004","미등록 된 쿠폰 코드입니다."),
     COUPON_UNUSABLE(HttpStatus.BAD_REQUEST, "CP-005", "사용 불가능한 쿠폰입니다. "),
-    COUPON_ISSUE_FAIL(HttpStatus.BAD_REQUEST, "CP-006", "쿠폰 발급에 실패했습니다.");
+    COUPON_ISSUE_FAIL(HttpStatus.BAD_REQUEST, "CP-006", "쿠폰 발급에 실패했습니다."),
+
+    // Alert -ERROR
+    FAIL_ALERT_SLACK(HttpStatus.INTERNAL_SERVER_ERROR, "AL-001", "Slack Message 발송에 실패했습니다." );
 
 
     private final HttpStatus status;

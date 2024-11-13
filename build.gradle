@@ -60,8 +60,10 @@ dependencies {
 
 	// redisson
 	implementation 'org.redisson:redisson-spring-boot-starter:3.17.4'
-}
 
+	// slack
+	implementation 'com.slack.api:slack-api-client:1.27.2'
+}
 tasks.named('test') {
 	useJUnitPlatform()
 }

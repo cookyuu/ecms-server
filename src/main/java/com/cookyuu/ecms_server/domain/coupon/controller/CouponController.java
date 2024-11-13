@@ -29,9 +29,8 @@ public class CouponController {
 
     @PostMapping("/issue")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<ApiResponse<String>> issueCoupon(@AuthenticationPrincipal UserDetails user, @RequestParam(name = "couponNumber") String couponNumber) {
+    public ResponseEntity<ApiResponse<String>> issueCoupon(@AuthenticationPrincipal UserDetails user, @RequestParam(name = "couponNumber") String couponNumber) throws Exception {
         couponFacade.issueCoupon(Long.parseLong(user.getUsername()), couponNumber);
         return ResponseEntity.ok(ApiResponse.success("쿠폰 발급 완료"));
     }
-
 }
