@@ -3,12 +3,14 @@ package com.cookyuu.ecms_server.domain.order.service;
 import com.cookyuu.ecms_server.domain.cart.entity.Cart;
 import com.cookyuu.ecms_server.domain.cart.entity.CartItem;
 import com.cookyuu.ecms_server.domain.cart.service.CartService;
+import com.cookyuu.ecms_server.domain.coupon.entity.CouponCode;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.entity.RoleType;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.domain.order.dto.*;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.domain.order.entity.OrderLine;
+import com.cookyuu.ecms_server.domain.order.entity.OrderCode;
 import com.cookyuu.ecms_server.domain.order.entity.OrderStatus;
 import com.cookyuu.ecms_server.domain.order.mapper.CreateOrderLineMapper;
 import com.cookyuu.ecms_server.domain.order.mapper.ReviseOrderLineMapper;
@@ -63,11 +65,11 @@ public class OrderService {
             orderItemInfo.addProduct(product);
             product.subQuantity(quantity);
         }
-        String orderNumber = createOrderNumber(OrderNumberCode.NORMAL_ORDER, OrderNumberCode.NO_COOPON);
+        String orderNumber = createOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
         log.info("[Order::CreateOrder] Create order number, Order Number : {}", orderNumber);
         log.info("44444444444444");
         while (redisUtils.getData(RedisKeyCode.ORDER_NUMBER.getSeparator()+orderNumber) != null) {
-            orderNumber = createOrderNumber(OrderNumberCode.NORMAL_ORDER, OrderNumberCode.NO_COOPON);
+            orderNumber = createOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
             log.debug("[Order::CreateOrder] Created order number is duplicated, Order Number : {}", orderNumber);
         }
         try {
@@ -222,7 +224,7 @@ public class OrderService {
                 .orElse(null);
     }
 
-    private String createOrderNumber(OrderNumberCode order, OrderNumberCode coopon) {
+    private String createOrderNumber(OrderCode order, CouponCode coopon) {
         StringBuilder sb = new StringBuilder();
         String formatDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"));
         sb.append(order.getCode()).append(formatDate).append(coopon.getCode());
