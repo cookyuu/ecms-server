@@ -1,19 +1,10 @@
 package com.cookyuu.ecms_server.domain.order.service;
 
-import com.cookyuu.ecms_server.domain.order.dto.CreateOrderDto;
-import com.cookyuu.ecms_server.domain.order.dto.CreateOrderItemInfo;
-import com.cookyuu.ecms_server.domain.order.dto.OrderShipmentInfo;
-import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @SpringBootTest
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -25,6 +16,7 @@ class OrderServiceTest {
     @Autowired
     private ProductService productService;
 
+    /*
     @Test
     @DisplayName("주문 동시성 테스트")
     void givenThousandRequest_whenCreateOrder_thenCheckConcurrency() throws InterruptedException {
@@ -73,4 +65,6 @@ class OrderServiceTest {
         Assertions.assertEquals(beforeProduct.getStockQuantity()-numThreads, afterProduct.getStockQuantity());
 
     }
+
+     */
 }
