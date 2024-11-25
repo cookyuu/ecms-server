@@ -27,7 +27,7 @@ spring:
 
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
 
 auth:
@@ -43,3 +43,7 @@ logging:
     com.cookyuu.ecms_server: debug
     org.hibernate.SQL: debug
     org.hibernate.type: trace
+
+slack:
+  webhook:
+    url: ${SLACK_WEBHOOK_URL}
