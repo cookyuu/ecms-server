@@ -1,0 +1,108 @@
+DELTA
+SVNENDREP
+PLAIN
+K 11
+targetHosts
+V 0
+
+END
+ENDREP
+id: 7-4.0.r4/56
+type: file
+count: 0
+text: 4 0 4 0 d41d8cd98f00b204e9800998ecf8427e da39a3ee5e6b4b0d3255bfef95601890afd80709 3-3/_9
+props: 4 17 26 26 b52a291b299a3031879de1a9534f5b33
+cpath: /ECMS-CREATE-ORDER/src/main/resources/resource1.txt
+copyroot: 0 /
+
+PLAIN
+K 13
+resource1.txt
+V 16
+file 7-4.0.r4/56
+END
+ENDREP
+id: 5-4.0.r4/370
+type: dir
+count: 0
+text: 4 312 45 45 2cb24a4f36178874bc1a2573c51aa3cc
+cpath: /ECMS-CREATE-ORDER/src/main/resources
+copyroot: 0 /
+
+PLAIN
+K 9
+resources
+V 16
+dir 5-4.0.r4/370
+END
+ENDREP
+id: 3-4.0.r4/570
+type: dir
+count: 0
+text: 4 517 40 40 f9569d6ae4ba03e52cc4558196f65b5a
+cpath: /ECMS-CREATE-ORDER/src/main
+copyroot: 0 /
+
+PLAIN
+K 4
+main
+V 16
+dir 3-4.0.r4/570
+END
+ENDREP
+id: 1-4.0.r4/755
+type: dir
+count: 0
+text: 4 707 35 35 75d18ed34991abb78de53c1d566e9b84
+cpath: /ECMS-CREATE-ORDER/src
+copyroot: 0 /
+
+PLAIN
+K 12
+build.gradle
+V 17
+file 1-3.0.r3/554
+K 3
+src
+V 16
+dir 1-4.0.r4/755
+END
+ENDREP
+id: 0-2.0.r4/975
+type: dir
+pred: 0-2.0.r3/854
+count: 2
+text: 4 887 75 75 cde28936a7a8c622bfaf959c7fab2085
+props: 2 0 62 62 81e11896e1099f616c016b1448e55afc
+cpath: /ECMS-CREATE-ORDER
+copyroot: 0 /
+
+PLAIN
+K 14
+.gitconfig.yml
+V 17
+file 0-1.0.r1/346
+K 17
+ECMS-CREATE-ORDER
+V 16
+dir 0-2.0.r4/975
+END
+ENDREP
+id: 0.0.r4/1277
+type: dir
+pred: 0.0.r3/1155
+count: 4
+text: 4 1172 92 92 ca5c3b56f6b81a17284e9e6c910db711
+cpath: /
+copyroot: 0 /
+
+_5.0.t3-3 add-dir false false /ECMS-CREATE-ORDER/src/main/resources
+
+_7.0.t3-3 add-file true true /ECMS-CREATE-ORDER/src/main/resources/resource1.txt
+
+_1.0.t3-3 add-dir false false /ECMS-CREATE-ORDER/src
+
+_3.0.t3-3 add-dir false false /ECMS-CREATE-ORDER/src/main
+
+
+1277 1406

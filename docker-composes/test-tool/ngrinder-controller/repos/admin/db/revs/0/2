@@ -1,0 +1,40 @@
+PLAIN
+K 10
+svn:ignore
+V 36
+.project
+.classpath
+.settings
+target
+END
+ENDREP
+id: 0-2.0.r2/75
+type: dir
+count: 0
+props: 2 0 62 62 81e11896e1099f616c016b1448e55afc
+cpath: /ECMS-CREATE-ORDER
+copyroot: 0 /
+
+PLAIN
+K 14
+.gitconfig.yml
+V 17
+file 0-1.0.r1/346
+K 17
+ECMS-CREATE-ORDER
+V 15
+dir 0-2.0.r2/75
+END
+ENDREP
+id: 0.0.r2/305
+type: dir
+pred: 0.0.r1/580
+count: 2
+text: 2 201 91 91 e1039fa1c81c194f44ff66195369f5ab
+cpath: /
+copyroot: 0 /
+
+_0.0.t1-1 add-dir false true /ECMS-CREATE-ORDER
+
+
+305 431
