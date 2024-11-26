@@ -1,29 +1,29 @@
-2024-11-25 07:25:29,199 INFO  Setting of nGrinder local DNS successfully
-2024-11-25 07:25:29,235 INFO  The Grinder version 3.9.1
-2024-11-25 07:25:29,251 INFO  OpenJDK Runtime Environment 11.0.22+7-LTS: OpenJDK 64-Bit Server VM (11.0.22+7-LTS, mixed mode) on Linux amd64 5.15.167.4-microsoft-standard-WSL2
-2024-11-25 07:25:29,289 INFO  time zone is UTC (+0000)
-2024-11-25 07:25:29,914 INFO  worker process 0 of agent number 0
-2024-11-25 07:25:30,080 INFO  Instrumentation agents: byte code transforming instrumenter for Java
-2024-11-25 07:25:40,511 INFO  registered plug-in net.grinder.plugin.http.HTTPPlugin
-2024-11-25 07:25:41,080 INFO  before process.
-2024-11-25 07:25:41,096 INFO  Running "ECMS_CREATE_ORDER.groovy" using GroovyScriptEngine running with groovy version: 3.0.5
-2024-11-25 07:25:41,455 INFO  before thread.
-2024-11-25 07:25:41,461 INFO  starting, will do 1 run
-2024-11-25 07:25:41,463 INFO  Start time is 1732519541466 ms since Epoch
-2024-11-25 07:25:41,538 INFO  before. init headers and cookies
-2024-11-25 07:25:44,263 INFO  http://172.27.80.1:7777/api/v1/product/search -> 200 , 1336 bytes
-2024-11-25 07:25:44,413 INFO  finished 1 run
-2024-11-25 07:25:44,431 INFO  elapsed time is 2968 ms
-2024-11-25 07:25:44,434 INFO  Final statistics for this process:
-2024-11-25 07:25:44,487 INFO  
+2024-11-26 22:42:30,906 INFO  Setting of nGrinder local DNS successfully
+2024-11-26 22:42:30,915 INFO  The Grinder version 3.9.1
+2024-11-26 22:42:30,920 INFO  OpenJDK Runtime Environment 11.0.22+7-LTS: OpenJDK 64-Bit Server VM (11.0.22+7-LTS, mixed mode) on Linux amd64 6.10.0-linuxkit
+2024-11-26 22:42:30,932 INFO  time zone is UTC (+0000)
+2024-11-26 22:42:31,078 INFO  worker process 0 of agent number 0
+2024-11-26 22:42:31,101 INFO  Instrumentation agents: byte code transforming instrumenter for Java
+2024-11-26 22:42:35,114 INFO  registered plug-in net.grinder.plugin.http.HTTPPlugin
+2024-11-26 22:42:35,222 INFO  before process.
+2024-11-26 22:42:35,225 INFO  Running "ORDER_SEARCH.groovy" using GroovyScriptEngine running with groovy version: 3.0.5
+2024-11-26 22:42:35,480 INFO  before thread.
+2024-11-26 22:42:35,483 INFO  starting, will do 1 run
+2024-11-26 22:42:35,484 INFO  Start time is 1732660955484 ms since Epoch
+2024-11-26 22:42:35,603 INFO  before. init headers and cookies
+2024-11-26 22:42:35,982 INFO  http://192.168.0.100:7777/api/v1/order/search -> 200 , 6375 bytes
+2024-11-26 22:42:36,045 INFO  finished 1 run
+2024-11-26 22:42:36,050 INFO  elapsed time is 566 ms
+2024-11-26 22:42:36,050 INFO  Final statistics for this process:
+2024-11-26 22:42:36,061 INFO  
              Tests        Errors       Mean Test    Test Time    TPS          Mean         Response     Response     Mean time to Mean time to Mean time to 
                                        Time (ms)    Standard                  response     bytes per    errors       resolve host establish    first byte   
                                                     Deviation                 length       second                                 connection                
                                                     (ms)                                                                                                    
 
-Test 1       1            0            2832.00      0.00         0.34         1336.00      450.13       0            0.00         108.00       2554.00       "172.27.80.1"
+Test 1       1            0            435.00       0.00         1.77         6375.00      11263.25     0            0.00         40.00        336.00        "192.168.0.100"
 
-Totals       1            0            2832.00      0.00         0.34         1336.00      450.13       0            0.00         108.00       2554.00      
+Totals       1            0            435.00       0.00         1.77         6375.00      11263.25     0            0.00         40.00        336.00       
 
   Tests resulting in error only contribute to the Errors column.          
   Statistics for individual tests can be found in the data file, including
@@ -33,5 +33,5 @@ Totals       1            0            2832.00      0.00         0.34         13
 
 
 Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8
-2024-11-25 07:25:41,121 INFO  validation-0: Starting threads
-2024-11-25 07:25:44,488 INFO  validation-0: Finished
+2024-11-26 22:42:35,231 INFO  validation-0: Starting threads
+2024-11-26 22:42:36,061 INFO  validation-0: Finished
