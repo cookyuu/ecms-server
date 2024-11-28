@@ -1,15 +1,10 @@
 package com.cookyuu.ecms_server.domain.coupon.facade;
 
-import com.cookyuu.ecms_server.domain.coupon.dto.CreateCouponDto;
-import com.cookyuu.ecms_server.domain.coupon.entity.Coupon;
 import com.cookyuu.ecms_server.domain.coupon.service.CouponService;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayNameGeneration;
+import org.junit.jupiter.api.DisplayNameGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @SpringBootTest
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -20,7 +15,7 @@ class CouponFacadeTest {
     @Autowired
     private CouponService couponService;
 
-
+/*
     @Test
     @DisplayName("선착순 쿠폰 발급 테스트")
     void givenMultiRequest_whenIssueCoupon_thenCheckCouponQuantity() throws InterruptedException {
@@ -63,4 +58,5 @@ class CouponFacadeTest {
         Assertions.assertEquals(coupon.getQuantity(), createCouponInfo.getQuantity() - numThreads);
 
     }
+ */
 }

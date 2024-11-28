@@ -1,9 +1,7 @@
 package com.cookyuu.ecms_server.domain.seller.entity;
 
 import com.cookyuu.ecms_server.domain.member.entity.RoleType;
-import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
-import com.cookyuu.ecms_server.domain.seller.dto.RegisterSellerDto;
 import com.cookyuu.ecms_server.domain.seller.dto.UpdateSellerDto;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -24,7 +22,12 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "ecms_seller")
+@Table(
+        name = "ecms_seller",
+        indexes = {
+                @Index(name = "ecms_seller_search_idx_1", columnList = "name")
+        }
+)
 public class Seller extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

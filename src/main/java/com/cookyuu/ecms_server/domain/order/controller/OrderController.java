@@ -43,10 +43,12 @@ public class OrderController {
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<SearchOrderDto.Response>>> searchOrderList(@RequestParam(name = "option", required = false) String option,
                                                                                       @RequestParam(name = "keyword", required = false) String keyword,
+                                                                                      @RequestParam(name = "status", defaultValue = "ALL") String status,
                                                                                       Pageable pageable) {
         SearchOrderDto.Request req = SearchOrderDto.Request.builder()
                 .option(option)
                 .keyword(keyword)
+                .status(status)
                 .pageable(pageable)
                 .build();
         Page<SearchOrderDto.Response> resOrderList = orderService.searchOrderList(req);

@@ -24,7 +24,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "ecms_product")
+@Table(
+        name = "ecms_product",
+        indexes = {
+                @Index(name = "ecms_product_search_idx_1", columnList = "name", unique = true)
+        }
+)
 public class Product extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -19,7 +19,13 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "ecms_order")
+@Table(
+        name = "ecms_order",
+        indexes = {
+                @Index(name = "ecms_order_search_idx_1", columnList = "status", unique = true),
+                @Index(name = "ecms_order_search_idx_2", columnList = "orderNumber", unique = true)
+        }
+)
 public class Order extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
