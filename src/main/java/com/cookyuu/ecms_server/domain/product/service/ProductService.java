@@ -92,6 +92,12 @@ public class ProductService {
         return productRepository.findProductDetail(productId);
     }
 
+    @Transactional
+    public void applyHitCount(Long productId, int hitCount) {
+        Product product = findProductById(productId);
+        product.applyHitCount(hitCount);
+    }
+
     public Product findProductById(Long id) {
         return productRepository.findById(id).orElseThrow(ECMSProductException::new);
     }
@@ -103,7 +109,7 @@ public class ProductService {
 
     private void validatePostView(Long productId, HttpServletRequest request, HttpServletResponse response) {
         log.debug("[Product::Detail] Validate post view product in cookie.");
-        int postViewCookieDuration = 60*60*3;
+        int postViewCookieDuration = 60*3;
         Cookie oldCookie = null;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -137,5 +143,4 @@ public class ProductService {
             redisUtil.increaseCount(RedisKeyCode.PRODUCT_HIT_COUNT.getSeparator()+productId);
         }
     }
-
 }

@@ -5,12 +5,13 @@ import com.cookyuu.ecms_server.global.exception.utils.EcmsRedisException;
 import io.lettuce.core.RedisException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.*;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -83,4 +84,22 @@ public class RedisUtils {
         String hashKey = "count";
         hashOperations.increment(key, hashKey, 1);
     }
+
+    public Map<String, Integer> getHashCountDataAndDelete(String keyPattern) {
+        HashOperations<String, String, String> hashOperations = redisTemplate.opsForHash();
+        Cursor<byte[]> cursor = redisTemplate.getConnectionFactory().getConnection().scan(
+                ScanOptions.scanOptions().match("*" + keyPattern + "*").build()
+        );
+
+        Map<String, Integer> countDataMap = new HashMap<>();
+
+        while (cursor.hasNext()) {
+            String key = new String(cursor.next(), StandardCharsets.UTF_8);
+            Map<String, String> entries = hashOperations.entries(key);
+            countDataMap.put(key, Integer.valueOf(entries.get("count")));
+            hashOperations.delete(key,"count");
+        }
+        return countDataMap;
+    }
+
 }

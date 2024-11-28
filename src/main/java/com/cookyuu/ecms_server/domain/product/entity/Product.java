@@ -103,4 +103,8 @@ public class Product extends BaseTimeEntity {
             throw new ECMSProductException(ResultCode.ALREADY_DELETED_PRODUCT, "이미 삭제된 상품입니다. productId : " + id);
         }
     }
+
+    public void applyHitCount(int hitCount) {
+        this.hitCount+=hitCount;
+    }
 }
