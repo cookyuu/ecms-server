@@ -38,3 +38,5 @@ out/
 
 ### yml file ###
 /src/main/resources/application-prod.yml
+
+*.env

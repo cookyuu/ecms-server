@@ -1,5 +1,6 @@
 package com.cookyuu.ecms_server.domain.product.repository;
 
+import com.cookyuu.ecms_server.domain.product.dto.FindProductDetailDto;
 import com.cookyuu.ecms_server.domain.product.dto.SearchProductDto;
 import com.cookyuu.ecms_server.domain.product.entity.SearchOption;
 import com.cookyuu.ecms_server.global.code.ResultCode;
@@ -66,6 +67,29 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
         return PageableExecutionUtils.getPage(content, request.getPageable(), countQuery::fetchOne);
     }
 
+    @Override
+    public FindProductDetailDto findProductDetail(Long productId) {
+        return queryFactory
+                .select(Projections.constructor(FindProductDetailDto.class,
+                        product.id.as("productId"),
+                        product.name.as("productName"),
+                        product.description.as("productDescription"),
+                        product.price.as("productPrice"),
+                        product.stockQuantity.as("productStockQuantity"),
+                        product.hitCount.as("productHitCount"),
+                        product.isDeleted,
+                        category.name.as("categoryName"),
+                        seller.id.as("sellerId"),
+                        seller.name.as("sellerName")
+                        )
+                )
+                .from(product)
+                .leftJoin(product.seller, seller)
+                .leftJoin(product.category, category)
+                .where(productIdEq(productId))
+                .fetchOne();
+    }
+
     private BooleanExpression isNotDeleted() {
         return product.isDeleted.eq(false);
     }
@@ -102,6 +126,10 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
             return SELLER_NAME;
         }
         throw new ECMSOrderException(ResultCode.BAD_REQUEST, "[Product::Search] 검색 할 수 없는 옵션입니다. Option : " + option);
+    }
+
+    private BooleanExpression productIdEq(Long productId) {
+        return product.id.eq(productId);
     }
 
 }
