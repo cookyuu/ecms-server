@@ -1,5 +1,6 @@
 package com.cookyuu.ecms_server.domain.product.service;
 
+import com.cookyuu.ecms_server.domain.product.dto.FindProductDetailDto;
 import com.cookyuu.ecms_server.domain.product.dto.RegisterProductDto;
 import com.cookyuu.ecms_server.domain.product.dto.SearchProductDto;
 import com.cookyuu.ecms_server.domain.product.dto.UpdateProductDto;
@@ -76,6 +77,11 @@ public class ProductService {
         return productRepository.searchPageOrderByCreatedAtDesc(searchInfo);
     }
 
+    @Transactional(readOnly = true)
+    public FindProductDetailDto findProductDetail(Long productId) {
+        return productRepository.findProductDetail(productId);
+    }
+
     public Product findProductById(Long id) {
         return productRepository.findById(id).orElseThrow(ECMSProductException::new);
     }
@@ -84,4 +90,5 @@ public class ProductService {
         log.info("[CheckProductOwner] Check product owner, ProductId : {}, SellerId : {}", product.getId(), sellerId);
         return product.getSeller().getId().equals(sellerId);
     }
+
 }

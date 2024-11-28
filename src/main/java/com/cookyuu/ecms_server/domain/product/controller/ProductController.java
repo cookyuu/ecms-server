@@ -1,10 +1,9 @@
 package com.cookyuu.ecms_server.domain.product.controller;
 
-import com.cookyuu.ecms_server.domain.order.dto.SearchOrderDto;
+import com.cookyuu.ecms_server.domain.product.dto.FindProductDetailDto;
 import com.cookyuu.ecms_server.domain.product.dto.RegisterProductDto;
 import com.cookyuu.ecms_server.domain.product.dto.SearchProductDto;
 import com.cookyuu.ecms_server.domain.product.dto.UpdateProductDto;
-import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -48,9 +47,10 @@ public class ProductController {
         return ResponseEntity.ok(ApiResponse.success());
     }
 
+    @PreAuthorize("permitAll()")
     @GetMapping("/{productId}")
-    public ResponseEntity<Product> getProductById(@PathVariable(name = "productId") Long productId) {
-        return ResponseEntity.ok(productService.findProductById(productId));
+    public ResponseEntity<ApiResponse<FindProductDetailDto>> findProductDetail(@PathVariable(name = "productId") Long productId) {
+        return ResponseEntity.ok(ApiResponse.success(productService.findProductDetail(productId)));
     }
 
     @PreAuthorize("permitAll()")

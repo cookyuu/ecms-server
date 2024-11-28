@@ -39,6 +39,9 @@ public class Product extends BaseTimeEntity {
     private Integer price;
     private Integer stockQuantity;
 
+    @ColumnDefault(value = "0")
+    private Integer hitCount;
+
     @ColumnDefault("false")
     @Column(columnDefinition = "TINYINT(1)")
     private boolean isDeleted;
