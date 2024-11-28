@@ -39,6 +39,9 @@ public class Product extends BaseTimeEntity {
     private Integer price;
     private Integer stockQuantity;
 
+    @ColumnDefault(value = "0")
+    private Integer hitCount;
+
     @ColumnDefault("false")
     @Column(columnDefinition = "TINYINT(1)")
     private boolean isDeleted;
@@ -99,5 +102,9 @@ public class Product extends BaseTimeEntity {
         if (isDeleted) {
             throw new ECMSProductException(ResultCode.ALREADY_DELETED_PRODUCT, "이미 삭제된 상품입니다. productId : " + id);
         }
+    }
+
+    public void applyHitCount(int hitCount) {
+        this.hitCount+=hitCount;
     }
 }

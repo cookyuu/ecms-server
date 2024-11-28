@@ -64,7 +64,7 @@ public class AuthService {
         log.info("[NormalLogin] Create Access/Refresh token ");
         String accessToken = jwtUtils.createAccessToken(userInfo);
         String refreshToken = jwtUtils.createRefreshToken(userInfo);
-        Cookie cookie = cookieUtils.setCookieExpire(CookieCode.REFRESH_TOKEN, refreshToken, refreshTokenExp);
+        Cookie cookie = cookieUtils.setCookieExpire(CookieCode.REFRESH_TOKEN, refreshToken, Integer.parseInt(refreshTokenExp));
         response.addCookie(cookie);
 
         redisUtils.setDataExpire(RedisKeyCode.REFRESH_TOKEN.getSeparator() + userInfo.getId(), refreshToken, Long.parseLong(refreshTokenExp)*minute);
@@ -80,7 +80,7 @@ public class AuthService {
         log.info("[SellerLogin] Create Access/Refresh token ");
         String accessToken = jwtUtils.createAccessToken((userInfo));
         String refreshToken = jwtUtils.createRefreshToken(userInfo);
-        Cookie cookie = cookieUtils.setCookieExpire(CookieCode.REFRESH_TOKEN, refreshToken, refreshTokenExp);
+        Cookie cookie = cookieUtils.setCookieExpire(CookieCode.REFRESH_TOKEN, refreshToken, Integer.parseInt(refreshTokenExp));
         response.addCookie(cookie);
 
         redisUtils.setDataExpire(RedisKeyCode.REFRESH_TOKEN.getSeparator() + userInfo.getId(), refreshToken, Long.parseLong(refreshTokenExp)*minute);
