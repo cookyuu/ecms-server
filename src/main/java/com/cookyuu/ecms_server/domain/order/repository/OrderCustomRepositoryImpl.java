@@ -28,6 +28,7 @@ import static com.cookyuu.ecms_server.domain.shipment.entity.QShipment.shipment;
 public class OrderCustomRepositoryImpl implements OrderCustomRepository {
 
     private final JPAQueryFactory queryFactory;
+    private String everyOrderStatusTypeCode = "ALL";
 
     @Override
     public Page<SearchOrderDto.Response> searchPageOrderByCreatedAtDesc(SearchOrderDto.Request request) {
@@ -48,7 +49,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
                 .from(order)
                 .leftJoin(order.buyer, member)
                 .leftJoin(order.shipment, shipment)
-                .where(optionEq(request.getOption(), request.getKeyword()))
+                .where(optionEq(request.getOption(), request.getKeyword()), optionEq(STATUS.getName(), request.getStatus()))
                 .orderBy(createOrderSpecifier(request.getSortType()))
                 .offset(request.getPageable().getOffset())
                 .limit(request.getPageable().getPageSize())
@@ -57,7 +58,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
         JPAQuery<Long> countQuery = queryFactory
                 .select(order.count())
                 .from(order)
-                .where(optionEq(request.getOption(), request.getKeyword()));
+                .where(optionEq(request.getOption(), request.getKeyword()), optionEq(STATUS.getName(), request.getStatus()));
 
         return PageableExecutionUtils.getPage(content, request.getPageable(), countQuery::fetchOne);
     }
@@ -112,10 +113,13 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
         if (StringUtils.isBlank(option)) {
             return null;
         }
+        if (option.equals(STATUS.getName()) && !keyword.equals(everyOrderStatusTypeCode)) {
+            return order.status.eq(OrderStatus.valueOf(keyword));
+        }
+
         return switch (convertToSearchOption(option)) {
             case ORDER_NUMBER -> order.orderNumber.contains(keyword);
             case LOGIN_ID -> order.buyer.loginId.contains(keyword);
-            case STATUS -> order.status.eq(OrderStatus.valueOf(keyword));
             default -> null;
         };
     }

@@ -17,6 +17,7 @@ public class SearchOrderDto {
     public static class Request {
         private String option;
         private String keyword;
+        private String status;
         private SortType sortType;
         private Pageable pageable;
     }

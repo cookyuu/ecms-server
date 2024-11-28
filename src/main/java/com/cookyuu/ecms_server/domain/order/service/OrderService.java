@@ -67,7 +67,6 @@ public class OrderService {
         }
         String orderNumber = createOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
         log.info("[Order::CreateOrder] Create order number, Order Number : {}", orderNumber);
-        log.info("44444444444444");
         while (redisUtils.getData(RedisKeyCode.ORDER_NUMBER.getSeparator()+orderNumber) != null) {
             orderNumber = createOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
             log.debug("[Order::CreateOrder] Created order number is duplicated, Order Number : {}", orderNumber);
