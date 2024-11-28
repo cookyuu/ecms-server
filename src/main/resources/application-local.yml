@@ -5,6 +5,9 @@ spring:
   config:
     activate:
       on-profile: local # 환경이름설정
+    import:
+      - optional:file:env/local.env[.properties]
+
 
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver

@@ -57,4 +57,6 @@ public class RedissonUtils {
         return Boolean.TRUE.equals(redisTemplate.opsForSet()
                 .isMember(RedisKeyCode.COUPON_USER_SET_KEY.getSeparator() + couponNumber, memberId));
     }
+
+
 }
