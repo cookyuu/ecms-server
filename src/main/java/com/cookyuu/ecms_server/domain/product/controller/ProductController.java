@@ -6,6 +6,8 @@ import com.cookyuu.ecms_server.domain.product.dto.SearchProductDto;
 import com.cookyuu.ecms_server.domain.product.dto.UpdateProductDto;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -49,8 +51,8 @@ public class ProductController {
 
     @PreAuthorize("permitAll()")
     @GetMapping("/{productId}")
-    public ResponseEntity<ApiResponse<FindProductDetailDto>> findProductDetail(@PathVariable(name = "productId") Long productId) {
-        return ResponseEntity.ok(ApiResponse.success(productService.findProductDetail(productId)));
+    public ResponseEntity<ApiResponse<FindProductDetailDto>> findProductDetail(@PathVariable(name = "productId") Long productId, HttpServletRequest request, HttpServletResponse response) {
+        return ResponseEntity.ok(ApiResponse.success(productService.findProductDetail(productId, request, response)));
     }
 
     @PreAuthorize("permitAll()")

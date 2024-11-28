@@ -9,10 +9,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class CookieUtils {
-    public Cookie setCookieExpire(CookieCode code, String value, String duration) {
+    public Cookie setCookieExpire(CookieCode code, String value, int duration) {
         try {
             Cookie cookie = new Cookie(code.getKey(), value);
-            cookie.setMaxAge(Integer.parseInt(duration));
+            cookie.setMaxAge(duration);
             cookie.setSecure(true);
             cookie.setHttpOnly(true);
             cookie.setPath("/");
