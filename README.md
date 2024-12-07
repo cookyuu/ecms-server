@@ -3,7 +3,7 @@
 
 1. 인프라 아키텍처
 
-![ECMS_SERVER_INFRA](https://github.com/user-attachments/assets/c2770809-f138-41a2-9723-b935b15fc15b)
+<img width="983" alt="ECMS_SERVER_INFRA" src="https://github.com/user-attachments/assets/0eeedfda-f0e3-4cc0-8b8e-cd7cb16231f8">
 
 <!--
 
