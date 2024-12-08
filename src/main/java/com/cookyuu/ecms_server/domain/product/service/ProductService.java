@@ -21,10 +21,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.sql.SQLException;
 
 @Slf4j
 @Service
@@ -38,21 +42,30 @@ public class ProductService {
 
     @Transactional
     public Long registerProduct(UserDetails user, RegisterProductDto.Request productInfo) {
-        Seller seller = sellerService.findSellerById(Long.parseLong(user.getUsername()));
-        Category category = categoryService.findByName(productInfo.getCategoryName());
-        Product registerProduct = Product.of(
-                productInfo.getName(),
-                productInfo.getDescription(),
-                productInfo.getPrice(),
-                productInfo.getStockQuantity(),
-                category,
-                seller);
-        Product product = productRepository.save(registerProduct);
-        log.info("[RegisterProduct] Product registration OK!");
-        return product.getId();
+        try {
+            Seller seller = sellerService.findSellerById(Long.parseLong(user.getUsername()));
+            Category category = categoryService.findByName(productInfo.getCategoryName());
+            Product registerProduct = Product.of(
+                    productInfo.getName(),
+                    productInfo.getDescription(),
+                    productInfo.getPrice(),
+                    productInfo.getStockQuantity(),
+                    category,
+                    seller);
+            Product product = productRepository.save(registerProduct);
+            log.info("[RegisterProduct] Product registration OK!");
+            return product.getId();
+        } catch (Exception e) {
+            log.error("[Product::Register::Error] Exception : ", e);
+            throw new ECMSProductException(ResultCode.PRODUCT_EXISTS_ALREADY, e);
+        }
     }
 
     @Transactional
+    @CacheEvict(
+            value = "routes",
+            key = "'product:id:' + T(String).valueOf(#productId)"
+    )
     public void updateProduct(Long productId, UserDetails user, UpdateProductDto.Request productInfo) {
         productInfo.chkAllNull();
         Product product = findProductById(productId);
@@ -87,6 +100,10 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(
+            value = "routes",
+            key = "'product:id:' + T(String).valueOf(#productId)"
+    )
     public FindProductDetailDto findProductDetail(Long productId, HttpServletRequest request, HttpServletResponse response) {
         validatePostView(productId, request, response);
         return productRepository.findProductDetail(productId);

@@ -21,7 +21,10 @@ public enum RedisKeyCode {
     COUPON_STATUS_KEY("coupon:status:"),
 
     // PRODUCT
-    PRODUCT_HIT_COUNT("hits:product:");
+    PRODUCT_HIT_COUNT("hits:product:"),
+
+    // ORDER
+    ORDER_DETAIL_KEY("order:number:");
 
 
 

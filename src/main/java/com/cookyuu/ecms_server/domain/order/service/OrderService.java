@@ -25,6 +25,8 @@ import com.cookyuu.ecms_server.global.utils.JwtUtils;
 import com.cookyuu.ecms_server.global.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -109,6 +111,10 @@ public class OrderService {
     }
 
     @Transactional
+    @CacheEvict(
+            value = "routes",
+            key = "'order:number:' + #reviseOrderInfo.orderNumber"
+    )
     public ResultCode reviseOrder(UserDetails user, ReviseOrderDto.Request reviseOrderInfo) {
         Order order = findOrderByOrderNumber(reviseOrderInfo.getOrderNumber());
         order.isCanceled();
@@ -147,7 +153,11 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public OrderDetailDto getOrderDetail(UserDetails user, String orderNumber) {
+    @Cacheable(
+            value = "routes",
+            key = "'order:number:' + #orderNumber"
+    )
+    public OrderDetailDto getOrderDetailCacheable(UserDetails user , String orderNumber) {
         String jwtRole = JwtUtils.getRoleFromUserDetails(user);
         log.debug("[Order::getDetail] ROLE : {}", jwtRole);
         OrderDetailDto orderDetailInfo = getOrderDetailBy(orderNumber);
@@ -162,6 +172,10 @@ public class OrderService {
         }
         return orderDetailInfo;
     }
+
+    /*
+    * 주문 상태 업데이트시 redis 확인 후 없으면 말고 있으면 제거
+    * */
 
     private OrderDetailDto getOrderDetailBy(String orderNumber) {
         return orderRepository.getOrderDetail(orderNumber);
