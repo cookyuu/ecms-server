@@ -24,7 +24,6 @@ public class ApplyProductHitsExecutor {
     public void executor() {
         Map<String, Integer> productHitsMap = redisUtils.getHashCountDataAndDelete(RedisKeyCode.PRODUCT_HIT_COUNT.getSeparator());
         if (productHitsMap.isEmpty()) {
-            log.info("[Product::HitApply] Product Hits Apply Data is Empty.");
             return;
         }
         productHitsMap.keySet().forEach(key -> {

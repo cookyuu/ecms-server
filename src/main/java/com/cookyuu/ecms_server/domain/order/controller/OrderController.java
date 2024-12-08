@@ -58,7 +58,7 @@ public class OrderController {
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_SELLER','ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<ApiResponse<OrderDetailDto>> getOrderDetail(@AuthenticationPrincipal UserDetails user, @RequestParam(name = "orderNumber") String orderNumber) {
-        OrderDetailDto res = orderService.getOrderDetail(user, orderNumber);
+        OrderDetailDto res = orderService.getOrderDetailCacheable(user, orderNumber);
         return ResponseEntity.ok(ApiResponse.success(res));
     }
 }
