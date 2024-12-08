@@ -29,13 +29,13 @@ public class OrderController {
     }
 
     @PostMapping("/cancel")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_SELLER','ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<ResultCode>> cancelOrder(@AuthenticationPrincipal UserDetails user, @RequestBody CancelOrderDto.Request cancelInfo) {
         return ResponseEntity.ok(ApiResponse.success(orderService.cancelOrder(user, cancelInfo)));
     }
 
     @PutMapping
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<ResultCode>> reviseOrderInfo(@AuthenticationPrincipal UserDetails user, @RequestBody ReviseOrderDto.Request reviseInfo) {
         return ResponseEntity.ok(ApiResponse.success(orderService.reviseOrder(user, reviseInfo)));
     }

@@ -25,6 +25,7 @@ import com.cookyuu.ecms_server.global.utils.JwtUtils;
 import com.cookyuu.ecms_server.global.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -110,6 +111,10 @@ public class OrderService {
     }
 
     @Transactional
+    @CacheEvict(
+            value = "routes",
+            key = "'order:number:' + #reviseOrderInfo.orderNumber"
+    )
     public ResultCode reviseOrder(UserDetails user, ReviseOrderDto.Request reviseOrderInfo) {
         Order order = findOrderByOrderNumber(reviseOrderInfo.getOrderNumber());
         order.isCanceled();
