@@ -69,6 +69,7 @@ public enum ResultCode {
     PRODUCT_OWNER_UNMATCHED(HttpStatus.BAD_REQUEST,"P-002", "상품에 대한 권한이 없습니다. 해당 상품의 판매자가 아닙니다." ),
     ALREADY_DELETED_PRODUCT(HttpStatus.BAD_REQUEST, "P-003" ,"이미 삭제된 상품입니다."),
     PRODUCT_SOLD_OUT(HttpStatus.BAD_REQUEST,"P-002" , "상품 재고가 없습니다."),
+    PRODUCT_EXISTS_ALREADY(HttpStatus.BAD_REQUEST,"P-002" ,"이미 등록된 상품명입니다." ),
 
     // Cart - ERROR
     CART_NOT_FOUND(HttpStatus.NOT_FOUND, "CT-001", "유저의 카트정보를 찾을 수 없습니다."),
@@ -86,6 +87,7 @@ public enum ResultCode {
     ALREADY_CANCELED_ORDER(HttpStatus.BAD_REQUEST,"O-005","이미 취소된 주문입니다."),
     ORDER_SELLER_UNMATCHED(HttpStatus.FORBIDDEN, "O-006", "해당 주문에 해당하는 상품의 판매자가 아닙니다."),
     ORDER_BUYER_UNMATCHED(HttpStatus.FORBIDDEN, "O-007", "해당 주문의 구매자가 아닙니다."),
+
 
     // Payment - ERROR
     PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "P-001","결제 정보를 찾을 수 없습니다."),
