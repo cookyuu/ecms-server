@@ -11,7 +11,22 @@ public enum RedisKeyCode {
     ,LOGOUT_TOKEN("logout:token:")
     ,REFRESH_TOKEN("refresh:token:")
     ,ORDER_NUMBER("order:number:")
-    ,PAYMENT_NUMBER("payment:number:");
+    ,PAYMENT_NUMBER("payment:number:"),
+
+    // COUPON
+    COUPON_COUNT_KEY("coupon:count:"),
+    COUPON_USER_SET_KEY("coupon:users:"),
+    COUPON_QUEUE_KEY("coupon:queue:"),
+    DAILY_LIMIT_KEY("coupon:daily:limit:"),
+    COUPON_STATUS_KEY("coupon:status:"),
+
+    // PRODUCT
+    PRODUCT_HIT_COUNT("hits:product:"),
+
+    // ORDER
+    ORDER_DETAIL_KEY("order:number:");
+
+
 
     String separator;
 }

@@ -17,7 +17,12 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "ecms_member")
+@Table(
+        name = "ecms_member",
+        indexes = {
+                @Index(name = "ecms_member_search_idx_1", columnList = "loginId", unique = true)
+        }
+)
 public class Member extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -29,13 +29,13 @@ public class OrderController {
     }
 
     @PostMapping("/cancel")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_SELLER','ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<ResultCode>> cancelOrder(@AuthenticationPrincipal UserDetails user, @RequestBody CancelOrderDto.Request cancelInfo) {
         return ResponseEntity.ok(ApiResponse.success(orderService.cancelOrder(user, cancelInfo)));
     }
 
     @PutMapping
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<ResultCode>> reviseOrderInfo(@AuthenticationPrincipal UserDetails user, @RequestBody ReviseOrderDto.Request reviseInfo) {
         return ResponseEntity.ok(ApiResponse.success(orderService.reviseOrder(user, reviseInfo)));
     }
@@ -43,10 +43,12 @@ public class OrderController {
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<List<SearchOrderDto.Response>>> searchOrderList(@RequestParam(name = "option", required = false) String option,
                                                                                       @RequestParam(name = "keyword", required = false) String keyword,
+                                                                                      @RequestParam(name = "status", defaultValue = "ALL") String status,
                                                                                       Pageable pageable) {
         SearchOrderDto.Request req = SearchOrderDto.Request.builder()
                 .option(option)
                 .keyword(keyword)
+                .status(status)
                 .pageable(pageable)
                 .build();
         Page<SearchOrderDto.Response> resOrderList = orderService.searchOrderList(req);
@@ -56,7 +58,7 @@ public class OrderController {
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_SELLER','ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<ApiResponse<OrderDetailDto>> getOrderDetail(@AuthenticationPrincipal UserDetails user, @RequestParam(name = "orderNumber") String orderNumber) {
-        OrderDetailDto res = orderService.getOrderDetail(user, orderNumber);
+        OrderDetailDto res = orderService.getOrderDetailCacheable(user, orderNumber);
         return ResponseEntity.ok(ApiResponse.success(res));
     }
 }

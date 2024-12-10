@@ -24,7 +24,12 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "ecms_product")
+@Table(
+        name = "ecms_product",
+        indexes = {
+                @Index(name = "ecms_product_search_idx_1", columnList = "name", unique = true)
+        }
+)
 public class Product extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,8 +39,11 @@ public class Product extends BaseTimeEntity {
     private Integer price;
     private Integer stockQuantity;
 
+    @Column(name = "hit_count", columnDefinition = "INT DEFAULT 0")
+    private Integer hitCount;
+
     @ColumnDefault("false")
-    @Column(columnDefinition = "TINYINT(1)")
+    @Column(name = "is_deleted", columnDefinition = "TINYINT(1)")
     private boolean isDeleted;
 
     @Column(name = "deleted_at")
@@ -94,5 +102,9 @@ public class Product extends BaseTimeEntity {
         if (isDeleted) {
             throw new ECMSProductException(ResultCode.ALREADY_DELETED_PRODUCT, "이미 삭제된 상품입니다. productId : " + id);
         }
+    }
+
+    public void applyHitCount(int hitCount) {
+        this.hitCount+=hitCount;
     }
 }

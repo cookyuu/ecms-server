@@ -1,0 +1,37 @@
+2024-11-28 01:32:27,889 INFO  Setting of nGrinder local DNS successfully
+2024-11-28 01:32:27,899 INFO  The Grinder version 3.9.1
+2024-11-28 01:32:27,905 INFO  OpenJDK Runtime Environment 11.0.22+7-LTS: OpenJDK 64-Bit Server VM (11.0.22+7-LTS, mixed mode) on Linux amd64 6.10.0-linuxkit
+2024-11-28 01:32:27,919 INFO  time zone is UTC (+0000)
+2024-11-28 01:32:28,092 INFO  worker process 0 of agent number 0
+2024-11-28 01:32:28,112 INFO  Instrumentation agents: byte code transforming instrumenter for Java
+2024-11-28 01:32:32,115 INFO  registered plug-in net.grinder.plugin.http.HTTPPlugin
+2024-11-28 01:32:32,208 INFO  before process.
+2024-11-28 01:32:32,211 INFO  Running "ORDER_SEARCH.groovy" using GroovyScriptEngine running with groovy version: 3.0.5
+2024-11-28 01:32:32,466 INFO  before thread.
+2024-11-28 01:32:32,469 INFO  starting, will do 1 run
+2024-11-28 01:32:32,470 INFO  Start time is 1732757552470 ms since Epoch
+2024-11-28 01:32:32,577 INFO  before. init headers and cookies
+2024-11-28 01:32:32,702 INFO  http://192.0.0.2:7777/api/v1/order/search?option=orderNumber&keyword=N3&status=ORDER_COMPLETE -> 200 , 6374 bytes
+2024-11-28 01:32:32,752 INFO  finished 1 run
+2024-11-28 01:32:32,756 INFO  elapsed time is 286 ms
+2024-11-28 01:32:32,756 INFO  Final statistics for this process:
+2024-11-28 01:32:32,763 INFO  
+             Tests        Errors       Mean Test    Test Time    TPS          Mean         Response     Response     Mean time to Mean time to Mean time to 
+                                       Time (ms)    Standard                  response     bytes per    errors       resolve host establish    first byte   
+                                                    Deviation                 length       second                                 connection                
+                                                    (ms)                                                                                                    
+
+Test 1       1            0            167.00       0.00         3.50         6374.00      22286.71     0            0.00         36.00        87.00         "192.168.0.100"
+
+Totals       1            0            167.00       0.00         3.50         6374.00      22286.71     0            0.00         36.00        87.00        
+
+  Tests resulting in error only contribute to the Errors column.          
+  Statistics for individual tests can be found in the data file, including
+  (possibly incomplete) statistics for erroneous tests. Composite tests   
+  are marked with () and not included in the totals.                      
+
+
+
+Picked up JAVA_TOOL_OPTIONS: -Dfile.encoding=UTF-8
+2024-11-28 01:32:32,219 INFO  validation-0: Starting threads
+2024-11-28 01:32:32,763 INFO  validation-0: Finished

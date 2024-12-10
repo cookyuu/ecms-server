@@ -7,7 +7,7 @@ import com.querydsl.core.types.dsl.*;
 import com.querydsl.core.types.PathMetadata;
 import javax.annotation.processing.Generated;
 import com.querydsl.core.types.Path;
-
+import com.querydsl.core.types.dsl.PathInits;
 
 /**
  * QCoupon is a Querydsl query type for Coupon
@@ -32,14 +32,26 @@ public class QCoupon extends EntityPathBase<Coupon> {
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
+    public final NumberPath<Integer> discountPrice = createNumber("discountPrice", Integer.class);
+
+    public final DateTimePath<java.time.LocalDateTime> expiredAt = createDateTime("expiredAt", java.time.LocalDateTime.class);
+
+    public final NumberPath<Long> id = createNumber("id", Long.class);
+
+    public final BooleanPath isExpired = createBoolean("isExpired");
+
+    public final ListPath<IssueCoupon, QIssueCoupon> issueCoupons = this.<IssueCoupon, QIssueCoupon>createList("issueCoupons", IssueCoupon.class, QIssueCoupon.class, PathInits.DIRECT2);
+
     //inherited
     public final DateTimePath<java.time.LocalDateTime> modifiedAt = _super.modifiedAt;
 
     public final StringPath name = createString("name");
-
     public final NumberPath<Integer> price = createNumber("price", Integer.class);
 
     public final NumberPath<Long> stockQuantity = createNumber("stockQuantity", Long.class);
+    public final NumberPath<Integer> quantity = createNumber("quantity", Integer.class);
+
+    public final DateTimePath<java.time.LocalDateTime> startAt = createDateTime("startAt", java.time.LocalDateTime.class);
 
     public QCoupon(String variable) {
         super(Coupon.class, forVariable(variable));

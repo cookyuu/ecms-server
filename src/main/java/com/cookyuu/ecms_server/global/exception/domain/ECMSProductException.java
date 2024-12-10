@@ -21,7 +21,7 @@ public class ECMSProductException extends ECMSAppException {
         super(resultCode, data, args);
     }
 
-    protected ECMSProductException(ResultCode resultCode, Throwable t) {
+    public ECMSProductException(ResultCode resultCode, Throwable t) {
         super(resultCode, t);
     }
 

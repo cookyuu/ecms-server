@@ -3,7 +3,6 @@ package com.cookyuu.ecms_server.domain.product.entity;
 import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,3 +42,4 @@ public class Category extends BaseTimeEntity {
         this.parent = parent==null ? this.parent : parent;
     }
 }
+
