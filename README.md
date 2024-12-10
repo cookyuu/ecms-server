@@ -1,6 +1,10 @@
 # ECMS
 > 이커머스 도메인에서 겪을 수 있는 문제점을 고민해보기 위한 프로젝트
 
+1. 인프라 아키텍처
+
+<img width="983" alt="ECMS_SERVER_INFRA" src="https://github.com/user-attachments/assets/0eeedfda-f0e3-4cc0-8b8e-cd7cb16231f8">
+
 <!--
 
 ## 설치 방법
