@@ -17,11 +17,11 @@
    4. [Slack 알림 서비스 구축](#44-slack-알림-서비스-구축)
 
 ## 1. 인프라 아키텍처
-<img src="https://github.com/user-attachments/assets/0eeedfda-f0e3-4cc0-8b8e-cd7cb16231f8" width="200" height="400"/>
+<img src="https://github.com/user-attachments/assets/0eeedfda-f0e3-4cc0-8b8e-cd7cb16231f8" width="700" height="500"/>
 <!--![ECMS_SERVER_INFRA](https://github.com/user-attachments/assets/0eeedfda-f0e3-4cc0-8b8e-cd7cb16231f8)-->
 
 ## 2. ERD
-<img src="https://github.com/user-attachments/assets/b240bd35-76d5-4f7e-836e-50da000c75ff" width="200" height="400"/>
+<img src="https://github.com/user-attachments/assets/b240bd35-76d5-4f7e-836e-50da000c75ff" width="700" height="500"/>
 <!--![ERD](https://github.com/user-attachments/assets/b240bd35-76d5-4f7e-836e-50da000c75ff)-->
 
 ## 3. 고려해본 문제점
