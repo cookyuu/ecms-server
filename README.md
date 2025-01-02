@@ -5,6 +5,10 @@
 
 <img width="983" alt="ECMS_SERVER_INFRA" src="https://github.com/user-attachments/assets/0eeedfda-f0e3-4cc0-8b8e-cd7cb16231f8">
 
+2. ERD
+![953DC97B-B968-484A-BBDF-04FA48B0992B](https://github.com/user-attachments/assets/b240bd35-76d5-4f7e-836e-50da000c75ff)
+
+3. 
 <!--
 
 ## 설치 방법
