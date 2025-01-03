@@ -50,11 +50,11 @@
 > 주문 상세 : 414tps -> 506tps 약 22% 증가 (1분, 가상 유저 1000명 기준) </br>
 
 </br>
-<img src="https://github.com/user-attachments/assets/db30632d-a613-4e0c-ae98-24209af6c76f" width="450" height="400"/>
-<img src="https://github.com/user-attachments/assets/539cb970-1bf7-4c00-825d-5ca1ba929281" width="450" height="400"/>
+<img src="https://github.com/user-attachments/assets/db30632d-a613-4e0c-ae98-24209af6c76f" width="400" height="400"/>
+<img src="https://github.com/user-attachments/assets/539cb970-1bf7-4c00-825d-5ca1ba929281" width="400" height="400"/>
 </br>
-<img src="https://github.com/user-attachments/assets/526cf2a7-5943-4083-9fa7-9ebc0012e876" width="450" height="400"/>
-<img src="https://github.com/user-attachments/assets/38a7b53a-6498-46fd-943f-fe5dc07d6ea9" width="450" height="400"/>
+<img src="https://github.com/user-attachments/assets/526cf2a7-5943-4083-9fa7-9ebc0012e876" width="400" height="400"/>
+<img src="https://github.com/user-attachments/assets/38a7b53a-6498-46fd-943f-fe5dc07d6ea9" width="400" height="400"/>
 
 ### 4.2 CI/CD 파이프라인 구축
 > AWS와 Jenkins를 활용한 CI/CD 파이프라인 구축 </br></br>
