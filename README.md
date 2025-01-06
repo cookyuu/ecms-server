@@ -17,7 +17,7 @@
    4. [Slack 알림 서비스 구축](#44-slack-알림-서비스-구축)
 
 ## 1. 인프라 아키텍처
-<img src="https://github.com/user-attachments/assets/0eeedfda-f0e3-4cc0-8b8e-cd7cb16231f8" width="900" height="500"/>
+<img src="https://github.com/user-attachments/assets/0b96fba4-afa9-4696-a912-20d8bfd9a14d" width="900" height="500"/>
 
 ## 2. ERD
 <img src="https://github.com/user-attachments/assets/b240bd35-76d5-4f7e-836e-50da000c75ff" width="900" height="500"/>
