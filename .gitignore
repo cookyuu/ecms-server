@@ -41,3 +41,33 @@ out/
 /src/main/resources/application-local.yml
 
 *.env
+
+### macOS ###
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+### Logs ###
+*.log
+logs/
+
+### Database ###
+*.db
+*.sqlite
+*.sqlite3
+
+### Docker volumes and data ###
+docker-composes/**/data/
+docker-composes/**/lib/
+docker-composes/**/db/
+docker-composes/**/logs/
+
+### Generated sources ###
+src/main/generated/
+
+### Backup files ###
+*.bak
+*.swp
+*.swo
+*~
