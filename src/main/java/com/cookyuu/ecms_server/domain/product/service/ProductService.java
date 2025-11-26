@@ -113,7 +113,7 @@ public class ProductService {
     }
 
     public Product findProductById(Long id) {
-        return productRepository.findById(id).orElseThrow(BusinessException::new);
+        return productRepository.findById(id).orElseThrow(() -> new BusinessException(ResultCode.PRODUCT_NOT_FOUND));
     }
 
     private boolean isProductOwnedBySeller(Product product, Long sellerId) {

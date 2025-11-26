@@ -249,6 +249,6 @@ public class OrderService {
     }
 
     public Order findOrderByOrderNumber(String orderNumber) {
-        return orderRepository.findByOrderNumber(orderNumber).orElseThrow(BusinessException::new);
+        return orderRepository.findByOrderNumber(orderNumber).orElseThrow(() -> new BusinessException(ResultCode.ORDER_NOT_FOUND));
     }
 }

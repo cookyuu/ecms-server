@@ -1,6 +1,7 @@
 package com.cookyuu.ecms_server.common.utils;
 
 import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -28,7 +29,7 @@ public class ValidateUtils {
         Pattern pattern = Pattern.compile(emailRegex);
         Matcher matcher = pattern.matcher(email);
         if (!matcher.matches()) {
-            throw new ValidationException(ResultCode.VALID_EMAIL_FORMAT);
+            throw new BusinessException(ResultCode.VALID_EMAIL_FORMAT);
         }
     }
 
@@ -37,7 +38,7 @@ public class ValidateUtils {
         Matcher matcher = pattern.matcher(phoneNumber);
         if (!matcher.matches()) {
             log.error("[ValidPhoneNumber] This Phone Number format is unAvailable, PhoneNumber : {}", phoneNumber);
-            throw new ValidationException(ResultCode.VALID_PHONENUMBER_FORMAT);
+            throw new BusinessException(ResultCode.VALID_PHONENUMBER_FORMAT);
         }
         log.debug("[ValidPhoneNumberFormat] Validate phoneNumber format. OK!!,  phone number : {} ", phoneNumber);
     }
@@ -48,7 +49,7 @@ public class ValidateUtils {
         Matcher matcher = pattern.matcher(password);
         if (!matcher.matches()) {
             log.error("[ValidPhoneNumber] This Password format is unAvailable");
-            throw new ValidationException(ResultCode.VALID_PASSWORD_FORMAT);
+            throw new BusinessException(ResultCode.VALID_PASSWORD_FORMAT);
         }
     }
 
@@ -57,7 +58,7 @@ public class ValidateUtils {
         Matcher matcher = pattern.matcher(loginId);
         if (!matcher.matches()) {
             log.error("[ValidPhoneNumber] This Login ID format is unAvailable. LoginId : {}", loginId);
-            throw new ValidationException(ResultCode.VALID_LOGINID_FORMAT);
+            throw new BusinessException(ResultCode.VALID_LOGINID_FORMAT);
         }
         log.info("[ValidUserIdFormat] Validate userId format. OK!!, LoginId : {}", loginId);
     }
@@ -68,7 +69,7 @@ public class ValidateUtils {
         Matcher matcher = pattern.matcher(businessNumber);
         if (!matcher.matches()) {
             log.error("[ValidBusinessNumFormat] This Business Number format is unAvailable. Business number : {}", businessNumber);
-            throw new ValidationException(ResultCode.VALID_BUSINESSNUM_FORMAT);
+            throw new BusinessException(ResultCode.VALID_BUSINESSNUM_FORMAT);
         }
         log.info("[ValidBusinessNumFormat] Validate business number format. OK!!");
          chkBusinessNum(businessNumber);
@@ -84,7 +85,7 @@ public class ValidateUtils {
         sum += ((businessNumber.charAt(8)-'0') * 5)/10;
         if ((businessNumber.charAt(9)-'0' != (10-sum%10)%10)) {
             log.error("[CheckBusinessNumber] This Business number is unAvailable. BusinessNum : {}", businessNumber);
-            throw new ValidationException(ResultCode.VALID_BUSINESSNUM_FORMAT);
+            throw new BusinessException(ResultCode.VALID_BUSINESSNUM_FORMAT);
         }
         log.debug("[CheckBusinessNumber] Validate business number. is Available. OK!!");
     }

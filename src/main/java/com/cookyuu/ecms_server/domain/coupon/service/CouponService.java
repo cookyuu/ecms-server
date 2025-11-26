@@ -72,7 +72,7 @@ public class CouponService {
 
     @Transactional
     public Coupon findCouponByCouponNumber(String couponNumber) {
-        return couponRepository.findByCouponNumber(couponNumber).orElseThrow(BusinessException::new);
+        return couponRepository.findByCouponNumber(couponNumber).orElseThrow(() -> new BusinessException(ResultCode.COUPON_NOT_FOUND));
     }
 
     public void validateCoupon(String couponNumber) {

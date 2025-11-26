@@ -50,13 +50,13 @@ public class CategoryService {
     }
 
     public Category findByName(String name) {
-        Category category = categoryRepository.findByName(name).orElseThrow(BusinessException::new);
+        Category category = categoryRepository.findByName(name).orElseThrow(() -> new BusinessException(ResultCode.CATEGORY_NOT_FOUND));
         log.info("[FindCategoryByName] Find category OK!, category Id : {}", category.getId());
         return category;
     }
 
     public Category findById(Long categoryId) {
-        Category category = categoryRepository.findById(categoryId).orElseThrow(BusinessException::new);
+        Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new BusinessException(ResultCode.CATEGORY_NOT_FOUND));
         log.info("[FindCategoryByName] Find category OK!, category Name : {}", category.getName());
         return category;
     }

@@ -1,4 +1,4 @@
-package com.cookyuu.ecms_server.domain.product.executor;
+package com.cookyuu.ecms_server.domain.product.scheduler;
 
 
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
@@ -15,7 +15,7 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-public class ApplyProductHitsExecutor {
+public class ProductHitCountScheduler {
     private final RedisUtils redisUtils;
     private final ProductService productService;
 

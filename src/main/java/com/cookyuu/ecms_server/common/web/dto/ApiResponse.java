@@ -123,6 +123,15 @@ public class ApiResponse<T> {
         );
     }
 
+    public static ApiResponse<Object> failure(ResultCode resultCode, String message, Object data) {
+        return new ApiResponse<>(
+                resultCode,
+                message,
+                data,
+                null
+        );
+    }
+
     @Getter
     public static class PageResponse {
         private final int number;

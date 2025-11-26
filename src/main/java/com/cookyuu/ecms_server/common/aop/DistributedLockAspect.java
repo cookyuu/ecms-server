@@ -1,5 +1,6 @@
 package com.cookyuu.ecms_server.common.aop;
 
+import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,13 +40,13 @@ public class DistributedLockAspect {
 
             if (!isLocked){
                 log.error("[Lock::Fail] Fail to acquire distributed lock");
-                throw new BusinessException();
+                throw new BusinessException(ResultCode.REDISSON_COMMON_EXP);
             }
             return joinPoint.proceed();
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("[Lock::Fail] Interrupted distributed lock");
-            throw new BusinessException();
+            throw new BusinessException(ResultCode.REDISSON_COMMON_EXP, e);
         } finally {
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();

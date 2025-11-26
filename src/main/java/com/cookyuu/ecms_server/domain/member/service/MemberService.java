@@ -49,18 +49,18 @@ public class MemberService {
 
     public void checkDuplicateLoginId(String loginId) {
         if (memberRepository.existsByLoginId(loginId)) {
-            throw new ValidationException(ResultCode.VALID_LOGINID_DUPLICATE);
+            throw new BusinessException(ResultCode.VALID_LOGINID_DUPLICATE);
         }
     }
 
     public void checkDuplicateEmail(String email) {
         if (memberRepository.existsByEmail(email)) {
-            throw new ValidationException(ResultCode.VALID_EMAIL_DUPLICATE);
+            throw new BusinessException(ResultCode.VALID_EMAIL_DUPLICATE);
         }
     }
     public void checkDuplicatePhoneNumber(String phoneNumber) {
         if (memberRepository.existsByPhoneNumber(phoneNumber)) {
-            throw new ValidationException(ResultCode.VALID_PHONENUMBER_DUPLICATE);
+            throw new BusinessException(ResultCode.VALID_PHONENUMBER_DUPLICATE);
         }
     }
 

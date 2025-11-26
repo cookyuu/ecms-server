@@ -153,7 +153,7 @@ public class PaymentService {
     }
 
     private Payment findPaymentByPaymentNumber(String paymentNumber) {
-        return paymentRepository.findByPaymentNumber(paymentNumber).orElseThrow(BusinessException::new);
+        return paymentRepository.findByPaymentNumber(paymentNumber).orElseThrow(() -> new BusinessException(ResultCode.PAYMENT_NOT_FOUND));
     }
 
     private void compareToBuyerPaymentUser(Long buyerId, Long paymentUserId) {

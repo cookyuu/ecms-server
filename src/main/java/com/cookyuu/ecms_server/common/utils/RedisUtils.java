@@ -39,7 +39,7 @@ public class RedisUtils {
             valueOperations.set(key, value, expiredDuration);
         } catch (RedisException e) {
             log.error("[SaveRedisData] ", e);
-            throw new BusinessException(ResultCode.REDIS_COMMON_EXP);
+            throw new BusinessException(ResultCode.REDIS_COMMON_EXP, e);
         }
     }
 
@@ -49,7 +49,7 @@ public class RedisUtils {
             valueOperations.set(key, value);
         } catch (RedisException e) {
             log.error("[SaveRedisData] ", e);
-            throw new BusinessException();
+            throw new BusinessException(ResultCode.REDIS_COMMON_EXP, e);
         }
     }
 
@@ -65,7 +65,7 @@ public class RedisUtils {
             redisTemplate.delete(key);
         } catch (RedisException e) {
             log.error("[DeleteRedisData] ", e);
-            throw new BusinessException();
+            throw new BusinessException(ResultCode.REDIS_COMMON_EXP, e);
         }
     }
 
@@ -74,7 +74,7 @@ public class RedisUtils {
             return redisTemplate.hasKey(key);
         } catch (RedisException e) {
             log.error("[RedisKeyIsExist] ", e);
-            throw new BusinessException();
+            throw new BusinessException(ResultCode.REDIS_COMMON_EXP, e);
         }
     }
 

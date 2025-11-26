@@ -30,7 +30,7 @@ public class SellerService {
 
     public Seller findSellerById(Long sellerId) {
         log.info("[FindSeller] Find Seller By Seller ID, Id : {}", sellerId);
-        return sellerRepository.findById(sellerId).orElseThrow(BusinessException::new);
+        return sellerRepository.findById(sellerId).orElseThrow(() -> new BusinessException(ResultCode.SELLER_NOT_FOUND));
     }
 
     @Transactional

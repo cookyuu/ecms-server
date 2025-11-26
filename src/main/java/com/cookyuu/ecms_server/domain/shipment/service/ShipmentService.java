@@ -1,5 +1,6 @@
 package com.cookyuu.ecms_server.domain.shipment.service;
 
+import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.domain.order.service.OrderService;
 import com.cookyuu.ecms_server.domain.shipment.dto.CreateShipmentDto;
@@ -65,7 +66,7 @@ public class ShipmentService {
     }
 
     private Shipment findShipmentByShipmentNumber(String shipmentNumber) {
-        return shipmentRepository.findByShipmentNumber(shipmentNumber).orElseThrow(BusinessException::new);
+        return shipmentRepository.findByShipmentNumber(shipmentNumber).orElseThrow(() -> new BusinessException(ResultCode.SHIPMENT_NOT_FOUND));
     }
 
     private String createShipmentNumber() {
