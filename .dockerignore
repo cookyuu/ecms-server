@@ -1,0 +1,72 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.iml
+*.iws
+*.ipr
+.settings
+.classpath
+.project
+.factorypath
+.apt_generated
+.springBeans
+.sts4-cache
+
+# Build
+build/
+target/
+out/
+bin/
+
+# Gradle
+.gradle
+gradlew.bat
+
+# Environment
+.env
+*.env
+env/
+
+# Logs
+*.log
+logs/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Documentation
+README.md
+HELP.md
+*.md
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Config (may want to keep some)
+config/
+
+# Test
+**/test/
+**/*Test.java
+**/*Tests.java
+
+# Backup
+*.bak
+*.swp
+*.swo
+*~

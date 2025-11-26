@@ -1,10 +1,9 @@
 spring:
-  spring:
-    application:
-      name: ecms-server
+  application:
+    name: ecms-server
 
   profiles:
-    default: prod # 기본 환경을 dev로
+    default: local # 기본 환경을 local로
 
 management:
   endpoints:

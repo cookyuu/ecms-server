@@ -1,6 +1,6 @@
 package com.cookyuu.ecms_server.global.exception;
 
-import com.cookyuu.ecms_server.domain.alert.service.SlackService;
+//import com.cookyuu.ecms_server.domain.alert.service.SlackService;
 import com.cookyuu.ecms_server.global.code.ResultCode;
 import com.cookyuu.ecms_server.global.dto.ApiResponse;
 import com.cookyuu.ecms_server.global.exception.auth.ValidateJwtTokenException;
@@ -28,7 +28,7 @@ import java.util.NoSuchElementException;
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
-    private final SlackService slackService;
+//    private final SlackService slackService;
 
 
     @ExceptionHandler(value = ECMSAppException.class)
@@ -152,7 +152,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleException(WebRequest request, Exception e) {
         log.error("[Exception] ", e);
-        slackService.sendErrorForSlack(e);
+//        slackService.sendErrorForSlack(e);
         var response = ApiResponse.failure(ResultCode.INTERNAL_SERVER_ERROR, e.getMessage());
         return new ResponseEntity<>(response, ResultCode.INTERNAL_SERVER_ERROR.getStatus());
     }
