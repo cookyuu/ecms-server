@@ -1,13 +1,13 @@
 package com.cookyuu.ecms_server.domain.auth.service;
 
+import com.cookyuu.ecms_server.common.exception.auth.ValidationException;
 import com.cookyuu.ecms_server.domain.auth.dto.SignupDto;
 import com.cookyuu.ecms_server.domain.cart.service.CartService;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.auth.*;
-import com.cookyuu.ecms_server.global.utils.AuthUtils;
-import com.cookyuu.ecms_server.global.utils.ValidateUtils;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.utils.AuthUtils;
+import com.cookyuu.ecms_server.common.utils.ValidateUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

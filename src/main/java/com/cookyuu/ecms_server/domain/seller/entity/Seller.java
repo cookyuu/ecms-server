@@ -3,7 +3,7 @@ package com.cookyuu.ecms_server.domain.seller.entity;
 import com.cookyuu.ecms_server.domain.member.entity.RoleType;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.seller.dto.UpdateSellerDto;
-import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
+import com.cookyuu.ecms_server.common.domain.BaseTimeEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;

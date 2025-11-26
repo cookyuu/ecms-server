@@ -11,9 +11,9 @@ import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSCartException;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSCartItemException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -40,10 +40,10 @@ public class CartService {
         Member member = memberService.findMemberById(Long.parseLong(user.getUsername()));
         Product product = productService.findProductById(cartItemInfo.getProductId());
         product.isDeleted();
-        Cart cart = cartRepository.findByMemberId(member.getId()).orElseThrow(ECMSCartException::new);
+        Cart cart = cartRepository.findByMemberId(member.getId()).orElseThrow(BusinessException::new);
         if (cartItemInfo.getQuantity() < 1) {
             log.error("[UpdateCartItem] CartItem quantity is too less, Quantity : {}", cartItemInfo.getQuantity());
-            throw new ECMSCartItemException(ResultCode.BAD_REQUEST, "카트에 담길 상품의 수량은 1이상 이여야합니다.");
+            throw new BusinessException(ResultCode.BAD_REQUEST, "카트에 담길 상품의 수량은 1이상 이여야합니다.");
         }
         if (cartItemRepository.existsByCartAndProduct(cart, product)) {
             CartItem cartItem = findCartItemByCartAndProduct(cart, product);
@@ -59,7 +59,7 @@ public class CartService {
     public void deleteCartItem(UserDetails user, DeleteCartItemDto.Request cartItemInfo) {
         Member member = memberService.findMemberById(Long.parseLong(user.getUsername()));
         Product product = productService.findProductById(cartItemInfo.getProductId());
-        Cart cart = cartRepository.findByMemberId(member.getId()).orElseThrow(ECMSCartException::new);
+        Cart cart = cartRepository.findByMemberId(member.getId()).orElseThrow(BusinessException::new);
         CartItem cartItem = findCartItemByCartAndProduct(cart, product);
         cartItemRepository.delete(cartItem);
         log.info("[DeleteCartItem] Delete cart item OK!, CartId : {}, ProductId : {}", cart.getId(), product.getId());
@@ -71,10 +71,10 @@ public class CartService {
     }
 
     private CartItem findCartItemByCartAndProduct(Cart cart, Product product) {
-        return cartItemRepository.findByCartAndProduct(cart, product).orElseThrow(ECMSCartItemException::new);
+        return cartItemRepository.findByCartAndProduct(cart, product).orElseThrow(BusinessException::new);
     }
 
     public Cart findCartByMemberId(Long id) {
-        return cartRepository.findByMemberId(id).orElseThrow(ECMSCartException::new);
+        return cartRepository.findByMemberId(id).orElseThrow(BusinessException::new);
     }
 }

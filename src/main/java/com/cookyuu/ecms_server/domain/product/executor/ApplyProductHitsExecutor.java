@@ -2,8 +2,8 @@ package com.cookyuu.ecms_server.domain.product.executor;
 
 
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
-import com.cookyuu.ecms_server.global.code.RedisKeyCode;
-import com.cookyuu.ecms_server.global.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
+import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

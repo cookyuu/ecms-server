@@ -18,11 +18,11 @@ import com.cookyuu.ecms_server.domain.order.repository.OrderLineRepository;
 import com.cookyuu.ecms_server.domain.order.repository.OrderRepository;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
-import com.cookyuu.ecms_server.global.code.RedisKeyCode;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
-import com.cookyuu.ecms_server.global.utils.JwtUtils;
-import com.cookyuu.ecms_server.global.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.utils.JwtUtils;
+import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -36,7 +36,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static com.cookyuu.ecms_server.global.code.ResultCode.ORDER_PROCESS_FAIL;
+import static com.cookyuu.ecms_server.common.enums.ResultCode.ORDER_PROCESS_FAIL;
 
 @Slf4j
 @Service
@@ -104,7 +104,7 @@ public class OrderService {
             log.info("[Order::Cancel] Cancel request of Order OK!, orderNumber : {}", order.getOrderNumber());
         } else {
             log.info("[Order::Cancel] Can not cancel order, order status is {}", order.getStatus());
-            throw new ECMSOrderException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
+            throw new BusinessException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
         }
         log.debug("[Order::Cancel] Order cancel request is OK!");
         return ResultCode.ORDER_CANCEL_SUCCESS;
@@ -121,7 +121,7 @@ public class OrderService {
         boolean isPossibleRevise = OrderStatus.isPossibleOrderRevise(order.getStatus());
         if (!isPossibleRevise) {
             log.info("[Order::Revise] Can not revise order, order status is {}", order.getStatus());
-            throw new ECMSOrderException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
+            throw new BusinessException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
         }
 
         List<OrderLine> orderLines = order.getOrderLines();
@@ -167,7 +167,7 @@ public class OrderService {
         } else if (jwtRole.equals("ROLE_"+RoleType.SELLER.name())) {
             boolean isSellerOfOrder = orderDetailInfo.getOrderLines().stream().anyMatch(orderLineInfo -> checkSellerOfOrder(Long.parseLong(user.getUsername()), orderLineInfo.getSellerId()));
             if (!isSellerOfOrder) {
-                throw new ECMSOrderException(ResultCode.ORDER_SELLER_UNMATCHED);
+                throw new BusinessException(ResultCode.ORDER_SELLER_UNMATCHED);
             }
         }
         return orderDetailInfo;
@@ -184,7 +184,7 @@ public class OrderService {
     private void checkBuyerOfOrder(Long reqUserId, Long buyerId) {
         log.debug("[Order::BuyerMatch] Unmatched Order's buyer Info and request User Info, buyerId : {}, reqUserId : {}", buyerId, reqUserId);
         if (!buyerId.equals(reqUserId)) {
-            throw new ECMSOrderException(ResultCode.ORDER_BUYER_UNMATCHED);
+            throw new BusinessException(ResultCode.ORDER_BUYER_UNMATCHED);
         }
         log.info("[Order::BuyerMatch] Match buyer id and request user id OK!");
     }
@@ -197,11 +197,11 @@ public class OrderService {
     private void compareQuantityAndStockQuantity(int quantity, Integer stockQuantity) {
         if (stockQuantity == 0) {
             log.error("[Order::Error] This product stock quantity is zero, Product Sold out!");
-            throw new ECMSOrderException(ResultCode.PRODUCT_SOLD_OUT, "주문하신 상품의 재고 수량이 없습니다.");
+            throw new BusinessException(ResultCode.PRODUCT_SOLD_OUT, "주문하신 상품의 재고 수량이 없습니다.");
         }
         if (quantity > stockQuantity) {
             log.error("[Order::Error] This product stock quantity is less than order quantity, stockQuantity : {}, orderQuantity : {}", stockQuantity, quantity);
-            throw new ECMSOrderException(ResultCode.PRODUCT_SOLD_OUT, "주문하신 상품의 재고 수량이 부족합니다. 재고 수량 : " + stockQuantity);
+            throw new BusinessException(ResultCode.PRODUCT_SOLD_OUT, "주문하신 상품의 재고 수량이 부족합니다. 재고 수량 : " + stockQuantity);
         }
         log.info("[Order::CompareStockQuantity] This product ");
     }
@@ -221,11 +221,11 @@ public class OrderService {
     private void comparePriceAndCurrentPrice(int price, Integer currentPrice, Long productId) {
         if (currentPrice == null) {
             log.error("[Order::Error] Product price has not been set yet, productId : {}", productId);
-            throw new ECMSOrderException(ORDER_PROCESS_FAIL, "가격이 아직 책정되지 않은 상품이 있습니다.");
+            throw new BusinessException(ORDER_PROCESS_FAIL, "가격이 아직 책정되지 않은 상품이 있습니다.");
         }
         if (price != currentPrice) {
             log.error("[Order::Error] Compare product order price and current price Fail!, productId : {}, orderPrice : {}, currentPrice : {}", productId, price, currentPrice);
-            throw new ECMSOrderException(ORDER_PROCESS_FAIL, "상품의 현재 가격과 주문 가격이 일치하지 않습니다.");
+            throw new BusinessException(ORDER_PROCESS_FAIL, "상품의 현재 가격과 주문 가격이 일치하지 않습니다.");
         }
         log.info("[CompareProductPriceForOrder] Compare product order price and current price OK!");
     }
@@ -249,6 +249,6 @@ public class OrderService {
     }
 
     public Order findOrderByOrderNumber(String orderNumber) {
-        return orderRepository.findByOrderNumber(orderNumber).orElseThrow(ECMSOrderException::new);
+        return orderRepository.findByOrderNumber(orderNumber).orElseThrow(BusinessException::new);
     }
 }

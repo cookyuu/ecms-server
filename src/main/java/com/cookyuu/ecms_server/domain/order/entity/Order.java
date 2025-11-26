@@ -2,9 +2,9 @@ package com.cookyuu.ecms_server.domain.order.entity;
 
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.shipment.entity.Shipment;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.domain.BaseTimeEntity;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -84,13 +84,13 @@ public class Order extends BaseTimeEntity {
 
     public void isCanceled() {
         if (isCanceled) {
-            throw new ECMSOrderException(ResultCode.ALREADY_CANCELED_ORDER);
+            throw new BusinessException(ResultCode.ALREADY_CANCELED_ORDER);
         }
     }
 
     public void isPaymentComplete() {
         if (!this.status.equals(OrderStatus.PAYMENT_COMPLETE)) {
-            throw new ECMSOrderException(ResultCode.ORDER_STATUS_ERROR);
+            throw new BusinessException(ResultCode.ORDER_STATUS_ERROR);
         }
     }
 

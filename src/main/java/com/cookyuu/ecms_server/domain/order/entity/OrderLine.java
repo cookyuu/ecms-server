@@ -1,7 +1,7 @@
 package com.cookyuu.ecms_server.domain.order.entity;
 
 import com.cookyuu.ecms_server.domain.product.entity.Product;
-import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
+import com.cookyuu.ecms_server.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

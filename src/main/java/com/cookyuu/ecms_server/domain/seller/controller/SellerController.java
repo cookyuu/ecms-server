@@ -5,7 +5,7 @@ import com.cookyuu.ecms_server.domain.seller.dto.RegisterSellerDto;
 import com.cookyuu.ecms_server.domain.seller.dto.SellerDetailDto;
 import com.cookyuu.ecms_server.domain.seller.dto.UpdateSellerDto;
 import com.cookyuu.ecms_server.domain.seller.service.SellerService;
-import com.cookyuu.ecms_server.global.dto.ApiResponse;
+import com.cookyuu.ecms_server.common.web.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

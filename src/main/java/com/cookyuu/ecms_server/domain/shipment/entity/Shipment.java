@@ -1,9 +1,9 @@
 package com.cookyuu.ecms_server.domain.shipment.entity;
 
 import com.cookyuu.ecms_server.domain.order.entity.Order;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSShipmentException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.domain.BaseTimeEntity;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -46,7 +46,7 @@ public class Shipment extends BaseTimeEntity {
 
     public void checkStatus(ShipmentStatus status) {
         if (!this.status.equals(status)) {
-            throw new ECMSShipmentException(ResultCode.SHIPMENT_STATUS_UNMATCHED);
+            throw new BusinessException(ResultCode.SHIPMENT_STATUS_UNMATCHED);
         }
     }
 

@@ -3,7 +3,7 @@ package com.cookyuu.ecms_server.domain.coupon.controller;
 import com.cookyuu.ecms_server.domain.coupon.dto.CreateCouponDto;
 import com.cookyuu.ecms_server.domain.coupon.facade.CouponFacade;
 import com.cookyuu.ecms_server.domain.coupon.service.CouponService;
-import com.cookyuu.ecms_server.global.dto.ApiResponse;
+import com.cookyuu.ecms_server.common.web.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

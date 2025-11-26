@@ -1,6 +1,6 @@
 package com.cookyuu.ecms_server.domain.product.dto;
 
-import com.cookyuu.ecms_server.global.entity.SortType;
+import com.cookyuu.ecms_server.common.enums.SortType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

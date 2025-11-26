@@ -4,7 +4,7 @@ import com.cookyuu.ecms_server.domain.shipment.dto.CreateShipmentDto;
 import com.cookyuu.ecms_server.domain.shipment.dto.ShipmentDetailDto;
 import com.cookyuu.ecms_server.domain.shipment.dto.UpdateShipmentDto;
 import com.cookyuu.ecms_server.domain.shipment.service.ShipmentService;
-import com.cookyuu.ecms_server.global.dto.ApiResponse;
+import com.cookyuu.ecms_server.common.web.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

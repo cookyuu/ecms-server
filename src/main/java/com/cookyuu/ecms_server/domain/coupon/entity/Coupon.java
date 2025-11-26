@@ -1,8 +1,8 @@
 package com.cookyuu.ecms_server.domain.coupon.entity;
 
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSCouponException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.domain.BaseTimeEntity;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,7 +48,7 @@ public class Coupon extends BaseTimeEntity {
 
     public void issue(int count) {
         if (this.quantity == 0) {
-            throw new ECMSCouponException(ResultCode.COUPON_SOLD_OUT);
+            throw new BusinessException(ResultCode.COUPON_SOLD_OUT);
         }
         this.quantity = count;
     }

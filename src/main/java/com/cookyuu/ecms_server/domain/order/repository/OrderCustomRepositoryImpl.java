@@ -3,9 +3,9 @@ package com.cookyuu.ecms_server.domain.order.repository;
 import com.cookyuu.ecms_server.domain.order.dto.OrderDetailDto;
 import com.cookyuu.ecms_server.domain.order.dto.SearchOrderDto;
 import com.cookyuu.ecms_server.domain.order.entity.*;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.entity.SortType;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.enums.SortType;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.querydsl.core.types.*;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -146,7 +146,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
         } else if (option.equals(STATUS.getName())) {
             return STATUS;
         }
-        throw new ECMSOrderException(ResultCode.BAD_REQUEST, "[Order::Search] 검색 할 수 없는 옵션입니다. Option : " + option);
+        throw new BusinessException(ResultCode.BAD_REQUEST, "[Order::Search] 검색 할 수 없는 옵션입니다. Option : " + option);
     }
 
 }

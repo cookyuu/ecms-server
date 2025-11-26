@@ -2,8 +2,8 @@ package com.cookyuu.ecms_server.domain.order.controller;
 
 import com.cookyuu.ecms_server.domain.order.dto.*;
 import com.cookyuu.ecms_server.domain.order.service.OrderService;
-import com.cookyuu.ecms_server.global.dto.ApiResponse;
-import com.cookyuu.ecms_server.global.code.ResultCode;
+import com.cookyuu.ecms_server.common.web.dto.ApiResponse;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

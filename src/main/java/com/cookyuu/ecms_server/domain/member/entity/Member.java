@@ -3,7 +3,7 @@ package com.cookyuu.ecms_server.domain.member.entity;
 import com.cookyuu.ecms_server.domain.cart.entity.Cart;
 import com.cookyuu.ecms_server.domain.coupon.entity.IssueCoupon;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
-import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
+import com.cookyuu.ecms_server.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -2,11 +2,10 @@ package com.cookyuu.ecms_server.domain.product.controller;
 
 import com.cookyuu.ecms_server.domain.product.dto.CategoryInfoDto;
 import com.cookyuu.ecms_server.domain.product.service.CategoryService;
-import com.cookyuu.ecms_server.global.dto.ApiResponse;
+import com.cookyuu.ecms_server.common.web.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

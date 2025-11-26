@@ -3,9 +3,9 @@ package com.cookyuu.ecms_server.domain.product.repository;
 import com.cookyuu.ecms_server.domain.product.dto.FindProductDetailDto;
 import com.cookyuu.ecms_server.domain.product.dto.SearchProductDto;
 import com.cookyuu.ecms_server.domain.product.entity.SearchOption;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.entity.SortType;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.enums.SortType;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -125,7 +125,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
         } else if (option.equals(SELLER_NAME.getName())) {
             return SELLER_NAME;
         }
-        throw new ECMSOrderException(ResultCode.BAD_REQUEST, "[Product::Search] 검색 할 수 없는 옵션입니다. Option : " + option);
+        throw new BusinessException(ResultCode.BAD_REQUEST, "[Product::Search] 검색 할 수 없는 옵션입니다. Option : " + option);
     }
 
     private BooleanExpression productIdEq(Long productId) {

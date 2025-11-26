@@ -4,11 +4,11 @@ import com.cookyuu.ecms_server.domain.coupon.dto.CreateCouponDto;
 import com.cookyuu.ecms_server.domain.coupon.entity.Coupon;
 import com.cookyuu.ecms_server.domain.coupon.entity.CouponCode;
 import com.cookyuu.ecms_server.domain.coupon.repository.CouponRepository;
-import com.cookyuu.ecms_server.global.code.RedisKeyCode;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSCouponException;
-import com.cookyuu.ecms_server.global.utils.RedisUtils;
-import com.cookyuu.ecms_server.global.utils.StringUtils;
+import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -54,7 +54,7 @@ public class CouponService {
 
     private Integer isNullDiscountPrice(Integer price) {
         if (price == null || price == 0) {
-            throw new ECMSCouponException(ResultCode.COUPON_PRICE_EMPTY);
+            throw new BusinessException(ResultCode.COUPON_PRICE_EMPTY);
         }
         return price;
     }
@@ -72,18 +72,18 @@ public class CouponService {
 
     @Transactional
     public Coupon findCouponByCouponNumber(String couponNumber) {
-        return couponRepository.findByCouponNumber(couponNumber).orElseThrow(ECMSCouponException::new);
+        return couponRepository.findByCouponNumber(couponNumber).orElseThrow(BusinessException::new);
     }
 
     public void validateCoupon(String couponNumber) {
         Coupon coupon = findCouponByCouponNumber(couponNumber);
         if (coupon.isExpired()) {
             log.info("[Coupon::Validate] Coupon is expired. couponNumber : {}", couponNumber);
-            throw new ECMSCouponException(ResultCode.COUPON_UNUSABLE, "만료된 쿠폰입니다. ");
+            throw new BusinessException(ResultCode.COUPON_UNUSABLE, "만료된 쿠폰입니다. ");
         }
         if (coupon.getQuantity() == 0) {
             log.info("[Coupon::Validate] Coupon is sold out, couponNumber : {}", couponNumber);
-            throw new ECMSCouponException(ResultCode.COUPON_SOLD_OUT);
+            throw new BusinessException(ResultCode.COUPON_SOLD_OUT);
         }
     }
 

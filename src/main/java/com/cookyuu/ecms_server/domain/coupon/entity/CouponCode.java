@@ -1,7 +1,7 @@
 package com.cookyuu.ecms_server.domain.coupon.entity;
 
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSCouponException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import lombok.Getter;
 
 @Getter
@@ -35,6 +35,6 @@ public enum CouponCode {
                 return couponCode;
             }
         }
-        throw new ECMSCouponException(ResultCode.COUPON_CODE_UNREGISTRATION);
+        throw new BusinessException(ResultCode.COUPON_CODE_UNREGISTRATION);
     }
 }

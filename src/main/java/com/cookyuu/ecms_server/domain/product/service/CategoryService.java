@@ -3,8 +3,8 @@ package com.cookyuu.ecms_server.domain.product.service;
 import com.cookyuu.ecms_server.domain.product.dto.CategoryInfoDto;
 import com.cookyuu.ecms_server.domain.product.entity.Category;
 import com.cookyuu.ecms_server.domain.product.repository.CategoryRepository;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSCategoryException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,19 +50,19 @@ public class CategoryService {
     }
 
     public Category findByName(String name) {
-        Category category = categoryRepository.findByName(name).orElseThrow(ECMSCategoryException::new);
+        Category category = categoryRepository.findByName(name).orElseThrow(BusinessException::new);
         log.info("[FindCategoryByName] Find category OK!, category Id : {}", category.getId());
         return category;
     }
 
     public Category findById(Long categoryId) {
-        Category category = categoryRepository.findById(categoryId).orElseThrow(ECMSCategoryException::new);
+        Category category = categoryRepository.findById(categoryId).orElseThrow(BusinessException::new);
         log.info("[FindCategoryByName] Find category OK!, category Name : {}", category.getName());
         return category;
     }
     private void chkCategoryNameDuplicated(String name) {
         if (categoryRepository.existsByName(name)) {
-            throw new ECMSCategoryException(ResultCode.CATEGORY_NAME_DUPLICATED);
+            throw new BusinessException(ResultCode.CATEGORY_NAME_DUPLICATED);
         }
         log.info("[CheckCategoryNameDuplication] Duplication check OK!, CategoryName : {}", name);
     }

@@ -1,5 +1,8 @@
 package com.cookyuu.ecms_server.domain.auth.service;
 
+import com.cookyuu.ecms_server.common.enums.CookieCode;
+import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
+import com.cookyuu.ecms_server.common.utils.*;
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
 import com.cookyuu.ecms_server.domain.auth.dto.LoginDto;
 import com.cookyuu.ecms_server.domain.auth.dto.SignupDto;
@@ -7,9 +10,6 @@ import com.cookyuu.ecms_server.domain.cart.service.CartService;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.domain.seller.service.SellerService;
-import com.cookyuu.ecms_server.global.code.CookieCode;
-import com.cookyuu.ecms_server.global.code.RedisKeyCode;
-import com.cookyuu.ecms_server.global.utils.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

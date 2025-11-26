@@ -1,7 +1,7 @@
 package com.cookyuu.ecms_server.domain.product.dto;
 
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSProductException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,7 +22,7 @@ public class UpdateProductDto {
         public void chkAllNull() {
             if (StringUtils.isEmpty(this.name) && StringUtils.isEmpty(this.description) && StringUtils.isEmpty(this.price)
                     && StringUtils.isEmpty(this.stockQuantity) && StringUtils.isEmpty(this.categoryName)) {
-                throw new ECMSProductException(ResultCode.REQUEST_DATA_ISNULL);
+                throw new BusinessException(ResultCode.REQUEST_DATA_ISNULL);
             }
         }
     }

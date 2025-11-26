@@ -8,7 +8,7 @@ import com.cookyuu.ecms_server.domain.shipment.dto.UpdateShipmentDto;
 import com.cookyuu.ecms_server.domain.shipment.entity.Shipment;
 import com.cookyuu.ecms_server.domain.shipment.entity.ShipmentStatus;
 import com.cookyuu.ecms_server.domain.shipment.repository.ShipmentRepository;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSShipmentException;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -66,7 +65,7 @@ public class ShipmentService {
     }
 
     private Shipment findShipmentByShipmentNumber(String shipmentNumber) {
-        return shipmentRepository.findByShipmentNumber(shipmentNumber).orElseThrow(ECMSShipmentException::new);
+        return shipmentRepository.findByShipmentNumber(shipmentNumber).orElseThrow(BusinessException::new);
     }
 
     private String createShipmentNumber() {

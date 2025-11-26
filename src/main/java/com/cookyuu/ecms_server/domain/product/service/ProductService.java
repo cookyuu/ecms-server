@@ -9,13 +9,13 @@ import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.repository.ProductRepository;
 import com.cookyuu.ecms_server.domain.seller.entity.Seller;
 import com.cookyuu.ecms_server.domain.seller.service.SellerService;
-import com.cookyuu.ecms_server.global.code.CookieCode;
-import com.cookyuu.ecms_server.global.code.RedisKeyCode;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSProductException;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSSellerException;
-import com.cookyuu.ecms_server.global.utils.CookieUtils;
-import com.cookyuu.ecms_server.global.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.enums.CookieCode;
+import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.utils.CookieUtils;
+import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -27,8 +27,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.sql.SQLException;
 
 @Slf4j
 @Service
@@ -57,7 +55,7 @@ public class ProductService {
             return product.getId();
         } catch (Exception e) {
             log.error("[Product::Register::Error] Exception : ", e);
-            throw new ECMSProductException(ResultCode.PRODUCT_EXISTS_ALREADY, e);
+            throw new BusinessException(ResultCode.PRODUCT_EXISTS_ALREADY, e);
         }
     }
 
@@ -71,7 +69,7 @@ public class ProductService {
         Product product = findProductById(productId);
         Long sellerId = Long.parseLong(user.getUsername());
         if (!isProductOwnedBySeller(product, sellerId)) {
-            throw new ECMSSellerException(ResultCode.PRODUCT_OWNER_UNMATCHED);
+            throw new BusinessException(ResultCode.PRODUCT_OWNER_UNMATCHED);
         }
         if (!(productInfo.getCategoryName()==null || productInfo.getCategoryName().isBlank())) {
             Category category = categoryService.findByName(productInfo.getCategoryName());
@@ -86,7 +84,7 @@ public class ProductService {
         Product product = findProductById(productId);
         Long sellerId = Long.parseLong(user.getUsername());
         if (!isProductOwnedBySeller(product, sellerId)) {
-            throw new ECMSSellerException(ResultCode.PRODUCT_OWNER_UNMATCHED);
+            throw new BusinessException(ResultCode.PRODUCT_OWNER_UNMATCHED);
         }
         product.isDeleted();
         product.delete();
@@ -115,7 +113,7 @@ public class ProductService {
     }
 
     public Product findProductById(Long id) {
-        return productRepository.findById(id).orElseThrow(ECMSProductException::new);
+        return productRepository.findById(id).orElseThrow(BusinessException::new);
     }
 
     private boolean isProductOwnedBySeller(Product product, Long sellerId) {

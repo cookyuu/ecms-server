@@ -4,7 +4,7 @@ import com.cookyuu.ecms_server.domain.payment.dto.CancelPaymentDto;
 import com.cookyuu.ecms_server.domain.payment.dto.CreatePaymentDto;
 import com.cookyuu.ecms_server.domain.payment.dto.PaymentDetailDto;
 import com.cookyuu.ecms_server.domain.payment.service.PaymentService;
-import com.cookyuu.ecms_server.global.dto.ApiResponse;
+import com.cookyuu.ecms_server.common.web.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

@@ -10,14 +10,13 @@ import com.cookyuu.ecms_server.domain.payment.dto.PaymentDetailDto;
 import com.cookyuu.ecms_server.domain.payment.entity.Payment;
 import com.cookyuu.ecms_server.domain.payment.entity.PaymentMethod;
 import com.cookyuu.ecms_server.domain.payment.repository.PaymentRepository;
-import com.cookyuu.ecms_server.global.code.RedisKeyCode;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSPaymentException;
-import com.cookyuu.ecms_server.global.utils.JwtUtils;
-import com.cookyuu.ecms_server.global.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.utils.JwtUtils;
+import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,7 +88,7 @@ public class PaymentService {
         } else if (reqUserRole.equals("ROLE_ADMIN")) {
             log.debug("[Payment::getDetail] User role : {}, OK", reqUserRole);
         } else {
-            throw new ECMSPaymentException(ResultCode.PAYMENT_INACCESSIBLE_DETAIL);
+            throw new BusinessException(ResultCode.PAYMENT_INACCESSIBLE_DETAIL);
         }
 
         log.debug("[Payment::getDetail] Get payment detail process, OK");
@@ -139,7 +138,7 @@ public class PaymentService {
         paymentPossibleOrderStatuses.add(OrderStatus.PAYMENT_FAIL);
 
         if (!paymentPossibleOrderStatuses.contains(order.getStatus())) {
-            throw new ECMSPaymentException(ResultCode.PAYMENT_IMPOSSIBLE_STATUS);
+            throw new BusinessException(ResultCode.PAYMENT_IMPOSSIBLE_STATUS);
         }
         log.debug("[Payment::Check] Check possible order status for payment, OK");
 
@@ -148,19 +147,19 @@ public class PaymentService {
     private void checkPossiblePaymentCancel(Order order, Long paymentUserId) {
         compareToBuyerPaymentUser(order.getBuyer().getId(), paymentUserId);
         if (!order.getStatus().equals(OrderStatus.PAYMENT_COMPLETE)) {
-            throw new ECMSPaymentException(ResultCode.PAYMENT_IMPOSSIBLE_STATUS);
+            throw new BusinessException(ResultCode.PAYMENT_IMPOSSIBLE_STATUS);
         }
         log.debug("[Payment::Check] Check possible order status for payment cancel, OK");
     }
 
     private Payment findPaymentByPaymentNumber(String paymentNumber) {
-        return paymentRepository.findByPaymentNumber(paymentNumber).orElseThrow(ECMSPaymentException::new);
+        return paymentRepository.findByPaymentNumber(paymentNumber).orElseThrow(BusinessException::new);
     }
 
     private void compareToBuyerPaymentUser(Long buyerId, Long paymentUserId) {
         log.debug("[Payment::Check] Compare to buyer and payment user");
         if (!Objects.equals(buyerId, paymentUserId)) {
-            throw new ECMSPaymentException(ResultCode.PAYMENT_BUYER_UNMATCHED);
+            throw new BusinessException(ResultCode.PAYMENT_BUYER_UNMATCHED);
         }
     }
 }

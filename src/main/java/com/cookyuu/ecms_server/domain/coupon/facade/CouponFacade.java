@@ -5,12 +5,12 @@ import com.cookyuu.ecms_server.domain.coupon.service.CouponService;
 import com.cookyuu.ecms_server.domain.coupon.service.IssueCouponService;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
-import com.cookyuu.ecms_server.global.aop.redisson.DistributedLock;
-import com.cookyuu.ecms_server.global.code.RedisKeyCode;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSCouponException;
-import com.cookyuu.ecms_server.global.utils.RedisUtils;
-import com.cookyuu.ecms_server.global.utils.RedissonUtils;
+import com.cookyuu.ecms_server.common.aop.DistributedLock;
+import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.utils.RedissonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -39,7 +39,7 @@ public class CouponFacade {
         } catch (Exception e) {
             log.info("[Coupon::Issue] Fail to issue coupon, ", e);
             recordFailure(couponNumber);
-            throw new ECMSCouponException(ResultCode.BAD_REQUEST, "쿠폰 발급 실패");
+            throw new BusinessException(ResultCode.BAD_REQUEST, "쿠폰 발급 실패");
         }
     }
 
@@ -53,11 +53,11 @@ public class CouponFacade {
         String couponCount = (String) redisTemplate.opsForValue().get(RedisKeyCode.COUPON_COUNT_KEY.getSeparator() + couponNumber);
 
         if (Boolean.TRUE.equals(redissonUtils.isIssuedCoupon(strMemberId, couponNumber))) {
-            throw new ECMSCouponException(ResultCode.COUPON_ISSUE_FAIL, "이미 발급된 쿠폰입니다. ");
+            throw new BusinessException(ResultCode.COUPON_ISSUE_FAIL, "이미 발급된 쿠폰입니다. ");
         }
 
         if (couponCount == null && Long.parseLong(couponCount) <= 0) {
-            throw new ECMSCouponException(ResultCode.COUPON_SOLD_OUT);
+            throw new BusinessException(ResultCode.COUPON_SOLD_OUT);
         }
         log.debug("[Coupon::Issue] Check Is Issuable for redis, OK!");
     }
