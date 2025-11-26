@@ -1,5 +1,6 @@
 package com.cookyuu.ecms_server.domain.member.entity;
 
+import com.cookyuu.ecms_server.domain.member.enums.RoleType;
 import com.cookyuu.ecms_server.domain.cart.entity.Cart;
 import com.cookyuu.ecms_server.domain.coupon.entity.IssueCoupon;
 import com.cookyuu.ecms_server.domain.order.entity.Order;

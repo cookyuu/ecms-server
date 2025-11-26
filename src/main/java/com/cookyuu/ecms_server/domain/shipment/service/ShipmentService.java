@@ -7,7 +7,7 @@ import com.cookyuu.ecms_server.domain.shipment.dto.CreateShipmentDto;
 import com.cookyuu.ecms_server.domain.shipment.dto.ShipmentDetailDto;
 import com.cookyuu.ecms_server.domain.shipment.dto.UpdateShipmentDto;
 import com.cookyuu.ecms_server.domain.shipment.entity.Shipment;
-import com.cookyuu.ecms_server.domain.shipment.entity.ShipmentStatus;
+import com.cookyuu.ecms_server.domain.shipment.enums.ShipmentStatus;
 import com.cookyuu.ecms_server.domain.shipment.repository.ShipmentRepository;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
 import lombok.RequiredArgsConstructor;

@@ -2,13 +2,13 @@ package com.cookyuu.ecms_server.domain.payment.service;
 
 import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.domain.order.entity.OrderLine;
-import com.cookyuu.ecms_server.domain.order.entity.OrderStatus;
+import com.cookyuu.ecms_server.domain.order.enums.OrderStatus;
 import com.cookyuu.ecms_server.domain.order.service.OrderService;
 import com.cookyuu.ecms_server.domain.payment.dto.CancelPaymentDto;
 import com.cookyuu.ecms_server.domain.payment.dto.CreatePaymentDto;
 import com.cookyuu.ecms_server.domain.payment.dto.PaymentDetailDto;
 import com.cookyuu.ecms_server.domain.payment.entity.Payment;
-import com.cookyuu.ecms_server.domain.payment.entity.PaymentMethod;
+import com.cookyuu.ecms_server.domain.payment.enums.PaymentMethod;
 import com.cookyuu.ecms_server.domain.payment.repository.PaymentRepository;
 import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
 import com.cookyuu.ecms_server.common.enums.ResultCode;

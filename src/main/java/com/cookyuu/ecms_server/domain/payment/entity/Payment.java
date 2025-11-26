@@ -1,6 +1,8 @@
 package com.cookyuu.ecms_server.domain.payment.entity;
 
 import com.cookyuu.ecms_server.common.domain.BaseTimeEntity;
+import com.cookyuu.ecms_server.domain.payment.enums.PaymentMethod;
+import com.cookyuu.ecms_server.domain.payment.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

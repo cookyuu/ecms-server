@@ -1,13 +1,15 @@
 package com.cookyuu.ecms_server.domain.order.repository;
 
-import com.cookyuu.ecms_server.domain.order.dto.OrderDetailDto;
-import com.cookyuu.ecms_server.domain.order.dto.SearchOrderDto;
-import com.cookyuu.ecms_server.domain.order.entity.*;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.enums.SortType;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
-import com.querydsl.core.types.*;
+import com.cookyuu.ecms_server.domain.order.dto.OrderDetailDto;
+import com.cookyuu.ecms_server.domain.order.dto.SearchOrderDto;
+import com.cookyuu.ecms_server.domain.order.enums.OrderSearchOption;
+import com.cookyuu.ecms_server.domain.order.enums.OrderStatus;
 import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -21,7 +23,7 @@ import java.util.List;
 import static com.cookyuu.ecms_server.domain.member.entity.QMember.member;
 import static com.cookyuu.ecms_server.domain.order.entity.QOrder.order;
 import static com.cookyuu.ecms_server.domain.order.entity.QOrderLine.orderLine;
-import static com.cookyuu.ecms_server.domain.order.entity.SearchOption.*;
+import static com.cookyuu.ecms_server.domain.order.enums.OrderSearchOption.*;
 import static com.cookyuu.ecms_server.domain.shipment.entity.QShipment.shipment;
 
 @RequiredArgsConstructor
@@ -138,7 +140,7 @@ public class OrderCustomRepositoryImpl implements OrderCustomRepository {
         };
     }
 
-    private SearchOption convertToSearchOption(String option) {
+    private OrderSearchOption convertToSearchOption(String option) {
         if (option.equals(ORDER_NUMBER.getName())){
             return ORDER_NUMBER;
         } else if (option.equals(LOGIN_ID.getName())){

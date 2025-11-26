@@ -1,4 +1,4 @@
-package com.cookyuu.ecms_server.domain.coupon.entity;
+package com.cookyuu.ecms_server.domain.coupon.enums;
 
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;

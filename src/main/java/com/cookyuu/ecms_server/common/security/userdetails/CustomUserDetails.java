@@ -1,7 +1,7 @@
 package com.cookyuu.ecms_server.common.security.userdetails;
 
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
-import com.cookyuu.ecms_server.domain.member.entity.RoleType;
+import com.cookyuu.ecms_server.domain.member.enums.RoleType;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;

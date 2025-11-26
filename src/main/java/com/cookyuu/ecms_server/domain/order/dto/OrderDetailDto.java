@@ -1,6 +1,6 @@
 package com.cookyuu.ecms_server.domain.order.dto;
 
-import com.cookyuu.ecms_server.domain.order.entity.OrderStatus;
+import com.cookyuu.ecms_server.domain.order.enums.OrderStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

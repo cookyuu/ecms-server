@@ -1,4 +1,4 @@
-package com.cookyuu.ecms_server.domain.order.entity;
+package com.cookyuu.ecms_server.domain.order.enums;
 
 import lombok.Getter;
 

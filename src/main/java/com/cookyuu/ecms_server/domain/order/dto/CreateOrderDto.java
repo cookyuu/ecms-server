@@ -2,7 +2,7 @@ package com.cookyuu.ecms_server.domain.order.dto;
 
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
-import com.cookyuu.ecms_server.domain.order.entity.OrderStatus;
+import com.cookyuu.ecms_server.domain.order.enums.OrderStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -2,7 +2,7 @@ package com.cookyuu.ecms_server.domain.product.repository;
 
 import com.cookyuu.ecms_server.domain.product.dto.FindProductDetailDto;
 import com.cookyuu.ecms_server.domain.product.dto.SearchProductDto;
-import com.cookyuu.ecms_server.domain.product.entity.SearchOption;
+import com.cookyuu.ecms_server.domain.product.enums.ProductSearchOption;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.enums.SortType;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
@@ -22,7 +22,7 @@ import java.util.List;
 import static com.cookyuu.ecms_server.domain.order.entity.QOrder.order;
 import static com.cookyuu.ecms_server.domain.product.entity.QCategory.category;
 import static com.cookyuu.ecms_server.domain.product.entity.QProduct.product;
-import static com.cookyuu.ecms_server.domain.product.entity.SearchOption.*;
+import static com.cookyuu.ecms_server.domain.product.enums.ProductSearchOption.*;
 import static com.cookyuu.ecms_server.domain.seller.entity.QSeller.seller;
 
 @RequiredArgsConstructor
@@ -117,7 +117,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
         };
     }
 
-    private SearchOption convertToSearchOption(String option) {
+    private ProductSearchOption convertToSearchOption(String option) {
         if (option.equals(PRODUCT_NAME.getName())){
             return PRODUCT_NAME;
         } else if (option.equals(CATEGORY_NAME.getName())){

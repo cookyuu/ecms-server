@@ -1,6 +1,6 @@
 package com.cookyuu.ecms_server.domain.shipment.dto;
 
-import com.cookyuu.ecms_server.domain.shipment.entity.ShipmentStatus;
+import com.cookyuu.ecms_server.domain.shipment.enums.ShipmentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

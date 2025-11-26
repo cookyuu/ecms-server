@@ -2,7 +2,7 @@ package com.cookyuu.ecms_server.domain.coupon.service;
 
 import com.cookyuu.ecms_server.domain.coupon.dto.CreateCouponDto;
 import com.cookyuu.ecms_server.domain.coupon.entity.Coupon;
-import com.cookyuu.ecms_server.domain.coupon.entity.CouponCode;
+import com.cookyuu.ecms_server.domain.coupon.enums.CouponCode;
 import com.cookyuu.ecms_server.domain.coupon.repository.CouponRepository;
 import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
 import com.cookyuu.ecms_server.common.enums.ResultCode;

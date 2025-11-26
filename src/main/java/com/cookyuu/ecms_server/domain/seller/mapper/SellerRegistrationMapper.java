@@ -1,6 +1,6 @@
 package com.cookyuu.ecms_server.domain.seller.mapper;
 
-import com.cookyuu.ecms_server.domain.member.entity.RoleType;
+import com.cookyuu.ecms_server.domain.member.enums.RoleType;
 import com.cookyuu.ecms_server.domain.seller.dto.RegisterSellerDto;
 import com.cookyuu.ecms_server.domain.seller.entity.Seller;
 

@@ -2,7 +2,7 @@ package com.cookyuu.ecms_server.common.security.userdetails;
 
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
-import com.cookyuu.ecms_server.domain.member.entity.RoleType;
+import com.cookyuu.ecms_server.domain.member.enums.RoleType;
 import com.cookyuu.ecms_server.domain.member.repository.MemberRepository;
 import com.cookyuu.ecms_server.domain.seller.entity.Seller;
 import com.cookyuu.ecms_server.domain.seller.repository.SellerRepository;

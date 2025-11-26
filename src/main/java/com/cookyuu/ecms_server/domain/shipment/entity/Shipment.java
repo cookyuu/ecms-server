@@ -4,6 +4,7 @@ import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.domain.BaseTimeEntity;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.domain.shipment.enums.ShipmentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

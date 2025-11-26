@@ -1,6 +1,7 @@
 package com.cookyuu.ecms_server.domain.order.entity;
 
 import com.cookyuu.ecms_server.domain.member.entity.Member;
+import com.cookyuu.ecms_server.domain.order.enums.OrderStatus;
 import com.cookyuu.ecms_server.domain.shipment.entity.Shipment;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.domain.BaseTimeEntity;

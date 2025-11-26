@@ -3,7 +3,7 @@ package com.cookyuu.ecms_server.domain.member.service;
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
 import com.cookyuu.ecms_server.domain.member.dto.MemberDetailDto;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
-import com.cookyuu.ecms_server.domain.member.entity.RoleType;
+import com.cookyuu.ecms_server.domain.member.enums.RoleType;
 import com.cookyuu.ecms_server.domain.member.repository.MemberRepository;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.AuthenticationException;

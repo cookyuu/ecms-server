@@ -1,7 +1,7 @@
 package com.cookyuu.ecms_server.domain.payment.dto;
 
-import com.cookyuu.ecms_server.domain.payment.entity.PaymentMethod;
-import com.cookyuu.ecms_server.domain.payment.entity.PaymentStatus;
+import com.cookyuu.ecms_server.domain.payment.enums.PaymentMethod;
+import com.cookyuu.ecms_server.domain.payment.enums.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
