@@ -83,6 +83,7 @@ public class OrderService {
             orderInfo.addOrderNumber(orderNumber);
             Order order = orderRepository.save(orderInfo.toEntity());
             log.debug("[Order::CreateOrder] Save order info.");
+
             orderLineRepository.saveAll(CreateOrderLineMapper.toEntityList(orderInfo.getOrderItemList(), order));
             return CreateOrderDto.Response.toDto(order);
         } catch (Exception e) {
@@ -94,7 +95,7 @@ public class OrderService {
 
     @Transactional
     public ResultCode cancelOrder(UserDetails user, CancelOrderDto.Request cancelInfo) {
-        Order order = findOrderByOrderNumber(cancelInfo.getOrderNumber());
+        Order order = findOrderByOrderNumberWithProducts(cancelInfo.getOrderNumber());
         order.isCanceled();
         checkBuyerOfOrder(Long.parseLong(user.getUsername()), order.getBuyer().getId());
         boolean isPossibleCancel = OrderStatus.isPossibleOrderCancel(order.getStatus());
@@ -116,7 +117,7 @@ public class OrderService {
             key = "'order:number:' + #reviseOrderInfo.orderNumber"
     )
     public ResultCode reviseOrder(UserDetails user, ReviseOrderDto.Request reviseOrderInfo) {
-        Order order = findOrderByOrderNumber(reviseOrderInfo.getOrderNumber());
+        Order order = findOrderByOrderNumberWithProducts(reviseOrderInfo.getOrderNumber());
         order.isCanceled();
         boolean isPossibleRevise = OrderStatus.isPossibleOrderRevise(order.getStatus());
         if (!isPossibleRevise) {
@@ -127,6 +128,7 @@ public class OrderService {
         List<OrderLine> orderLines = order.getOrderLines();
         checkBuyerOfOrder(Long.parseLong(user.getUsername()), order.getBuyer().getId());
         orderLines.forEach(orderLine -> orderLine.getProduct().addQuantity(orderLine.getQuantity()));
+
         orderLineRepository.deleteAll(orderLines);
 
         int totalPrice = 0;
@@ -172,10 +174,6 @@ public class OrderService {
         }
         return orderDetailInfo;
     }
-
-    /*
-    * 주문 상태 업데이트시 redis 확인 후 없으면 말고 있으면 제거
-    * */
 
     private OrderDetailDto getOrderDetailBy(String orderNumber) {
         return orderRepository.getOrderDetail(orderNumber);
@@ -250,5 +248,20 @@ public class OrderService {
 
     public Order findOrderByOrderNumber(String orderNumber) {
         return orderRepository.findByOrderNumber(orderNumber).orElseThrow(() -> new BusinessException(ResultCode.ORDER_NOT_FOUND));
+    }
+
+    public Order findOrderByOrderNumberWithBuyer(String orderNumber) {
+        return orderRepository.findByOrderNumberWithBuyer(orderNumber)
+                .orElseThrow(() -> new BusinessException(ResultCode.ORDER_NOT_FOUND));
+    }
+
+    public Order findOrderByOrderNumberWithProducts(String orderNumber) {
+        return orderRepository.findByOrderNumberWithProducts(orderNumber)
+                .orElseThrow(() -> new BusinessException(ResultCode.ORDER_NOT_FOUND));
+    }
+
+    public Order findOrderByOrderNumberWithAll(String orderNumber) {
+        return orderRepository.findByOrderNumberWithAll(orderNumber)
+                .orElseThrow(() -> new BusinessException(ResultCode.ORDER_NOT_FOUND));
     }
 }

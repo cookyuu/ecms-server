@@ -16,14 +16,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * 주문 엔티티
- *
- * E-Commerce의 핵심 도메인
- * - 구매자(Member) 1:N 관계
- * - 주문상품(OrderLine) 1:N 관계 (cascade)
- * - 배송(Shipment) 1:1 관계
- */
 @Entity
 @Getter
 @AllArgsConstructor
@@ -41,28 +33,16 @@ public class Order extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    /**
-     * 총 주문 금액
-     */
     @Column(nullable = false)
     private Integer totalPrice;
 
-    /**
-     * 주문 번호 (고유)
-     */
     @Column(nullable = false, unique = true, length = 50)
     private String orderNumber;
 
-    /**
-     * 주문 상태
-     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private OrderStatus status;
 
-    /**
-     * 취소 관련 정보
-     */
     @Column(length = 500)
     private String cancelReason;
 
@@ -71,9 +51,6 @@ public class Order extends BaseTimeEntity {
 
     private LocalDateTime canceledAt;
 
-    /**
-     * 배송지 정보
-     */
     @Column(nullable = false, length = 200)
     private String destination;
 
@@ -86,31 +63,16 @@ public class Order extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private String recipientPhoneNumber;
 
-    /**
-     * 결제 실패 메시지
-     */
     @Column(length = 500)
     private String paymentFailMsg;
 
-    /**
-     * 구매자 (필수)
-     */
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "buyer_id", nullable = false, foreignKey = @ForeignKey(name = "fk_order_buyer"))
     private Member buyer;
 
-    /**
-     * 주문 상품 목록
-     * - 주문 삭제 시 OrderLine도 함께 삭제 (cascade)
-     * - 고아 객체 자동 제거 (orphanRemoval)
-     */
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLine> orderLines = new ArrayList<>();
 
-    /**
-     * 배송 정보 (선택)
-     * - 배송 시작 전에는 null
-     */
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shipment_id", foreignKey = @ForeignKey(name = "fk_order_shipment"))
     private Shipment shipment;
@@ -121,7 +83,7 @@ public class Order extends BaseTimeEntity {
         this.orderNumber = orderNumber;
         this.status = status;
         this.buyer = buyer;
-        this.orderLines = orderLines;
+        this.orderLines = orderLines != null ? orderLines : new ArrayList<>();
         this.destination = destination;
         this.destinationDetail = destinationDetail;
         this.recipientName = recipientName;

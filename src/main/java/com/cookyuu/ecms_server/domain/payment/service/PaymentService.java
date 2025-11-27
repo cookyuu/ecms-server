@@ -37,7 +37,8 @@ public class PaymentService {
 
     @Transactional
     public CreatePaymentDto.ResponseServ createPayment(UserDetails user, CreatePaymentDto.Request paymentInfo) {
-        Order order = orderService.findOrderByOrderNumber(paymentInfo.getOrderNumber());
+        // N+1 방지: OrderLines + Product + Seller + Buyer를 한 번에 조회
+        Order order = orderService.findOrderByOrderNumberWithAll(paymentInfo.getOrderNumber());
         checkPossiblePayment(order, Long.parseLong(user.getUsername()));
         String paymentNumber = createAndSavePaymentNumberInRedis(paymentInfo.getPaymentMethod());
 
@@ -62,7 +63,8 @@ public class PaymentService {
     public CancelPaymentDto.Response cancelPayment(UserDetails user, CancelPaymentDto.Request paymentInfo) {
         log.debug("[Payment::cancel] Request Info. orderNumber : {}, paymentNumber : {}, cancelReason : {}",
                 paymentInfo.getOrderNumber(), paymentInfo.getPaymentNumber(), paymentInfo.getCancelReason());
-        Order order = orderService.findOrderByOrderNumber(paymentInfo.getOrderNumber());
+        // N+1 방지: Buyer를 한 번에 조회
+        Order order = orderService.findOrderByOrderNumberWithBuyer(paymentInfo.getOrderNumber());
         checkPossiblePaymentCancel(order, Long.parseLong(user.getUsername()));
         Payment payment = findPaymentByPaymentNumber(paymentInfo.getPaymentNumber());
         payment.cancel(paymentInfo.getCancelReason());

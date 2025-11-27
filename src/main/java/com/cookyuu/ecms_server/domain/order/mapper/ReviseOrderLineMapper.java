@@ -13,12 +13,11 @@ public class ReviseOrderLineMapper {
     public static List<OrderLine> toEntityList(List<ReviseOrderItemInfo> orderItemList, Order order) {
         List<OrderLine> orderLines = new ArrayList<>();
         orderItemList.forEach(orderItemInfo -> {
-            orderLines.add(OrderLine.builder()
-                    .quantity(orderItemInfo.getQuantity())
-                    .price(orderItemInfo.getPrice())
-                    .order(order)
-                    .product(orderItemInfo.getProduct())
-                    .build());
+            orderLines.add(OrderLine.createSnapshot(
+                    order,
+                    orderItemInfo.getProduct(),
+                    orderItemInfo.getQuantity()
+            ));
         });
         return orderLines;
     }
