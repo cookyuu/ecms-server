@@ -13,23 +13,63 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+/**
+ * 배송 엔티티
+ *
+ * - 주문(Order) 1:1 양방향 관계
+ */
 @Entity
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "ecms_shipment")
+@Table(
+        name = "ecms_shipment",
+        indexes = {
+                @Index(name = "ecms_shipment_idx_1", columnList = "shipmentNumber", unique = true),
+                @Index(name = "ecms_shipment_idx_2", columnList = "orderNumber"),
+                @Index(name = "ecms_shipment_idx_3", columnList = "status")
+        }
+)
 public class Shipment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    /**
+     * 배송 번호 (고유)
+     */
+    @Column(nullable = false, unique = true, length = 50)
     private String shipmentNumber;
+
+    /**
+     * 현재 위치
+     */
+    @Column(length = 200)
     private String currentLocation;
+
+    /**
+     * 배송 상태
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     private ShipmentStatus status;
+
+    /**
+     * 도착 일시
+     */
     private LocalDateTime arrivedAt;
+
+    /**
+     * 주문 번호 (참조용)
+     */
+    @Column(nullable = false, length = 50)
     private String orderNumber;
 
-    @OneToOne(mappedBy = "shipment")
+    /**
+     * 주문 (양방향 관계)
+     */
+    @OneToOne(mappedBy = "shipment", fetch = FetchType.LAZY)
     private Order order;
 
     @Builder
