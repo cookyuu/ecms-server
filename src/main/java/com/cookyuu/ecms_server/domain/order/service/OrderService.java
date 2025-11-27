@@ -52,7 +52,7 @@ public class OrderService {
     @Transactional
     public CreateOrderDto.Response createOrder(Long userId, CreateOrderDto.Request orderInfo) {
         Member buyer = memberService.findMemberById(userId);
-        Cart cart = cartService.findCartByMemberId(buyer.getId());
+        Cart cart = cartService.findCartByMemberIdWithCartItemsAndProducts(buyer.getId());
         int totalPrice = 0;
         for (CreateOrderItemInfo orderItemInfo : orderInfo.getOrderItemList()) {
             Product product = productService.findProductById(orderItemInfo.getProductId());

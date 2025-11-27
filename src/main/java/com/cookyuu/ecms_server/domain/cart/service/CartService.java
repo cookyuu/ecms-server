@@ -76,4 +76,9 @@ public class CartService {
     public Cart findCartByMemberId(Long id) {
         return cartRepository.findByMemberId(id).orElseThrow(() -> new BusinessException(ResultCode.CART_NOT_FOUND));
     }
+
+    public Cart findCartByMemberIdWithCartItemsAndProducts(Long id) {
+        return cartRepository.findByMemberIdWithCartItemsAndProducts(id)
+                .orElseThrow(() -> new BusinessException(ResultCode.CART_NOT_FOUND));
+    }
 }
