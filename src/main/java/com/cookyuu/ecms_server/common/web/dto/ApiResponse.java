@@ -14,91 +14,23 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * 엔터프라이즈급 표준 API 응답 래퍼 클래스
- *
- * RFC 7807 (Problem Details for HTTP APIs) 및 업계 표준을 참고하여 설계
- * Google, Microsoft, Stripe, GitHub API 가이드라인 준수
- *
- * 응답 구조:
- * {
- *   "success": true,
- *   "timestamp": "2025-11-26T15:30:45",
- *   "path": "/api/v1/orders",
- *   "traceId": "a1b2c3d4-e5f6-7890",
- *   "code": "0000",
- *   "message": "성공",
- *   "data": { ... },
- *   "pagination": { ... },
- *   "errors": [ ... ],
- *   "metadata": { ... }
- * }
- *
- * @param <T> 응답 데이터 타입
- */
 @Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
-    /**
-     * 요청 성공 여부 (클라이언트가 빠르게 판단 가능)
-     */
-    private final Boolean success;
 
-    /**
-     * 응답 생성 시간 (ISO 8601 형식)
-     */
+    private final Boolean success;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private final LocalDateTime timestamp;
-
-    /**
-     * 요청된 API 경로
-     */
     private final String path;
-
-    /**
-     * 분산 추적 ID (로그 상관관계, APM 연동)
-     */
     private final String traceId;
-
-    /**
-     * 에러 코드 (성공: "0000", 실패: "C-001", "O-002" 등)
-     */
     private final String code;
-
-    /**
-     * 사용자 친화적 메시지
-     */
     private final String message;
-
-    /**
-     * HTTP 상태 코드
-     */
     private final Integer status;
-
-    /**
-     * 응답 데이터
-     */
     private final T data;
-
-    /**
-     * 페이징 정보 (리스트 응답 시)
-     */
     private final PaginationInfo pagination;
-
-    /**
-     * 상세 에러 정보 (Validation 실패 등)
-     */
     private final List<ErrorDetail> errors;
-
-    /**
-     * 추가 메타데이터
-     */
     private final Map<String, Object> metadata;
-
-    /**
-     * ResultCode는 내부용, JSON 응답에서 제외
-     */
     @JsonIgnore
     private final ResultCode resultCode;
 
