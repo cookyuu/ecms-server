@@ -78,13 +78,16 @@ public class PaymentService {
         Long reqUserId = Long.parseLong(user.getUsername());
         List<PaymentDetailDto> resPaymentDetail = getPaymentInfo(paymentNumber);
         if (reqUserRole.equals("ROLE_USER")) {
-            for (PaymentDetailDto paymentDetail : resPaymentDetail) {
-                if (paymentDetail.getBuyerId().equals(reqUserId)) {
-                    break;
-                }
+            boolean hasAccess = resPaymentDetail.stream()
+                    .anyMatch(paymentDetail -> paymentDetail.getBuyerId().equals(reqUserId));
+            if (!hasAccess) {
+                throw new BusinessException(ResultCode.PAYMENT_INACCESSIBLE_DETAIL);
             }
         } else if (reqUserRole.equals("ROLE_SELLER")) {
             resPaymentDetail.removeIf(paymentDetail -> !paymentDetail.getSellerId().equals(reqUserId));
+            if (resPaymentDetail.isEmpty()) {
+                throw new BusinessException(ResultCode.PAYMENT_INACCESSIBLE_DETAIL);
+            }
         } else if (reqUserRole.equals("ROLE_ADMIN")) {
             log.debug("[Payment::getDetail] User role : {}, OK", reqUserRole);
         } else {
