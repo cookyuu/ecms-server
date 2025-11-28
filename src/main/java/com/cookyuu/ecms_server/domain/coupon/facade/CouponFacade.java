@@ -56,7 +56,7 @@ public class CouponFacade {
             throw new BusinessException(ResultCode.COUPON_ISSUE_FAIL, "이미 발급된 쿠폰입니다. ");
         }
 
-        if (couponCount == null && Long.parseLong(couponCount) <= 0) {
+        if (couponCount == null || Long.parseLong(couponCount) <= 0) {
             throw new BusinessException(ResultCode.COUPON_SOLD_OUT);
         }
         log.debug("[Coupon::Issue] Check Is Issuable for redis, OK!");

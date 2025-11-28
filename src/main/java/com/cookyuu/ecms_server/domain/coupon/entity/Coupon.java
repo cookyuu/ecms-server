@@ -111,4 +111,8 @@ public class Coupon extends BaseTimeEntity {
     public void issueFail(int count) {
         this.quantity = count;
     }
+
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(this.expiredAt) || this.isExpired;
+    }
 }
