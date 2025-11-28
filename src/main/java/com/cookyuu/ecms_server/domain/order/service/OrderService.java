@@ -55,10 +55,22 @@ public class OrderService {
     public CreateOrderDto.Response createOrder(Long userId, CreateOrderDto.Request orderInfo) {
         Member buyer = memberService.findMemberById(userId);
         Cart cart = cartService.findCartByMemberIdWithCartItemsAndProducts(buyer.getId());
-        int totalPrice = 0;
 
+        // 주문 상품들을 비관적 락으로 일괄 조회
+        List<Long> productIds = orderInfo.getOrderItemList().stream()
+                .map(CreateOrderItemInfo::getProductId)
+                .collect(Collectors.toList());
+        List<Product> products = productService.findProductsByIdInWithLock(productIds);
+
+        Map<Long, Product> productMap = products.stream()
+                .collect(Collectors.toMap(Product::getId, product -> product));
+
+        int totalPrice = 0;
         for (CreateOrderItemInfo orderItemInfo : orderInfo.getOrderItemList()) {
-            Product product = productService.findProductByIdWithLock(orderItemInfo.getProductId());
+            Product product = productMap.get(orderItemInfo.getProductId());
+            if (product == null) {
+                throw new BusinessException(ResultCode.PRODUCT_NOT_FOUND);
+            }
             product.isDeleted();
             int quantity = orderItemInfo.getQuantity();
             int price = orderItemInfo.getPrice();
@@ -155,9 +167,20 @@ public class OrderService {
             }
         }
 
+        List<Long> newProductIds = reviseOrderInfo.getOrderItemList().stream()
+                .map(ReviseOrderItemInfo::getProductId)
+                .collect(Collectors.toList());
+        List<Product> newProducts = productService.findProductsByIdInWithLock(newProductIds);
+
+        Map<Long, Product> newProductMap = newProducts.stream()
+                .collect(Collectors.toMap(Product::getId, product -> product));
+
         int totalPrice = 0;
         for (ReviseOrderItemInfo orderItemInfo : reviseOrderInfo.getOrderItemList()) {
-            Product product = productService.findProductByIdWithLock(orderItemInfo.getProductId());
+            Product product = newProductMap.get(orderItemInfo.getProductId());
+            if (product == null) {
+                throw new BusinessException(ResultCode.PRODUCT_NOT_FOUND);
+            }
             product.isDeleted();
             int quantity = orderItemInfo.getQuantity();
             int price = orderItemInfo.getPrice();
