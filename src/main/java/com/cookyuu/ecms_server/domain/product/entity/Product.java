@@ -50,6 +50,10 @@ public class Product extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer stockQuantity;
 
+    @Version
+    @Column(name = "version")
+    private Long version;
+
     @Column(name = "hit_count", nullable = false)
     @ColumnDefault("0")
     @Builder.Default
@@ -106,10 +110,20 @@ public class Product extends BaseTimeEntity {
     }
 
     public void subQuantity(int quantity) {
+        if (quantity < 0) {
+            throw new BusinessException(ResultCode.BAD_REQUEST, "차감할 수량은 0보다 커야 합니다.");
+        }
+        if (this.stockQuantity < quantity) {
+            throw new BusinessException(ResultCode.PRODUCT_SOLD_OUT,
+                "재고가 부족합니다. 현재 재고: " + this.stockQuantity + ", 요청 수량: " + quantity);
+        }
         this.stockQuantity -= quantity;
     }
 
     public void addQuantity(int quantity) {
+        if (quantity < 0) {
+            throw new BusinessException(ResultCode.BAD_REQUEST, "추가할 수량은 0보다 커야 합니다.");
+        }
         this.stockQuantity += quantity;
     }
 

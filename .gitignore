@@ -57,6 +57,9 @@ logs/
 *.sqlite
 *.sqlite3
 
+### Database Migration ###
+src/main/resources/db/migration/*.sql
+
 ### Docker volumes and data ###
 docker-composes/**/data/
 docker-composes/**/lib/
