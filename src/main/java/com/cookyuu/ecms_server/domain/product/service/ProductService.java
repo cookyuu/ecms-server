@@ -27,6 +27,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -117,6 +120,13 @@ public class ProductService {
 
     public Product findProductByIdWithLock(Long id) {
         return productRepository.findByIdWithLock(id).orElseThrow(() -> new BusinessException(ResultCode.PRODUCT_NOT_FOUND));
+    }
+
+    public List<Product> findProductsByIdInWithLock(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return productRepository.findByIdInWithLock(ids);
     }
 
     private boolean isProductOwnedBySeller(Product product, Long sellerId) {

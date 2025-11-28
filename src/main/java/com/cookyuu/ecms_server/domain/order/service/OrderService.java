@@ -35,6 +35,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.cookyuu.ecms_server.common.enums.ResultCode.ORDER_PROCESS_FAIL;
 
@@ -137,6 +139,22 @@ public class OrderService {
         List<OrderLine> orderLines = order.getOrderLines();
         checkBuyerOfOrder(Long.parseLong(user.getUsername()), order.getBuyer().getId());
 
+        List<Long> oldProductIds = orderLines.stream()
+                .map(orderLine -> orderLine.getProduct().getId())
+                .collect(Collectors.toList());
+        List<Product> oldProducts = productService.findProductsByIdInWithLock(oldProductIds);
+
+        Map<Long, Product> oldProductMap = oldProducts.stream()
+                .collect(Collectors.toMap(Product::getId, product -> product));
+
+        for (OrderLine orderLine : orderLines) {
+            Product product = oldProductMap.get(orderLine.getProduct().getId());
+            if (product != null) {
+                product.addQuantity(orderLine.getQuantity());
+                log.debug("[Order::Revise] Restore product quantity, productId: {}, quantity: {}", product.getId(), orderLine.getQuantity());
+            }
+        }
+
         int totalPrice = 0;
         for (ReviseOrderItemInfo orderItemInfo : reviseOrderInfo.getOrderItemList()) {
             Product product = productService.findProductByIdWithLock(orderItemInfo.getProductId());
@@ -149,8 +167,6 @@ public class OrderService {
             comparePriceAndCurrentPrice(price, product.getPrice(), product.getId());
             orderItemInfo.addProduct(product);
         }
-
-        orderLines.forEach(orderLine -> orderLine.getProduct().addQuantity(orderLine.getQuantity()));
         orderLineRepository.deleteAll(orderLines);
         orderLineRepository.saveAll(ReviseOrderLineMapper.toEntityList(reviseOrderInfo.getOrderItemList(), order));
         order.reviseOrder(totalPrice);
