@@ -115,6 +115,10 @@ public class ProductService {
         return productRepository.findById(id).orElseThrow(() -> new BusinessException(ResultCode.PRODUCT_NOT_FOUND));
     }
 
+    public Product findProductByIdWithLock(Long id) {
+        return productRepository.findByIdWithLock(id).orElseThrow(() -> new BusinessException(ResultCode.PRODUCT_NOT_FOUND));
+    }
+
     private boolean isProductOwnedBySeller(Product product, Long sellerId) {
         log.info("[CheckProductOwner] Check product owner, ProductId : {}, SellerId : {}", product.getId(), sellerId);
         return product.getSeller().getId().equals(sellerId);

@@ -56,7 +56,7 @@ public class OrderService {
         int totalPrice = 0;
 
         for (CreateOrderItemInfo orderItemInfo : orderInfo.getOrderItemList()) {
-            Product product = productService.findProductById(orderItemInfo.getProductId());
+            Product product = productService.findProductByIdWithLock(orderItemInfo.getProductId());
             product.isDeleted();
             int quantity = orderItemInfo.getQuantity();
             int price = orderItemInfo.getPrice();
@@ -139,7 +139,7 @@ public class OrderService {
 
         int totalPrice = 0;
         for (ReviseOrderItemInfo orderItemInfo : reviseOrderInfo.getOrderItemList()) {
-            Product product = productService.findProductById(orderItemInfo.getProductId());
+            Product product = productService.findProductByIdWithLock(orderItemInfo.getProductId());
             product.isDeleted();
             int quantity = orderItemInfo.getQuantity();
             int price = orderItemInfo.getPrice();
@@ -269,11 +269,6 @@ public class OrderService {
 
     public Order findOrderByOrderNumberWithBuyer(String orderNumber) {
         return orderRepository.findByOrderNumberWithBuyer(orderNumber)
-                .orElseThrow(() -> new BusinessException(ResultCode.ORDER_NOT_FOUND));
-    }
-
-    public Order findOrderByOrderNumberWithProducts(String orderNumber) {
-        return orderRepository.findByOrderNumberWithProducts(orderNumber)
                 .orElseThrow(() -> new BusinessException(ResultCode.ORDER_NOT_FOUND));
     }
 

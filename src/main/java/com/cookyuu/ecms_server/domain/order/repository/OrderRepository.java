@@ -17,13 +17,6 @@ public interface OrderRepository extends JpaRepository<Order, Long>, OrderCustom
            "WHERE o.orderNumber = :orderNumber")
     Optional<Order> findByOrderNumberWithBuyer(@Param("orderNumber") String orderNumber);
 
-    @Query("SELECT o FROM Order o " +
-           "LEFT JOIN FETCH o.orderLines ol " +
-           "LEFT JOIN FETCH ol.product " +
-           "LEFT JOIN FETCH o.buyer " +
-           "WHERE o.orderNumber = :orderNumber")
-    Optional<Order> findByOrderNumberWithProducts(@Param("orderNumber") String orderNumber);
-
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT o FROM Order o " +
            "LEFT JOIN FETCH o.orderLines ol " +
