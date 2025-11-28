@@ -14,7 +14,6 @@ import com.cookyuu.ecms_server.common.utils.RedissonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -70,7 +69,6 @@ public class CouponFacade {
 
     }
 
-    @Async
     @Transactional
     protected void processActualCouponIssue(Long memberId, String couponNumber) {
         Coupon coupon = couponService.findCouponByCouponNumber(couponNumber);
