@@ -21,6 +21,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final AuthUtils authUtils;
 
+    @Transactional
     public Member save(Member member) {
         return memberRepository.save(member);
     }

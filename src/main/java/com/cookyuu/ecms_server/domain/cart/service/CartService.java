@@ -28,6 +28,7 @@ public class CartService {
     private final MemberService memberService;
     private final ProductService productService;
 
+    @Transactional
     public void makeCart(Member member) {
         Cart cart = Cart.builder().member(member).build();
         cartRepository.save(cart);
@@ -64,6 +65,7 @@ public class CartService {
         log.info("[DeleteCartItem] Delete cart item OK!, CartId : {}, ProductId : {}", cart.getId(), product.getId());
     }
 
+    @Transactional
     public void deleteCartItem(Cart cart, Product product) {
         CartItem cartItem = findCartItemByCartAndProduct(cart, product);
         cartItemRepository.delete(cartItem);
