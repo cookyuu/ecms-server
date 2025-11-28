@@ -104,7 +104,7 @@ public class OrderService {
 
     @Transactional
     public ResultCode cancelOrder(UserDetails user, CancelOrderDto.Request cancelInfo) {
-        Order order = findOrderByOrderNumberWithProducts(cancelInfo.getOrderNumber());
+        Order order = findOrderByOrderNumberWithProductsForUpdate(cancelInfo.getOrderNumber());
         order.isCanceled();
         checkBuyerOfOrder(Long.parseLong(user.getUsername()), order.getBuyer().getId());
         boolean isPossibleCancel = OrderStatus.isPossibleOrderCancel(order.getStatus());
@@ -126,7 +126,7 @@ public class OrderService {
             key = "'order:number:' + #reviseOrderInfo.orderNumber"
     )
     public ResultCode reviseOrder(UserDetails user, ReviseOrderDto.Request reviseOrderInfo) {
-        Order order = findOrderByOrderNumberWithProducts(reviseOrderInfo.getOrderNumber());
+        Order order = findOrderByOrderNumberWithProductsForUpdate(reviseOrderInfo.getOrderNumber());
         order.isCanceled();
         boolean isPossibleRevise = OrderStatus.isPossibleOrderRevise(order.getStatus());
         if (!isPossibleRevise) {
@@ -136,13 +136,11 @@ public class OrderService {
 
         List<OrderLine> orderLines = order.getOrderLines();
         checkBuyerOfOrder(Long.parseLong(user.getUsername()), order.getBuyer().getId());
-        orderLines.forEach(orderLine -> orderLine.getProduct().addQuantity(orderLine.getQuantity()));
-
-        orderLineRepository.deleteAll(orderLines);
 
         int totalPrice = 0;
         for (ReviseOrderItemInfo orderItemInfo : reviseOrderInfo.getOrderItemList()) {
             Product product = productService.findProductById(orderItemInfo.getProductId());
+            product.isDeleted();
             int quantity = orderItemInfo.getQuantity();
             int price = orderItemInfo.getPrice();
             totalPrice += (quantity*price);
@@ -151,8 +149,18 @@ public class OrderService {
             comparePriceAndCurrentPrice(price, product.getPrice(), product.getId());
             orderItemInfo.addProduct(product);
         }
+
+        orderLines.forEach(orderLine -> orderLine.getProduct().addQuantity(orderLine.getQuantity()));
+        orderLineRepository.deleteAll(orderLines);
         orderLineRepository.saveAll(ReviseOrderLineMapper.toEntityList(reviseOrderInfo.getOrderItemList(), order));
         order.reviseOrder(totalPrice);
+
+        for (ReviseOrderItemInfo orderItemInfo : reviseOrderInfo.getOrderItemList()) {
+            Product product = orderItemInfo.getProduct();
+            int quantity = orderItemInfo.getQuantity();
+            product.subQuantity(quantity);
+            log.debug("[Order::Revise] Subtract product quantity, productId: {}, quantity: {}", product.getId(), quantity);
+        }
         log.info("[Order::Revise] Revise order info is OK!, orderNumber : {}", order.getOrderNumber());
 
         return ResultCode.ORDER_REVISE_SUCCESS;
@@ -266,6 +274,11 @@ public class OrderService {
 
     public Order findOrderByOrderNumberWithProducts(String orderNumber) {
         return orderRepository.findByOrderNumberWithProducts(orderNumber)
+                .orElseThrow(() -> new BusinessException(ResultCode.ORDER_NOT_FOUND));
+    }
+
+    public Order findOrderByOrderNumberWithProductsForUpdate(String orderNumber) {
+        return orderRepository.findByOrderNumberWithProductsForUpdate(orderNumber)
                 .orElseThrow(() -> new BusinessException(ResultCode.ORDER_NOT_FOUND));
     }
 
