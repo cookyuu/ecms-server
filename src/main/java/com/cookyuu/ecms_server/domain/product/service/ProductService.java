@@ -34,6 +34,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ProductService {
+    private static final int POST_VIEW_COOKIE_DURATION_SECONDS = 60 * 3;
+
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
     private final SellerService sellerService;
@@ -136,7 +138,6 @@ public class ProductService {
 
     private void validatePostView(Long productId, HttpServletRequest request, HttpServletResponse response) {
         log.debug("[Product::Detail] Validate post view product in cookie.");
-        int postViewCookieDuration = 60*3;
         Cookie oldCookie = null;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -152,12 +153,12 @@ public class ProductService {
                 increaseProductHits(productId);
                 oldCookie.setValue(oldCookie.getValue() + "_[" + productId + "]");
                 oldCookie.setPath("/");
-                oldCookie.setMaxAge(postViewCookieDuration);
+                oldCookie.setMaxAge(POST_VIEW_COOKIE_DURATION_SECONDS);
                 response.addCookie(oldCookie);
             }
         } else {
             increaseProductHits(productId);
-            Cookie newCookie = cookieUtils.setCookieExpire(CookieCode.POST_VIEW, "[" + productId + "]", postViewCookieDuration);
+            Cookie newCookie = cookieUtils.setCookieExpire(CookieCode.POST_VIEW, "[" + productId + "]", POST_VIEW_COOKIE_DURATION_SECONDS);
             response.addCookie(newCookie);
         }
     }

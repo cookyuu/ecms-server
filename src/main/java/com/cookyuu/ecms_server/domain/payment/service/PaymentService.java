@@ -31,6 +31,10 @@ import java.util.Objects;
 @Slf4j
 @RequiredArgsConstructor
 public class PaymentService {
+    private static final int PAYMENT_NUMBER_EXPIRATION_SECONDS = 61;
+    private static final int PAYMENT_NUMBER_RANDOM_SUFFIX_LENGTH = 5;
+    private static final int RANDOM_DIGIT_BOUND = 10;
+
     private final PaymentRepository paymentRepository;
     private final OrderService orderService;
     private final RedisUtils redisUtils;
@@ -110,9 +114,8 @@ public class PaymentService {
         }
 
         try {
-            int paymentNumberExp = 61;
             String redisValueOfPayment = "true";
-            redisUtils.setDataExpire(RedisKeyCode.PAYMENT_NUMBER.getSeparator()+paymentNumber, redisValueOfPayment, paymentNumberExp);
+            redisUtils.setDataExpire(RedisKeyCode.PAYMENT_NUMBER.getSeparator()+paymentNumber, redisValueOfPayment, PAYMENT_NUMBER_EXPIRATION_SECONDS);
             log.debug("[Payment::CreatePayment] Insert payment number in redis");
 
         } catch (Exception e) {
@@ -127,8 +130,8 @@ public class PaymentService {
         StringBuilder sb = new StringBuilder();
         String formatDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"));
         sb.append(paymentMethod.getCode()).append(formatDate);
-        for (int i = 0; i < 5; i++) {
-            int random = (int) (Math.random() * 10);
+        for (int i = 0; i < PAYMENT_NUMBER_RANDOM_SUFFIX_LENGTH; i++) {
+            int random = (int) (Math.random() * RANDOM_DIGIT_BOUND);
             sb.append(random);
         }
         return sb.toString();

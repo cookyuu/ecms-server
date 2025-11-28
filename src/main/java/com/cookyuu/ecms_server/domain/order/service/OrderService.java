@@ -44,6 +44,10 @@ import static com.cookyuu.ecms_server.common.enums.ResultCode.ORDER_PROCESS_FAIL
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+    private static final int ORDER_NUMBER_EXPIRATION_SECONDS = 61;
+    private static final int ORDER_NUMBER_RANDOM_SUFFIX_LENGTH = 5;
+    private static final int RANDOM_DIGIT_BOUND = 10;
+
     private final OrderRepository orderRepository;
     private final OrderLineRepository orderLineRepository;
     private final MemberService memberService;
@@ -90,9 +94,8 @@ public class OrderService {
         }
 
         try {
-            int orderNumberExp = 61;
             String redisValueOfOrderNumber = "true";
-            redisUtils.setDataExpire(RedisKeyCode.ORDER_NUMBER.getSeparator()+orderNumber, redisValueOfOrderNumber, orderNumberExp);
+            redisUtils.setDataExpire(RedisKeyCode.ORDER_NUMBER.getSeparator()+orderNumber, redisValueOfOrderNumber, ORDER_NUMBER_EXPIRATION_SECONDS);
 
             orderInfo.addTotalPrice(totalPrice);
             orderInfo.addBuyer(buyer);
@@ -295,8 +298,8 @@ public class OrderService {
         StringBuilder sb = new StringBuilder();
         String formatDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"));
         sb.append(order.getCode()).append(formatDate).append(coopon.getCode());
-        for (int i = 0; i < 5; i++) {
-            int random = (int) (Math.random() * 10);
+        for (int i = 0; i < ORDER_NUMBER_RANDOM_SUFFIX_LENGTH; i++) {
+            int random = (int) (Math.random() * RANDOM_DIGIT_BOUND);
             sb.append(random);
         }
         return sb.toString();

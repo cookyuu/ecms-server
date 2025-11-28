@@ -22,6 +22,9 @@ import java.time.format.DateTimeFormatter;
 @Service
 @RequiredArgsConstructor
 public class CouponService {
+    private static final int COUPON_NUMBER_RANDOM_SUFFIX_LENGTH = 5;
+    private static final int RANDOM_DIGIT_BOUND = 10;
+
     private final CouponRepository couponRepository;
     private final RedisTemplate redisTemplate;
     private final RedisUtils redisUtils;
@@ -63,8 +66,8 @@ public class CouponService {
         StringBuilder sb = new StringBuilder();
         String formatDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"));
         sb.append("CP").append(couponCode.getCode()).append(formatDate);
-        for (int i = 0; i < 5; i++) {
-            int random = (int) (Math.random() * 10);
+        for (int i = 0; i < COUPON_NUMBER_RANDOM_SUFFIX_LENGTH; i++) {
+            int random = (int) (Math.random() * RANDOM_DIGIT_BOUND);
             sb.append(random);
         }
         return sb.toString();

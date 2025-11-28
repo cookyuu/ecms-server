@@ -1,13 +1,13 @@
 package com.cookyuu.ecms_server.domain.auth.service;
 
-import com.cookyuu.ecms_server.common.exception.auth.ValidationException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.utils.AuthUtils;
+import com.cookyuu.ecms_server.common.utils.ValidateUtils;
 import com.cookyuu.ecms_server.domain.auth.dto.SignupDto;
 import com.cookyuu.ecms_server.domain.cart.service.CartService;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
-import com.cookyuu.ecms_server.common.enums.ResultCode;
-import com.cookyuu.ecms_server.common.utils.AuthUtils;
-import com.cookyuu.ecms_server.common.utils.ValidateUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,10 +75,10 @@ class AuthServiceTest {
                 .address("테스트 주소")
                 .build();
 
-        ValidationException exception1 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception1 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request1);
         });
-        ValidationException exception2 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception2 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request2);
         });
         assertEquals(ResultCode.VALID_EMAIL_FORMAT.getMessage(), exception1.getResultCode().getMessage());
@@ -115,13 +115,13 @@ class AuthServiceTest {
                 .address("테스트 주소")
                 .build();
 
-        ValidationException exception1 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception1 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request1);
         });
-        ValidationException exception2 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception2 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request2);
         });
-        ValidationException exception3 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception3 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request3);
         });
         assertEquals(ResultCode.VALID_LOGINID_FORMAT.getMessage(), exception1.getResultCode().getMessage());
@@ -167,16 +167,16 @@ class AuthServiceTest {
                 .address("테스트 주소")
                 .build();
 
-        ValidationException exception1 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception1 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request1);
         });
-        ValidationException exception2 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception2 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request2);
         });
-        ValidationException exception3 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception3 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request3);
         });
-        ValidationException exception4 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception4 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request4);
         });
 
@@ -232,19 +232,19 @@ class AuthServiceTest {
                 .address("테스트 주소")
                 .build();
 
-        ValidationException exception1 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception1 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request1);
         });
-        ValidationException exception2 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception2 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request2);
         });
-        ValidationException exception3 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception3 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request3);
         });
-        ValidationException exception4 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception4 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request4);
         });
-        ValidationException exception5 = assertThrows(ValidationException.class, () -> {
+        BusinessException exception5 = assertThrows(BusinessException.class, () -> {
             authService.signupNormal(request5);
         });
 
