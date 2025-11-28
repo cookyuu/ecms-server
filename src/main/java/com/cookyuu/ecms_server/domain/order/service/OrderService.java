@@ -54,6 +54,7 @@ public class OrderService {
         Member buyer = memberService.findMemberById(userId);
         Cart cart = cartService.findCartByMemberIdWithCartItemsAndProducts(buyer.getId());
         int totalPrice = 0;
+
         for (CreateOrderItemInfo orderItemInfo : orderInfo.getOrderItemList()) {
             Product product = productService.findProductById(orderItemInfo.getProductId());
             product.isDeleted();
@@ -65,14 +66,15 @@ public class OrderService {
             comparePriceAndCurrentPrice(price, product.getPrice(), product.getId());
             updateCartWithOrderItems(cart, product, orderItemInfo);
             orderItemInfo.addProduct(product);
-            product.subQuantity(quantity);
         }
+
         String orderNumber = createOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
         log.info("[Order::CreateOrder] Create order number, Order Number : {}", orderNumber);
         while (redisUtils.getData(RedisKeyCode.ORDER_NUMBER.getSeparator()+orderNumber) != null) {
             orderNumber = createOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
             log.debug("[Order::CreateOrder] Created order number is duplicated, Order Number : {}", orderNumber);
         }
+
         try {
             int orderNumberExp = 61;
             String redisValueOfOrderNumber = "true";
@@ -85,6 +87,13 @@ public class OrderService {
             log.debug("[Order::CreateOrder] Save order info.");
 
             orderLineRepository.saveAll(CreateOrderLineMapper.toEntityList(orderInfo.getOrderItemList(), order));
+
+            for (CreateOrderItemInfo orderItemInfo : orderInfo.getOrderItemList()) {
+                Product product = orderItemInfo.getProduct();
+                int quantity = orderItemInfo.getQuantity();
+                product.subQuantity(quantity);
+                log.debug("[Order::CreateOrder] Subtract product quantity, productId: {}, quantity: {}", product.getId(), quantity);
+            }
             return CreateOrderDto.Response.toDto(order);
         } catch (Exception e) {
             redisUtils.deleteData(RedisKeyCode.ORDER_NUMBER.getSeparator() + orderNumber);
