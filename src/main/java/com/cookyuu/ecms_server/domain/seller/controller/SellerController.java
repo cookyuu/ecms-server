@@ -9,7 +9,6 @@ import com.cookyuu.ecms_server.common.web.dto.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -27,21 +26,18 @@ public class SellerController {
         return ResponseEntity.ok(ApiResponse.created(res));
     }
 
-    @PreAuthorize("hasRole('ROLE_SELLER')")
     @PutMapping("/info")
     public ResponseEntity<ApiResponse<Object>> updateSellerInfo(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody UpdateSellerDto.Request sellerInfo) {
         sellerService.updateSellerInfo(user, sellerInfo);
         return ResponseEntity.ok(ApiResponse.success());
     }
 
-    @PreAuthorize("hasRole('ROLE_SELLER')")
     @DeleteMapping()
     public ResponseEntity<ApiResponse<Object>> deleteSeller(@AuthenticationPrincipal UserDetails user, @Valid @RequestBody DeleteSellerDto.Request sellerInfo) {
         sellerService.deleteSeller(user, sellerInfo);
         return ResponseEntity.ok(ApiResponse.success());
     }
 
-    @PreAuthorize("hasRole('ROLE_SELLER')")
     @GetMapping
     public ResponseEntity<ApiResponse<SellerDetailDto>> getSellerDetail(@AuthenticationPrincipal UserDetails user) {
         return ResponseEntity.ok(ApiResponse.success(sellerService.getSellerDetail(Long.parseLong(user.getUsername()))));

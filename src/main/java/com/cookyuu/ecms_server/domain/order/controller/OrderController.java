@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -22,20 +21,17 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<ApiResponse<CreateOrderDto.Response>> createOrder(@AuthenticationPrincipal UserDetails user, @RequestBody CreateOrderDto.Request orderInfo) {
         CreateOrderDto.Response res = orderService.createOrder(Long.parseLong(user.getUsername()), orderInfo);
         return ResponseEntity.ok(ApiResponse.success(res));
     }
 
     @PostMapping("/cancel")
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_SELLER','ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<ResultCode>> cancelOrder(@AuthenticationPrincipal UserDetails user, @RequestBody CancelOrderDto.Request cancelInfo) {
         return ResponseEntity.ok(ApiResponse.success(orderService.cancelOrder(user, cancelInfo)));
     }
 
     @PutMapping
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<ResultCode>> reviseOrderInfo(@AuthenticationPrincipal UserDetails user, @RequestBody ReviseOrderDto.Request reviseInfo) {
         return ResponseEntity.ok(ApiResponse.success(orderService.reviseOrder(user, reviseInfo)));
     }
@@ -55,7 +51,6 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success(resOrderList));
     }
 
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_SELLER','ROLE_ADMIN')")
     @GetMapping
     public ResponseEntity<ApiResponse<OrderDetailDto>> getOrderDetail(@AuthenticationPrincipal UserDetails user, @RequestParam(name = "orderNumber") String orderNumber) {
         OrderDetailDto res = orderService.getOrderDetailCacheable(user, orderNumber);

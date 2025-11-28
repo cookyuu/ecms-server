@@ -5,7 +5,6 @@ import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.common.web.dto.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,7 +19,6 @@ public class MemberController {
         return ResponseEntity.ok(ApiResponse.success(res));
     }
 
-    @PreAuthorize("permitAll()")
     @PutMapping("/role")
     public ResponseEntity<ApiResponse<String>> updateMemberRole(@RequestParam(name = "role") String role, @RequestParam(name = "loginId") String loginId) {
         memberService.updateRole(role, loginId);
