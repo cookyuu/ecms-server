@@ -20,6 +20,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
+import static com.cookyuu.ecms_server.common.logging.LogFields.*;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -61,7 +64,14 @@ public class AuthService {
     public LoginDto.Response loginNormal(LoginDto.Request request, HttpServletResponse response) {
         JWTUserInfo userInfo = memberService.checkLoginCredentials(request.getLoginId(), request.getPassword());
 
-        log.info("[NormalLogin] Create Access/Refresh token ");
+        log.atInfo()
+            .addKeyValue(EVENT, TOKEN_ISSUED)
+            .addKeyValue(USER_ID, userInfo.getId())
+            .addKeyValue(LOGIN_ID, userInfo.getLoginId())
+            .addKeyValue(USER_ROLE, userInfo.getRole())
+            .addKeyValue(TOKEN_TYPE, "access/refresh")
+            .log("Access and refresh tokens issued for normal user");
+
         String accessToken = jwtUtils.createAccessToken(userInfo);
         String refreshToken = jwtUtils.createRefreshToken(userInfo);
         Cookie cookie = cookieUtils.setCookieExpire(CookieCode.REFRESH_TOKEN, refreshToken, Integer.parseInt(refreshTokenExp));
@@ -77,7 +87,14 @@ public class AuthService {
     public LoginDto.Response loginSeller(LoginDto.Request request, HttpServletResponse response) {
         JWTUserInfo userInfo = sellerService.checkLoginCredentials(request.getLoginId(), request.getPassword());
 
-        log.info("[SellerLogin] Create Access/Refresh token ");
+        log.atInfo()
+            .addKeyValue(EVENT, TOKEN_ISSUED)
+            .addKeyValue(USER_ID, userInfo.getId())
+            .addKeyValue(LOGIN_ID, userInfo.getLoginId())
+            .addKeyValue(USER_ROLE, userInfo.getRole())
+            .addKeyValue(TOKEN_TYPE, "access/refresh")
+            .log("Access and refresh tokens issued for seller");
+
         String accessToken = jwtUtils.createAccessToken((userInfo));
         String refreshToken = jwtUtils.createRefreshToken(userInfo);
         Cookie cookie = cookieUtils.setCookieExpire(CookieCode.REFRESH_TOKEN, refreshToken, Integer.parseInt(refreshTokenExp));
@@ -93,6 +110,12 @@ public class AuthService {
     public void logoutNormal(UserDetails user, HttpServletRequest request, HttpServletResponse response) {
         String memberId = user.getUsername();
         String accessToken = jwtUtils.getAccessToken(request.getHeader("Authorization"));
+
+        log.atInfo()
+            .addKeyValue(EVENT, LOGOUT)
+            .addKeyValue(USER_ID, memberId)
+            .log("User logged out successfully");
+
         redisUtils.setDataExpire(RedisKeyCode.LOGOUT_TOKEN.getSeparator()+memberId, accessToken, Long.parseLong(accessTokenExp)*minute);
         redisUtils.deleteData(RedisKeyCode.REFRESH_TOKEN.getSeparator()+memberId);
         cookieUtils.removeCookie("refresh_token", response);

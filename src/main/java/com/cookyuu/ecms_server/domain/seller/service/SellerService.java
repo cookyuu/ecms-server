@@ -20,6 +20,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
+import static com.cookyuu.ecms_server.common.logging.LogFields.*;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -29,7 +32,9 @@ public class SellerService {
     private final AuthUtils authUtils;
 
     public Seller findSellerById(Long sellerId) {
-        log.info("[FindSeller] Find Seller By Seller ID, Id : {}", sellerId);
+        log.atDebug()
+                .addKeyValue(SELLER_ID, sellerId)
+                .log("Finding seller by ID");
         return sellerRepository.findById(sellerId).orElseThrow(() -> new BusinessException(ResultCode.SELLER_NOT_FOUND));
     }
 
@@ -38,7 +43,12 @@ public class SellerService {
         validateSellerPersonalInfo(sellerInfo.getLoginId(), sellerInfo.getBusinessNumber(), sellerInfo.getBusinessContactTelNum(), sellerInfo.getBusinessContactEmail());
         Seller registerSeller = SellerRegistrationMapper.toEntity(sellerInfo, validateAndEncryptPassword(sellerInfo.getPassword()));
         Seller seller = sellerRepository.save(registerSeller);
-        log.info("[RegisterSeller] Register seller, OK!");
+        log.atInfo()
+                .addKeyValue(EVENT, SELLER_REGISTERED)
+                .addKeyValue(SELLER_ID, seller.getId())
+                .addKeyValue(LOGIN_ID, seller.getLoginId())
+                .addKeyValue(BUSINESS_NUMBER, seller.getBusinessNumber())
+                .log("Seller registered successfully");
         return SellerRegistrationMapper.toDto(seller);
     }
 
@@ -51,7 +61,11 @@ public class SellerService {
         authUtils.checkPassword(jwtPw, reqPw);
         validateSellerPersonalInfo(null, null, sellerInfo.getBusinessContactTelNum(), sellerInfo.getBusinessContactEmail());
         seller.updateInfo(sellerInfo);
-        log.info("[UpdateSellerInfo] Update seller personal info OK!, SellerId : {}", seller.getId());
+        log.atInfo()
+                .addKeyValue(EVENT, SELLER_UPDATED)
+                .addKeyValue(SELLER_ID, seller.getId())
+                .addKeyValue(LOGIN_ID, seller.getLoginId())
+                .log("Seller information updated successfully");
     }
 
     @Transactional
@@ -62,7 +76,11 @@ public class SellerService {
         Seller seller = findSellerById(Long.parseLong(user.getUsername()));
         authUtils.checkPassword(seller.getPassword(), sellerInfo.getPassword());
         seller.delete();
-        log.info("[DeleteSeller] Delete Seller Account, Seller Id : {}", seller.getId());
+        log.atInfo()
+                .addKeyValue(EVENT, SELLER_DELETED)
+                .addKeyValue(SELLER_ID, seller.getId())
+                .addKeyValue(LOGIN_ID, seller.getLoginId())
+                .log("Seller account deleted");
     }
 
     @Transactional(readOnly = true)
@@ -86,7 +104,10 @@ public class SellerService {
         if (StringUtils.isNotEmpty(email)) {
             validateUtils.isAvailableEmailFormat(email);
         }
-        log.info("[RegisterSeller] Validate seller info OK!");
+        log.atDebug()
+                .addKeyValue(LOGIN_ID, loginId)
+                .addKeyValue(BUSINESS_NUMBER, businessNumber)
+                .log("Seller validation completed");
     }
 
     protected String validateAndEncryptPassword(String password) {
@@ -100,7 +121,11 @@ public class SellerService {
         authUtils.checkPassword(seller.getPassword(), password);
         JWTUserInfo userInfo = new JWTUserInfo();
         userInfo.of(seller);
-        log.info("[CheckLoginCredential] Check login credential OK!, Member loginId : {}", seller.getLoginId());
+        log.atInfo()
+                .addKeyValue(EVENT, LOGIN_SUCCESS)
+                .addKeyValue(SELLER_ID, seller.getId())
+                .addKeyValue(LOGIN_ID, seller.getLoginId())
+                .log("Seller login credentials verified");
         return userInfo;
     }
 }

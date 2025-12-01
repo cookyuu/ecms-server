@@ -19,6 +19,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
+import static com.cookyuu.ecms_server.common.logging.LogFields.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,7 +35,11 @@ public class CartService {
     public void makeCart(Member member) {
         Cart cart = Cart.builder().member(member).build();
         cartRepository.save(cart);
-        log.info("[MakeCart] Make member's cart OK!, Member id : {}", member.getId());
+        log.atInfo()
+                .addKeyValue(EVENT, CART_CREATED)
+                .addKeyValue(CART_ID, cart.getId())
+                .addKeyValue(MEMBER_ID, member.getId())
+                .log("Cart created successfully");
     }
 
     @Transactional
@@ -42,17 +49,35 @@ public class CartService {
         product.isDeleted();
         Cart cart = cartRepository.findByMemberId(member.getId()).orElseThrow(() -> new BusinessException(ResultCode.CART_NOT_FOUND));
         if (cartItemInfo.getQuantity() < 1) {
-            log.error("[UpdateCartItem] CartItem quantity is too less, Quantity : {}", cartItemInfo.getQuantity());
+            log.atError()
+                    .addKeyValue(EVENT, VALIDATION_ERROR)
+                    .addKeyValue(QUANTITY, cartItemInfo.getQuantity())
+                    .addKeyValue(CART_ID, cart.getId())
+                    .addKeyValue(PRODUCT_ID, cartItemInfo.getProductId())
+                    .log("Cart item quantity must be at least 1");
             throw new BusinessException(ResultCode.BAD_REQUEST, "카트에 담길 상품의 수량은 1이상 이여야합니다.");
         }
         if (cartItemRepository.existsByCartAndProduct(cart, product)) {
             CartItem cartItem = findCartItemByCartAndProduct(cart, product);
             cartItem.updateQuantity(cartItemInfo.getQuantity());
+            log.atInfo()
+                    .addKeyValue(EVENT, CART_ITEM_UPDATED)
+                    .addKeyValue(CART_ID, cart.getId())
+                    .addKeyValue(CART_ITEM_ID, cartItem.getId())
+                    .addKeyValue(PRODUCT_ID, product.getId())
+                    .addKeyValue(QUANTITY, cartItemInfo.getQuantity())
+                    .log("Cart item quantity updated");
         } else {
             CartItem cartItem = UpdateCartItemMapper.toEntity(cartItemInfo, product, cart);
             cartItemRepository.save(cartItem);
+            log.atInfo()
+                    .addKeyValue(EVENT, CART_ITEM_ADDED)
+                    .addKeyValue(CART_ID, cart.getId())
+                    .addKeyValue(CART_ITEM_ID, cartItem.getId())
+                    .addKeyValue(PRODUCT_ID, product.getId())
+                    .addKeyValue(QUANTITY, cartItemInfo.getQuantity())
+                    .log("Cart item added successfully");
         }
-        log.info("[UpdateCartItem] Update cart item product quantity OK!, CartId : {}, productId : {}", cart.getId(), product.getId());
     }
 
     @Transactional
@@ -62,7 +87,12 @@ public class CartService {
         Cart cart = cartRepository.findByMemberId(member.getId()).orElseThrow(() -> new BusinessException(ResultCode.CART_NOT_FOUND));
         CartItem cartItem = findCartItemByCartAndProduct(cart, product);
         cartItemRepository.delete(cartItem);
-        log.info("[DeleteCartItem] Delete cart item OK!, CartId : {}, ProductId : {}", cart.getId(), product.getId());
+        log.atInfo()
+                .addKeyValue(EVENT, CART_ITEM_REMOVED)
+                .addKeyValue(CART_ID, cart.getId())
+                .addKeyValue(CART_ITEM_ID, cartItem.getId())
+                .addKeyValue(PRODUCT_ID, product.getId())
+                .log("Cart item removed successfully");
     }
 
     @Transactional

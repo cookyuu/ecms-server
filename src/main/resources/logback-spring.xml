@@ -1,38 +1,128 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <property name="CONSOLE_PATTERN" value="[%d{yy.MM.dd HH:mm:ss}] [%-5p] [%thread] [%logger{5}:%L] -%m%n"/>
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="ecms-server"/>
+    <springProperty scope="context" name="PROFILE" source="spring.profiles.active" defaultValue="local"/>
 
-    <!-- Console appender 설정 -->
-    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <Pattern>${CONSOLE_PATTERN}</Pattern>
+    <!-- ========== Console Appender (Human-Readable for Local) ========== -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{trace_id:-no-trace}] %highlight(%-5level) %cyan(%logger{36}) [userId:%X{user_id:-anonymous}] - %msg%n</pattern>
         </encoder>
     </appender>
 
+    <!-- ========== JSON Console Appender (for Production) ========== -->
+    <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!-- Custom fields for all logs -->
+            <customFields>{"app":"${APP_NAME}","env":"${PROFILE}"}</customFields>
 
-    <logger name="jdbc" level="OFF" additive="false">
-        <appender-ref ref="STDOUT"/>
+            <!-- Field name customization -->
+            <fieldNames>
+                <timestamp>@timestamp</timestamp>
+                <version>[ignore]</version>
+                <levelValue>[ignore]</levelValue>
+            </fieldNames>
+
+            <!-- MDC fields to include (모든 MDC 필드 포함) -->
+            <includeMdc>true</includeMdc>
+
+            <!-- Enable context map (for addKeyValue) -->
+            <includeContext>true</includeContext>
+            <includeCallerData>false</includeCallerData>
+        </encoder>
+    </appender>
+
+    <!-- ========== File Appender (JSON) ========== -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/ecms-server.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/ecms-server.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>10GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"app":"${APP_NAME}","env":"${PROFILE}"}</customFields>
+            <includeMdc>true</includeMdc>
+            <includeContext>true</includeContext>
+        </encoder>
+    </appender>
+
+    <!-- ========== Error File Appender ========== -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/ecms-server-error.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/ecms-server-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>90</maxHistory>
+        </rollingPolicy>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"app":"${APP_NAME}","env":"${PROFILE}"}</customFields>
+            <includeMdc>true</includeMdc>
+            <includeContext>true</includeContext>
+        </encoder>
+    </appender>
+
+    <!-- ========== Async Appenders (for Performance) ========== -->
+    <appender name="ASYNC_JSON" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="JSON_CONSOLE"/>
+    </appender>
+
+    <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>512</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <appender-ref ref="FILE"/>
+    </appender>
+
+    <!-- ========== Profile-based Configuration ========== -->
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+        <logger name="com.cookyuu.ecms_server" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </logger>
+    </springProfile>
+
+    <springProfile name="dev,prod">
+        <root level="INFO">
+            <appender-ref ref="ASYNC_JSON"/>
+            <appender-ref ref="ASYNC_FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </root>
+        <logger name="com.cookyuu.ecms_server" level="INFO" additivity="false">
+            <appender-ref ref="ASYNC_JSON"/>
+            <appender-ref ref="ASYNC_FILE"/>
+            <appender-ref ref="ERROR_FILE"/>
+        </logger>
+    </springProfile>
+
+    <!-- ========== SQL Logging ========== -->
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
     </logger>
-    <logger name="jdbc.sqlonly" level="DEBUG" additive="false" >
-        <appender-ref ref="STDOUT"/>
+    <logger name="org.hibernate.type.descriptor.sql.BasicBinder" level="TRACE" additivity="false">
+        <appender-ref ref="CONSOLE"/>
     </logger>
-    <logger name="jdbc.sqltiming" level="OFF" additive="false" >
-        <appender-ref ref="STDOUT"/>
-    </logger>
-    <logger name="org.hibernate.SQL" level="DEBUG" additive="false">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-    <logger name="com.example.todolist.controller" level="DEBUG" additive="false" >
-        <appender-ref ref="STDOUT"/>
-    </logger>
-    <logger name="com.example.todolist.service" level="DEBUG" additive="false" >
-        <appender-ref ref="STDOUT"/>
-    </logger>
-    <logger name="com.example.todolist.domain" level="DEBUG" additive="false" >
-        <appender-ref ref="STDOUT"/>
+    <logger name="jdbc.sqlonly" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
     </logger>
 
-    <root level="INFO">
-        <appender-ref ref="STDOUT"/>
-    </root>
+    <!-- ========== External Libraries ========== -->
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.springframework.web" level="DEBUG"/>
+    <logger name="org.springframework.security" level="DEBUG"/>
+    <logger name="io.micrometer" level="INFO"/>
 </configuration>

@@ -18,6 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
+import static com.cookyuu.ecms_server.common.logging.LogFields.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,7 +35,10 @@ public class CouponService {
     @Transactional
     public CreateCouponDto.Response createCoupon(CreateCouponDto.Request couponInfo) {
         String couponNumber = makeCouponNumber(CouponCode.of(couponInfo.getCouponCode()));
-        log.debug("[Coupon:Create] Make coupon number. OK!, coupon number : {}", couponNumber);
+        log.atDebug()
+                .addKeyValue(COUPON_NUMBER, couponNumber)
+                .addKeyValue(COUPON_CODE, couponInfo.getCouponCode())
+                .log("Coupon number generated");
         Coupon coupon = Coupon.builder()
                 .name(couponInfo.getName())
                 .startAt(StringUtils.parseToLocalDateTime(couponInfo.getStartAt()))
@@ -45,7 +51,13 @@ public class CouponService {
         couponRepository.save(coupon);
         redisUtils.setData(RedisKeyCode.COUPON_COUNT_KEY.getSeparator() + couponNumber, String.valueOf(couponInfo.getQuantity()));
 
-        log.debug("[Coupon:Create] Insert Coupon OK!");
+        log.atInfo()
+                .addKeyValue(EVENT, COUPON_CREATED)
+                .addKeyValue(COUPON_NUMBER, couponNumber)
+                .addKeyValue(COUPON_CODE, couponInfo.getCouponCode())
+                .addKeyValue(QUANTITY, couponInfo.getQuantity())
+                .addKeyValue(DISCOUNT_PRICE, couponInfo.getDiscountPrice())
+                .log("Coupon created successfully");
         return CreateCouponDto.Response.builder()
                 .couponNumber(couponNumber)
                 .build();
@@ -81,11 +93,20 @@ public class CouponService {
     public void validateCoupon(String couponNumber) {
         Coupon coupon = findCouponByCouponNumber(couponNumber);
         if (coupon.isExpired()) {
-            log.info("[Coupon::Validate] Coupon is expired. couponNumber : {}", couponNumber);
+            log.atWarn()
+                    .addKeyValue(EVENT, COUPON_EXPIRED)
+                    .addKeyValue(COUPON_NUMBER, couponNumber)
+                    .addKeyValue(COUPON_ID, coupon.getId())
+                    .log("Coupon is expired");
             throw new BusinessException(ResultCode.COUPON_UNUSABLE, "만료된 쿠폰입니다. ");
         }
         if (coupon.getQuantity() == 0) {
-            log.info("[Coupon::Validate] Coupon is sold out, couponNumber : {}", couponNumber);
+            log.atWarn()
+                    .addKeyValue(EVENT, VALIDATION_ERROR)
+                    .addKeyValue(COUPON_NUMBER, couponNumber)
+                    .addKeyValue(COUPON_ID, coupon.getId())
+                    .addKeyValue(QUANTITY, 0)
+                    .log("Coupon is sold out");
             throw new BusinessException(ResultCode.COUPON_SOLD_OUT);
         }
     }

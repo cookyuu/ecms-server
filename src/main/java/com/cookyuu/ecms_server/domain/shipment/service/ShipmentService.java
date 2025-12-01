@@ -18,6 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
+import static com.cookyuu.ecms_server.common.logging.LogFields.*;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -35,12 +38,19 @@ public class ShipmentService {
         try {
             shipmentRepository.save(shipment);
             order.successShipment(shipment);
+            log.atInfo()
+                    .addKeyValue(EVENT, SHIPMENT_CREATED)
+                    .addKeyValue(SHIPMENT_NUMBER, shipmentNumber)
+                    .addKeyValue(ORDER_NUMBER, shipmentInfo.getOrderNumber())
+                    .log("Shipment created successfully");
         } catch (Exception e) {
-            log.error("[Shipment::ERROR] Create shipment, Fail..");
+            log.atError()
+                    .addKeyValue(EVENT, SYSTEM_ERROR)
+                    .addKeyValue(ORDER_NUMBER, shipmentInfo.getOrderNumber())
+                    .log("Failed to create shipment", e);
             throw e;
         }
 
-        log.debug("[Shipment::Create] Create shipment, OK.");
         return CreateShipmentDto.Response.builder()
                 .shipmentNumber(shipmentNumber)
                 .build();
@@ -51,6 +61,11 @@ public class ShipmentService {
         Shipment shipment = findShipmentByShipmentNumber(shipmentInfo.getShipmentNumber());
         shipment.checkStatus(ShipmentStatus.COLLECTION);
         shipment.begin(shipmentInfo.getLocation());
+        log.atInfo()
+                .addKeyValue(EVENT, SHIPMENT_BEGUN)
+                .addKeyValue(SHIPMENT_NUMBER, shipmentInfo.getShipmentNumber())
+                .addKeyValue(LOCATION, shipmentInfo.getLocation())
+                .log("Shipment delivery begun");
     }
 
     @Transactional
@@ -58,6 +73,11 @@ public class ShipmentService {
         Shipment shipment = findShipmentByShipmentNumber(shipmentInfo.getShipmentNumber());
         shipment.checkStatus(ShipmentStatus.IN_DELIVERY);
         shipment.updateLocation(shipmentInfo.getLocation());
+        log.atInfo()
+                .addKeyValue(EVENT, SHIPMENT_LOCATION_UPDATED)
+                .addKeyValue(SHIPMENT_NUMBER, shipmentInfo.getShipmentNumber())
+                .addKeyValue(LOCATION, shipmentInfo.getLocation())
+                .log("Shipment location updated");
     }
 
     @Transactional(readOnly = true)
@@ -78,7 +98,9 @@ public class ShipmentService {
             sb.append(random);
         }
         String shipmentNumber = sb.toString();
-        log.debug("[Shipment::Create] Create shipment number, OK. shipmentNumber : {}", shipmentNumber);
+        log.atDebug()
+                .addKeyValue(SHIPMENT_NUMBER, shipmentNumber)
+                .log("Shipment number generated");
         return shipmentNumber;
     }
 }

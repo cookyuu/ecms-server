@@ -30,6 +30,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
+import static com.cookyuu.ecms_server.common.logging.LogFields.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -55,10 +58,22 @@ public class ProductService {
                     category,
                     seller);
             Product product = productRepository.save(registerProduct);
-            log.info("[RegisterProduct] Product registration OK!");
+            log.atInfo()
+                    .addKeyValue(EVENT, PRODUCT_REGISTERED)
+                    .addKeyValue(PRODUCT_ID, product.getId())
+                    .addKeyValue(PRODUCT_NAME, product.getName())
+                    .addKeyValue(SELLER_ID, seller.getId())
+                    .addKeyValue(CATEGORY, category.getName())
+                    .addKeyValue(PRODUCT_PRICE, product.getPrice())
+                    .addKeyValue(STOCK_QUANTITY, product.getStockQuantity())
+                    .log("Product registered successfully");
             return product.getId();
         } catch (Exception e) {
-            log.error("[Product::Register::Error] Exception : ", e);
+            log.atError()
+                    .addKeyValue(EVENT, BUSINESS_ERROR)
+                    .addKeyValue(ERROR_CODE, ResultCode.PRODUCT_EXISTS_ALREADY.getCode())
+                    .addKeyValue(SELLER_ID, Long.parseLong(user.getUsername()))
+                    .log("Product registration failed", e);
             throw new BusinessException(ResultCode.PRODUCT_EXISTS_ALREADY, e);
         }
     }
@@ -81,7 +96,11 @@ public class ProductService {
         } else {
             product.updateInfo(productInfo.getName(), productInfo.getDescription(), productInfo.getPrice(), productInfo.getStockQuantity(), null);
         }
-        log.info("[UpdateProduct] Product update OK!, productId : {}", productId);
+        log.atInfo()
+                .addKeyValue(EVENT, PRODUCT_UPDATED)
+                .addKeyValue(PRODUCT_ID, productId)
+                .addKeyValue(SELLER_ID, sellerId)
+                .log("Product updated successfully");
     }
     @Transactional
     public void deleteProduct(Long productId, UserDetails user) {
@@ -92,7 +111,11 @@ public class ProductService {
         }
         product.isDeleted();
         product.delete();
-        log.info("[DeleteProduct] Product delete OK!, ProductId : {}", productId);
+        log.atInfo()
+                .addKeyValue(EVENT, PRODUCT_DELETED)
+                .addKeyValue(PRODUCT_ID, productId)
+                .addKeyValue(SELLER_ID, sellerId)
+                .log("Product deleted successfully");
     }
 
     @Transactional(readOnly = true)
@@ -132,12 +155,17 @@ public class ProductService {
     }
 
     private boolean isProductOwnedBySeller(Product product, Long sellerId) {
-        log.info("[CheckProductOwner] Check product owner, ProductId : {}, SellerId : {}", product.getId(), sellerId);
+        log.atDebug()
+                .addKeyValue(PRODUCT_ID, product.getId())
+                .addKeyValue(SELLER_ID, sellerId)
+                .log("Checking product ownership");
         return product.getSeller().getId().equals(sellerId);
     }
 
     private void validatePostView(Long productId, HttpServletRequest request, HttpServletResponse response) {
-        log.debug("[Product::Detail] Validate post view product in cookie.");
+        log.atDebug()
+                .addKeyValue(PRODUCT_ID, productId)
+                .log("Validating post view in cookie");
         Cookie oldCookie = null;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -164,7 +192,10 @@ public class ProductService {
     }
 
     private void increaseProductHits(Long productId) {
-        log.debug("[Product::Detail] Product hit count increase");
+        log.atDebug()
+                .addKeyValue(EVENT, PRODUCT_VIEWED)
+                .addKeyValue(PRODUCT_ID, productId)
+                .log("Product hit count increased");
         if (!redisUtil.hasKey(RedisKeyCode.PRODUCT_HIT_COUNT.getSeparator()+productId)) {
             redisUtil.setHashCountData(RedisKeyCode.PRODUCT_HIT_COUNT.getSeparator()+productId);
         } else {

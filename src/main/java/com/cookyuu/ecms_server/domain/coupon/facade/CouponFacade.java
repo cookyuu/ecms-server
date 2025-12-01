@@ -17,6 +17,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
+import static com.cookyuu.ecms_server.common.logging.LogFields.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -30,21 +33,46 @@ public class CouponFacade {
 
     @DistributedLock(key = "'lock:coupon:' + #couponNumber + ':' + #memberId")
     public void issueCoupon(long memberId, String couponNumber) {
+        long startTime = System.currentTimeMillis();
+
         try {
             validateRequest(couponNumber);
             isIssuable(memberId, couponNumber);
             processIssue(memberId, couponNumber);
             recordSuccess(couponNumber);
-        } catch (Exception e) {
-            log.info("[Coupon::Issue] Fail to issue coupon, ", e);
+
+            log.atInfo()
+                .addKeyValue(EVENT, COUPON_ISSUED)
+                .addKeyValue(USER_ID, memberId)
+                .addKeyValue(COUPON_NUMBER, couponNumber)
+                .addKeyValue(STATUS, "success")
+                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
+                .log("Coupon issued successfully");
+
+        } catch (BusinessException e) {
             recordFailure(couponNumber);
+
+            log.atError()
+                .addKeyValue(EVENT, COUPON_ISSUE_FAILED)
+                .addKeyValue(USER_ID, memberId)
+                .addKeyValue(COUPON_NUMBER, couponNumber)
+                .addKeyValue(ERROR_CODE, e.getResultCode().getCode())
+                .addKeyValue(ERROR_MESSAGE, e.getMessage())
+                .addKeyValue(STATUS, "failure")
+                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
+                .setCause(e)
+                .log("Coupon issue failed");
+
             throw new BusinessException(ResultCode.BAD_REQUEST, "쿠폰 발급 실패");
         }
     }
 
     private void validateRequest(String couponNumber) {
         couponService.validateCoupon(couponNumber);
-        log.debug("[Coupon::Issue] Validate Request process, OK!");
+        log.atDebug()
+            .addKeyValue("operation", "validateCouponRequest")
+            .addKeyValue(COUPON_NUMBER, couponNumber)
+            .log("Coupon validation passed");
     }
 
     private void isIssuable(long memberId, String couponNumber) {
@@ -52,20 +80,43 @@ public class CouponFacade {
         String couponCount = (String) redisTemplate.opsForValue().get(RedisKeyCode.COUPON_COUNT_KEY.getSeparator() + couponNumber);
 
         if (Boolean.TRUE.equals(redissonUtils.isIssuedCoupon(strMemberId, couponNumber))) {
+            log.atWarn()
+                .addKeyValue(EVENT, COUPON_ISSUE_FAILED)
+                .addKeyValue(USER_ID, memberId)
+                .addKeyValue(COUPON_NUMBER, couponNumber)
+                .addKeyValue(ERROR_CODE, ResultCode.COUPON_ISSUE_FAIL.getCode())
+                .addKeyValue(ERROR_MESSAGE, "Coupon already issued to this user")
+                .log("Coupon issue validation failed - duplicate issue");
             throw new BusinessException(ResultCode.COUPON_ISSUE_FAIL, "이미 발급된 쿠폰입니다. ");
         }
 
         if (couponCount == null || Long.parseLong(couponCount) <= 0) {
+            log.atWarn()
+                .addKeyValue(EVENT, COUPON_ISSUE_FAILED)
+                .addKeyValue(USER_ID, memberId)
+                .addKeyValue(COUPON_NUMBER, couponNumber)
+                .addKeyValue("available_count", couponCount)
+                .addKeyValue(ERROR_CODE, ResultCode.COUPON_SOLD_OUT.getCode())
+                .log("Coupon issue validation failed - sold out");
             throw new BusinessException(ResultCode.COUPON_SOLD_OUT);
         }
-        log.debug("[Coupon::Issue] Check Is Issuable for redis, OK!");
+        log.atDebug()
+            .addKeyValue("operation", "checkIssuable")
+            .addKeyValue(USER_ID, memberId)
+            .addKeyValue(COUPON_NUMBER, couponNumber)
+            .addKeyValue("available_count", couponCount)
+            .log("Coupon issuable validation passed");
     }
 
     protected void processIssue(Long memberId, String couponNumber) {
         String strMemberId = String.valueOf(memberId);
         redissonUtils.issueCoupon(strMemberId, couponNumber);
         processActualCouponIssue(memberId, couponNumber);
-        log.debug("[Coupon::Issue] Issue process, OK!");
+        log.atDebug()
+            .addKeyValue("operation", "processIssue")
+            .addKeyValue(USER_ID, memberId)
+            .addKeyValue(COUPON_NUMBER, couponNumber)
+            .log("Coupon issue process completed");
 
     }
 
@@ -78,9 +129,22 @@ public class CouponFacade {
             issueCouponService.issueCoupon(member, coupon);
             count = Integer.parseInt(redisUtils.getData(RedisKeyCode.COUPON_COUNT_KEY.getSeparator() + couponNumber));
             coupon.issue(count);
-            log.debug("[Coupon::Issue] Actual issue coupon process, OK!");
+            log.atDebug()
+                .addKeyValue("operation", "processActualCouponIssue")
+                .addKeyValue(USER_ID, memberId)
+                .addKeyValue(COUPON_ID, coupon.getId())
+                .addKeyValue(COUPON_NUMBER, couponNumber)
+                .addKeyValue("remaining_count", count)
+                .log("Actual coupon issue process completed");
         } catch (Exception e) {
-            log.error("[CouponIssue::Fail] Fail to Issue coupon, ", e);
+            log.atError()
+                .addKeyValue(EVENT, SYSTEM_ERROR)
+                .addKeyValue(USER_ID, memberId)
+                .addKeyValue(COUPON_ID, coupon.getId())
+                .addKeyValue(COUPON_NUMBER, couponNumber)
+                .addKeyValue(ERROR_MESSAGE, e.getMessage())
+                .setCause(e)
+                .log("Actual coupon issue failed - transaction error");
             rollback(memberId, couponNumber);
             count = Integer.parseInt(redisUtils.getData(RedisKeyCode.COUPON_COUNT_KEY.getSeparator() + couponNumber));
             coupon.issueFail(count);
@@ -93,17 +157,29 @@ public class CouponFacade {
     private void rollback(Long memberId, String couponNumber) {
         String strMemberId = String.valueOf(memberId);
         redissonUtils.issueCouponRollback(strMemberId, couponNumber);
-        log.debug("[Coupon::Issue] Rollback Issue coupon.");
+        log.atDebug()
+            .addKeyValue("operation", "rollbackCouponIssue")
+            .addKeyValue(USER_ID, memberId)
+            .addKeyValue(COUPON_NUMBER, couponNumber)
+            .log("Coupon issue rollback completed");
     }
 
     private void recordSuccess (String couponNumber) {
         redissonUtils.recordIssueCouponStatus(couponNumber, "success");
-        log.debug("[Coupon::Issue] Issue coupon success record, OK!");
+        log.atDebug()
+            .addKeyValue("operation", "recordIssueCouponStatus")
+            .addKeyValue(COUPON_NUMBER, couponNumber)
+            .addKeyValue(STATUS, "success")
+            .log("Coupon issue success recorded");
     }
 
     private void recordFailure(String couponNumber) {
         redissonUtils.recordIssueCouponStatus(couponNumber, "failure");
-        log.debug("[Coupon::Issue] Issue coupon failure record, OK!");
+        log.atDebug()
+            .addKeyValue("operation", "recordIssueCouponStatus")
+            .addKeyValue(COUPON_NUMBER, couponNumber)
+            .addKeyValue(STATUS, "failure")
+            .log("Coupon issue failure recorded");
     }
 
 

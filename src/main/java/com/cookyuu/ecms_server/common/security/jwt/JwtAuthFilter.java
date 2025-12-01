@@ -13,12 +13,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+
+import static com.cookyuu.ecms_server.common.logging.LogFields.USER_ID;
+import static com.cookyuu.ecms_server.common.logging.LogFields.USER_ROLE;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -47,6 +51,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                             new UsernamePasswordAuthenticationToken(userDetails, accessToken, userDetails.getAuthorities());
                     SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+
+                    // MDC에 user_id와 user_role 추가 (모든 로그에 자동 포함됨)
+                    MDC.put(USER_ID, id.toString());
+                    MDC.put(USER_ROLE, role.name());
                 }
                 String logoutToken = redisUtils.getData(RedisKeyCode.LOGOUT_TOKEN.getSeparator()+ id);
                 if (accessToken.equals(logoutToken)) {

@@ -39,6 +39,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.cookyuu.ecms_server.common.enums.ResultCode.ORDER_PROCESS_FAIL;
+import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
+import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 
 @Slf4j
 @Service
@@ -57,10 +59,10 @@ public class OrderService {
 
     @Transactional
     public CreateOrderDto.Response createOrder(Long userId, CreateOrderDto.Request orderInfo) {
+        long startTime = System.currentTimeMillis();
+
         Member buyer = memberService.findMemberById(userId);
         Cart cart = cartService.findCartByMemberIdWithCartItemsAndProducts(buyer.getId());
-
-        // 주문 상품들을 비관적 락으로 일괄 조회
         List<Long> productIds = orderInfo.getOrderItemList().stream()
                 .map(CreateOrderItemInfo::getProductId)
                 .collect(Collectors.toList());
@@ -73,13 +75,19 @@ public class OrderService {
         for (CreateOrderItemInfo orderItemInfo : orderInfo.getOrderItemList()) {
             Product product = productMap.get(orderItemInfo.getProductId());
             if (product == null) {
+                log.atError()
+                    .addKeyValue(EVENT, BUSINESS_ERROR)
+                    .addKeyValue(USER_ID, userId)
+                    .addKeyValue(PRODUCT_ID, orderItemInfo.getProductId())
+                    .addKeyValue(ERROR_CODE, ResultCode.PRODUCT_NOT_FOUND.getCode())
+                    .log("Order creation failed - product not found");
                 throw new BusinessException(ResultCode.PRODUCT_NOT_FOUND);
             }
             product.isDeleted();
             int quantity = orderItemInfo.getQuantity();
             int price = orderItemInfo.getPrice();
             totalPrice += (quantity*price);
-            log.info("[Order::CreateOrder] Compare product price, productId : {}", product.getId());
+
             compareQuantityAndStockQuantity(quantity, product.getStockQuantity());
             comparePriceAndCurrentPrice(price, product.getPrice(), product.getId());
             updateCartWithOrderItems(cart, product, orderItemInfo);
@@ -87,10 +95,8 @@ public class OrderService {
         }
 
         String orderNumber = createOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
-        log.info("[Order::CreateOrder] Create order number, Order Number : {}", orderNumber);
         while (redisUtils.getData(RedisKeyCode.ORDER_NUMBER.getSeparator()+orderNumber) != null) {
             orderNumber = createOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
-            log.debug("[Order::CreateOrder] Created order number is duplicated, Order Number : {}", orderNumber);
         }
 
         try {
@@ -101,7 +107,6 @@ public class OrderService {
             orderInfo.addBuyer(buyer);
             orderInfo.addOrderNumber(orderNumber);
             Order order = orderRepository.save(orderInfo.toEntity());
-            log.debug("[Order::CreateOrder] Save order info.");
 
             orderLineRepository.saveAll(CreateOrderLineMapper.toEntityList(orderInfo.getOrderItemList(), order));
 
@@ -109,32 +114,74 @@ public class OrderService {
                 Product product = orderItemInfo.getProduct();
                 int quantity = orderItemInfo.getQuantity();
                 product.subQuantity(quantity);
-                log.debug("[Order::CreateOrder] Subtract product quantity, productId: {}, quantity: {}", product.getId(), quantity);
             }
+
+            log.atInfo()
+                .addKeyValue(EVENT, ORDER_CREATED)
+                .addKeyValue(USER_ID, userId)
+                .addKeyValue(ORDER_ID, order.getId())
+                .addKeyValue(ORDER_NUMBER, order.getOrderNumber())
+                .addKeyValue(TOTAL_AMOUNT, order.getTotalPrice())
+                .addKeyValue(ITEM_COUNT, order.getOrderLines().size())
+                .addKeyValue(ORDER_STATUS, order.getStatus().name())
+                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
+                .log("Order created successfully");
+
             return CreateOrderDto.Response.toDto(order);
         } catch (Exception e) {
             redisUtils.deleteData(RedisKeyCode.ORDER_NUMBER.getSeparator() + orderNumber);
-            log.error("[Order::Error] Transaction failed, rollback Redis key. Order Number : {}", orderNumber);
+
+            log.atError()
+                .addKeyValue(EVENT, SYSTEM_ERROR)
+                .addKeyValue(USER_ID, userId)
+                .addKeyValue(ORDER_NUMBER, orderNumber)
+                .addKeyValue(ERROR_MESSAGE, e.getMessage())
+                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
+                .setCause(e)
+                .log("Order creation failed - transaction error");
             throw e;
         }
     }
 
     @Transactional
     public ResultCode cancelOrder(UserDetails user, CancelOrderDto.Request cancelInfo) {
+        long startTime = System.currentTimeMillis();
+        Long userId = Long.parseLong(user.getUsername());
+
         Order order = findOrderByOrderNumberWithProductsForUpdate(cancelInfo.getOrderNumber());
         order.isCanceled();
-        checkBuyerOfOrder(Long.parseLong(user.getUsername()), order.getBuyer().getId());
+        checkBuyerOfOrder(userId, order.getBuyer().getId());
+
         boolean isPossibleCancel = OrderStatus.isPossibleOrderCancel(order.getStatus());
         if (isPossibleCancel) {
-            order.getOrderLines().forEach(orderLine -> orderLine.getProduct().addQuantity(orderLine.getQuantity()));
+            order.getOrderLines().forEach(orderLine ->
+                orderLine.getProduct().addQuantity(orderLine.getQuantity()));
             order.cancel(cancelInfo.getCancelReason());
-            log.info("[Order::Cancel] Cancel request of Order OK!, orderNumber : {}", order.getOrderNumber());
+
+            log.atInfo()
+                .addKeyValue(EVENT, ORDER_CANCELLED)
+                .addKeyValue(USER_ID, userId)
+                .addKeyValue(ORDER_ID, order.getId())
+                .addKeyValue(ORDER_NUMBER, order.getOrderNumber())
+                .addKeyValue(ORDER_STATUS, order.getStatus().name())
+                .addKeyValue(CANCEL_REASON, cancelInfo.getCancelReason())
+                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
+                .log("Order cancelled successfully");
+
+            return ResultCode.ORDER_CANCEL_SUCCESS;
         } else {
-            log.info("[Order::Cancel] Can not cancel order, order status is {}", order.getStatus());
+            log.atWarn()
+                .addKeyValue(EVENT, BUSINESS_ERROR)
+                .addKeyValue(USER_ID, userId)
+                .addKeyValue(ORDER_ID, order.getId())
+                .addKeyValue(ORDER_NUMBER, order.getOrderNumber())
+                .addKeyValue(ORDER_STATUS, order.getStatus().name())
+                .addKeyValue(ERROR_CODE, ResultCode.ORDER_CANCEL_FAIL.getCode())
+                .addKeyValue(ERROR_MESSAGE, "Cannot cancel order in current status")
+                .log("Order cancellation failed - invalid status");
+
             throw new BusinessException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
         }
-        log.debug("[Order::Cancel] Order cancel request is OK!");
-        return ResultCode.ORDER_CANCEL_SUCCESS;
     }
 
     @Transactional
@@ -147,7 +194,13 @@ public class OrderService {
         order.isCanceled();
         boolean isPossibleRevise = OrderStatus.isPossibleOrderRevise(order.getStatus());
         if (!isPossibleRevise) {
-            log.info("[Order::Revise] Can not revise order, order status is {}", order.getStatus());
+            log.atWarn()
+                .addKeyValue(EVENT, BUSINESS_ERROR)
+                .addKeyValue(ORDER_ID, order.getId())
+                .addKeyValue(ORDER_STATUS, order.getStatus().name())
+                .addKeyValue(ERROR_CODE, ResultCode.ORDER_CANCEL_FAIL.getCode())
+                .addKeyValue(ERROR_MESSAGE, "Cannot revise order in current status")
+                .log("Order revision failed - invalid status");
             throw new BusinessException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
         }
 
@@ -166,7 +219,11 @@ public class OrderService {
             Product product = oldProductMap.get(orderLine.getProduct().getId());
             if (product != null) {
                 product.addQuantity(orderLine.getQuantity());
-                log.debug("[Order::Revise] Restore product quantity, productId: {}, quantity: {}", product.getId(), orderLine.getQuantity());
+                log.atDebug()
+                    .addKeyValue(EVENT, ORDER_REVISED)
+                    .addKeyValue(PRODUCT_ID, product.getId())
+                    .addKeyValue(QUANTITY, orderLine.getQuantity())
+                    .log("Restored product quantity for order revision");
             }
         }
 
@@ -188,7 +245,11 @@ public class OrderService {
             int quantity = orderItemInfo.getQuantity();
             int price = orderItemInfo.getPrice();
             totalPrice += (quantity*price);
-            log.info("[Order::Revise] Compare product price, productId : {}", product.getId());
+            log.atDebug()
+                .addKeyValue(EVENT, ORDER_REVISED)
+                .addKeyValue(PRODUCT_ID, product.getId())
+                .addKeyValue(PRODUCT_PRICE, price)
+                .log("Comparing product price for order revision");
             compareQuantityAndStockQuantity(quantity, product.getStockQuantity());
             comparePriceAndCurrentPrice(price, product.getPrice(), product.getId());
             orderItemInfo.addProduct(product);
@@ -201,9 +262,16 @@ public class OrderService {
             Product product = orderItemInfo.getProduct();
             int quantity = orderItemInfo.getQuantity();
             product.subQuantity(quantity);
-            log.debug("[Order::Revise] Subtract product quantity, productId: {}, quantity: {}", product.getId(), quantity);
         }
-        log.info("[Order::Revise] Revise order info is OK!, orderNumber : {}", order.getOrderNumber());
+
+        log.atInfo()
+            .addKeyValue(EVENT, ORDER_REVISED)
+            .addKeyValue(USER_ID, Long.parseLong(user.getUsername()))
+            .addKeyValue(ORDER_ID, order.getId())
+            .addKeyValue(ORDER_NUMBER, order.getOrderNumber())
+            .addKeyValue(TOTAL_AMOUNT, totalPrice)
+            .addKeyValue(ITEM_COUNT, reviseOrderInfo.getOrderItemList().size())
+            .log("Order revised successfully");
 
         return ResultCode.ORDER_REVISE_SUCCESS;
     }
@@ -220,7 +288,11 @@ public class OrderService {
     )
     public OrderDetailDto getOrderDetailCacheable(UserDetails user , String orderNumber) {
         String jwtRole = JwtUtils.getRoleFromUserDetails(user);
-        log.debug("[Order::getDetail] ROLE : {}", jwtRole);
+        log.atDebug()
+            .addKeyValue("operation", "getOrderDetail")
+            .addKeyValue(USER_ROLE, jwtRole)
+            .addKeyValue(ORDER_NUMBER, orderNumber)
+            .log("Fetching order detail");
         OrderDetailDto orderDetailInfo = getOrderDetailBy(orderNumber);
         if (jwtRole.equals("ROLE_"+RoleType.USER.name())) {
             Long buyerId = orderDetailInfo.getOrderInfo().getBuyerId();
@@ -239,35 +311,70 @@ public class OrderService {
     }
 
     private void checkBuyerOfOrder(Long reqUserId, Long buyerId) {
-        log.debug("[Order::BuyerMatch] Unmatched Order's buyer Info and request User Info, buyerId : {}, reqUserId : {}", buyerId, reqUserId);
+        log.atDebug()
+            .addKeyValue("operation", "checkBuyerOfOrder")
+            .addKeyValue("buyer_id", buyerId)
+            .addKeyValue("request_user_id", reqUserId)
+            .log("Checking buyer authorization");
         if (!buyerId.equals(reqUserId)) {
+            log.atWarn()
+                .addKeyValue(EVENT, AUTHORIZATION_ERROR)
+                .addKeyValue("buyer_id", buyerId)
+                .addKeyValue("request_user_id", reqUserId)
+                .addKeyValue(ERROR_CODE, ResultCode.ORDER_BUYER_UNMATCHED.getCode())
+                .log("Order buyer authorization failed - user mismatch");
             throw new BusinessException(ResultCode.ORDER_BUYER_UNMATCHED);
         }
-        log.info("[Order::BuyerMatch] Match buyer id and request user id OK!");
+        log.atDebug()
+            .addKeyValue("operation", "checkBuyerOfOrder")
+            .addKeyValue(USER_ID, reqUserId)
+            .log("Buyer authorization verified");
     }
 
     private boolean checkSellerOfOrder(long reqUserId, Long sellerId) {
-        log.debug("[Order::SellerMatch] Unmatched Order's seller Info and request User Info, sellerId : {}, reqUserId : {}", sellerId, reqUserId);
+        log.atDebug()
+            .addKeyValue("operation", "checkSellerOfOrder")
+            .addKeyValue(SELLER_ID, sellerId)
+            .addKeyValue("request_user_id", reqUserId)
+            .log("Checking seller authorization");
         return sellerId.equals(reqUserId);
     }
 
     private void compareQuantityAndStockQuantity(int quantity, Integer stockQuantity) {
         if (stockQuantity == 0) {
-            log.error("[Order::Error] This product stock quantity is zero, Product Sold out!");
+            log.atError()
+                .addKeyValue(EVENT, PRODUCT_OUT_OF_STOCK)
+                .addKeyValue(STOCK_QUANTITY, stockQuantity)
+                .addKeyValue(QUANTITY, quantity)
+                .addKeyValue(ERROR_CODE, ResultCode.PRODUCT_SOLD_OUT.getCode())
+                .log("Product sold out - zero stock");
             throw new BusinessException(ResultCode.PRODUCT_SOLD_OUT, "주문하신 상품의 재고 수량이 없습니다.");
         }
         if (quantity > stockQuantity) {
-            log.error("[Order::Error] This product stock quantity is less than order quantity, stockQuantity : {}, orderQuantity : {}", stockQuantity, quantity);
+            log.atError()
+                .addKeyValue(EVENT, PRODUCT_OUT_OF_STOCK)
+                .addKeyValue(STOCK_QUANTITY, stockQuantity)
+                .addKeyValue(QUANTITY, quantity)
+                .addKeyValue(ERROR_CODE, ResultCode.PRODUCT_SOLD_OUT.getCode())
+                .log("Insufficient stock - order quantity exceeds available stock");
             throw new BusinessException(ResultCode.PRODUCT_SOLD_OUT, "주문하신 상품의 재고 수량이 부족합니다. 재고 수량 : " + stockQuantity);
         }
-        log.info("[Order::CompareStockQuantity] This product ");
+        log.atDebug()
+            .addKeyValue("operation", "compareStockQuantity")
+            .addKeyValue(STOCK_QUANTITY, stockQuantity)
+            .addKeyValue(QUANTITY, quantity)
+            .log("Stock quantity validation passed");
     }
     private void updateCartWithOrderItems(Cart cart, Product product, CreateOrderItemInfo orderItemInfo) {
         CartItem cartItem = findCartItemByCartAndProduct(cart, product);
-        log.debug("[Order::UpdateCart]");
         if (cartItem == null) {
             return ;
         }
+        log.atDebug()
+            .addKeyValue("operation", "updateCart")
+            .addKeyValue(CART_ID, cart.getId())
+            .addKeyValue(PRODUCT_ID, product.getId())
+            .log("Updating cart with ordered items");
         if (cartItem.getQuantity() <= orderItemInfo.getQuantity()) {
             cartService.deleteCartItem(cart, product);
         } else {
@@ -277,14 +384,29 @@ public class OrderService {
 
     private void comparePriceAndCurrentPrice(int price, Integer currentPrice, Long productId) {
         if (currentPrice == null) {
-            log.error("[Order::Error] Product price has not been set yet, productId : {}", productId);
+            log.atError()
+                .addKeyValue(EVENT, VALIDATION_ERROR)
+                .addKeyValue(PRODUCT_ID, productId)
+                .addKeyValue(ERROR_CODE, ORDER_PROCESS_FAIL.getCode())
+                .addKeyValue(ERROR_MESSAGE, "Product price not set")
+                .log("Product price validation failed - price not set");
             throw new BusinessException(ORDER_PROCESS_FAIL, "가격이 아직 책정되지 않은 상품이 있습니다.");
         }
         if (price != currentPrice) {
-            log.error("[Order::Error] Compare product order price and current price Fail!, productId : {}, orderPrice : {}, currentPrice : {}", productId, price, currentPrice);
+            log.atError()
+                .addKeyValue(EVENT, VALIDATION_ERROR)
+                .addKeyValue(PRODUCT_ID, productId)
+                .addKeyValue("order_price", price)
+                .addKeyValue("current_price", currentPrice)
+                .addKeyValue(ERROR_CODE, ORDER_PROCESS_FAIL.getCode())
+                .log("Price validation failed - order price and current price mismatch");
             throw new BusinessException(ORDER_PROCESS_FAIL, "상품의 현재 가격과 주문 가격이 일치하지 않습니다.");
         }
-        log.info("[CompareProductPriceForOrder] Compare product order price and current price OK!");
+        log.atDebug()
+            .addKeyValue("operation", "comparePriceAndCurrentPrice")
+            .addKeyValue(PRODUCT_ID, productId)
+            .addKeyValue(PRODUCT_PRICE, currentPrice)
+            .log("Price validation passed");
     }
 
     private CartItem findCartItemByCartAndProduct(Cart cart, Product product) {

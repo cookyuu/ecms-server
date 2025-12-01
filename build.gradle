@@ -47,7 +47,7 @@ dependencies {
 
 	//Querydsl 추가
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
-	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
+	annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
 	annotationProcessor "jakarta.annotation:jakarta.annotation-api"
 	annotationProcessor "jakarta.persistence:jakarta.persistence-api"
 
@@ -57,6 +57,9 @@ dependencies {
 	// monitoring
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'io.micrometer:micrometer-registry-prometheus'
+
+	// structured logging (JSON)
+	implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
 
     // redisson
     implementation 'org.redisson:redisson-spring-boot-starter:3.17.4'
@@ -70,14 +73,16 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-def generated = 'src/main/generated'
-tasks.withType(JavaCompile) {
-	options.generatedSourceOutputDirectory = file(generated)
-}
+def querydslDir = "src/main/generated"
+
 sourceSets {
-	main.java.srcDirs += "$projectDir/build/generated"
+	main.java.srcDirs += [querydslDir]
+}
+
+tasks.withType(JavaCompile).configureEach {
+	options.generatedSourceOutputDirectory = file(querydslDir)
 }
 
 clean {
-	delete file(generated)
+	delete file(querydslDir)
 }

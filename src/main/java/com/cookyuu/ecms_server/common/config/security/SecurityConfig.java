@@ -35,6 +35,7 @@ public class SecurityConfig {
         "/api/v1/auth/login/seller",
         "/api/v1/auth/validation/**",
         "/api/v1/seller/registration",
+        "/api/v1/member/role",
         "/swagger-ui/**",
         "/swagger-resources/**",
         "/v3/api-docs/**"
@@ -42,8 +43,7 @@ public class SecurityConfig {
 
     private static final String[] AUTH_ADMIN = {
         "/api/v1/admin/**",
-        "/api/v1/category/**",
-        "/api/v1/member/role"
+        "/api/v1/category/**"
     };
 
     private static final String[] AUTH_SELLER = {

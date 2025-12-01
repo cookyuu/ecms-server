@@ -11,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
+import static com.cookyuu.ecms_server.common.logging.LogFields.*;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -27,7 +30,12 @@ public class CategoryService {
 
         Category registerCategory = Category.of(categoryInfo.getName(), parentCategory);
         Category category = categoryRepository.save(registerCategory);
-        log.info("[RegisterCategory] Category Registration OK!!");
+        log.atInfo()
+                .addKeyValue(EVENT, CATEGORY_REGISTERED)
+                .addKeyValue(CATEGORY_ID, category.getId())
+                .addKeyValue(CATEGORY_NAME, category.getName())
+                .addKeyValue(PARENT_CATEGORY_NAME, categoryInfo.getParentCategoryName())
+                .log("Category registered successfully");
         return category.getId();
     }
 
@@ -39,31 +47,47 @@ public class CategoryService {
             parentCategory = findByName(categoryInfo.getParentCategoryName());
         }
         category.update(categoryInfo.getName(), parentCategory);
-        log.info("[UpdateCategory] Update category OK!");
+        log.atInfo()
+                .addKeyValue(EVENT, CATEGORY_UPDATED)
+                .addKeyValue(CATEGORY_ID, categoryId)
+                .addKeyValue(CATEGORY_NAME, categoryInfo.getName())
+                .log("Category updated successfully");
     }
 
     @Transactional
     public void deleteCategory(Long categoryId) {
         Category category = findById(categoryId);
         categoryRepository.delete(category);
-        log.info("[DeleteCategory] Delete category OK!, category Name : {}", category.getName());
+        log.atInfo()
+                .addKeyValue(EVENT, CATEGORY_DELETED)
+                .addKeyValue(CATEGORY_ID, categoryId)
+                .addKeyValue(CATEGORY_NAME, category.getName())
+                .log("Category deleted successfully");
     }
 
     public Category findByName(String name) {
         Category category = categoryRepository.findByName(name).orElseThrow(() -> new BusinessException(ResultCode.CATEGORY_NOT_FOUND));
-        log.info("[FindCategoryByName] Find category OK!, category Id : {}", category.getId());
+        log.atDebug()
+                .addKeyValue(CATEGORY_ID, category.getId())
+                .addKeyValue(CATEGORY_NAME, name)
+                .log("Category found by name");
         return category;
     }
 
     public Category findById(Long categoryId) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new BusinessException(ResultCode.CATEGORY_NOT_FOUND));
-        log.info("[FindCategoryByName] Find category OK!, category Name : {}", category.getName());
+        log.atDebug()
+                .addKeyValue(CATEGORY_ID, categoryId)
+                .addKeyValue(CATEGORY_NAME, category.getName())
+                .log("Category found by ID");
         return category;
     }
     private void chkCategoryNameDuplicated(String name) {
         if (categoryRepository.existsByName(name)) {
             throw new BusinessException(ResultCode.CATEGORY_NAME_DUPLICATED);
         }
-        log.info("[CheckCategoryNameDuplication] Duplication check OK!, CategoryName : {}", name);
+        log.atDebug()
+                .addKeyValue(CATEGORY_NAME, name)
+                .log("Category name duplication check passed");
     }
 }

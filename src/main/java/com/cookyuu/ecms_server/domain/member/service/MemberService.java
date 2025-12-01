@@ -14,6 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
+import static com.cookyuu.ecms_server.common.logging.LogFields.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -23,7 +26,31 @@ public class MemberService {
 
     @Transactional
     public Member save(Member member) {
-        return memberRepository.save(member);
+        long startTime = System.currentTimeMillis();
+
+        try {
+            Member savedMember = memberRepository.save(member);
+
+            log.atInfo()
+                .addKeyValue(EVENT, MEMBER_REGISTERED)
+                .addKeyValue(MEMBER_ID, savedMember.getId())
+                .addKeyValue(LOGIN_ID, savedMember.getLoginId())
+                .addKeyValue(EMAIL, savedMember.getEmail())
+                .addKeyValue(USER_ROLE, savedMember.getRole().name())
+                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
+                .log("Member registered successfully");
+
+            return savedMember;
+        } catch (Exception e) {
+            log.atError()
+                .addKeyValue(EVENT, BUSINESS_ERROR)
+                .addKeyValue(LOGIN_ID, member.getLoginId())
+                .addKeyValue(ERROR_MESSAGE, e.getMessage())
+                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
+                .setCause(e)
+                .log("Member registration failed");
+            throw e;
+        }
     }
 
     @Transactional(readOnly = true)
@@ -33,19 +60,64 @@ public class MemberService {
 
     @Transactional
     public void updateRole(String role, String loginId) {
+        long startTime = System.currentTimeMillis();
+
         Member member = findMemberByLoginId(loginId);
+        RoleType oldRole = member.getRole();
         RoleType roleType = RoleType.valueOf(role);
         member.updateRole(roleType);
+
+        log.atInfo()
+            .addKeyValue(EVENT, MEMBER_ROLE_CHANGED)
+            .addKeyValue(MEMBER_ID, member.getId())
+            .addKeyValue(LOGIN_ID, loginId)
+            .addKeyValue("old_role", oldRole.name())
+            .addKeyValue("new_role", roleType.name())
+            .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
+            .log("Member role updated successfully");
     }
 
     public JWTUserInfo checkLoginCredentials(String loginId, String password) {
-        Member member = (Member) memberRepository.findByLoginId(loginId).orElseThrow(()->
-                new AuthenticationException(ResultCode.MEMBER_NOT_FOUND));
-        log.info("[CheckLoginCredential] Member loginId : {}", member.getLoginId());
-        authUtils.checkPassword(member.getPassword(), password);
-        JWTUserInfo userInfo = new JWTUserInfo();
-        userInfo.of(member);
-        return userInfo;
+        long startTime = System.currentTimeMillis();
+
+        try {
+            Member member = memberRepository.findByLoginId(loginId).orElseThrow(() -> {
+                log.atWarn()
+                    .addKeyValue(EVENT, LOGIN_FAILED)
+                    .addKeyValue(LOGIN_ID, loginId)
+                    .addKeyValue(ERROR_CODE, ResultCode.MEMBER_NOT_FOUND.getCode())
+                    .addKeyValue(ERROR_MESSAGE, "Member not found")
+                    .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
+                    .log("Login failed - member not found");
+                return new AuthenticationException(ResultCode.MEMBER_NOT_FOUND);
+            });
+
+            authUtils.checkPassword(member.getPassword(), password);
+
+            log.atInfo()
+                .addKeyValue(EVENT, LOGIN_SUCCESS)
+                .addKeyValue(MEMBER_ID, member.getId())
+                .addKeyValue(LOGIN_ID, member.getLoginId())
+                .addKeyValue(USER_ROLE, member.getRole().name())
+                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
+                .log("Login successful");
+
+            JWTUserInfo userInfo = new JWTUserInfo();
+            userInfo.of(member);
+            return userInfo;
+
+        } catch (AuthenticationException e) {
+            if (!e.getResultCode().equals(ResultCode.MEMBER_NOT_FOUND)) {
+                log.atWarn()
+                    .addKeyValue(EVENT, LOGIN_FAILED)
+                    .addKeyValue(LOGIN_ID, loginId)
+                    .addKeyValue(ERROR_CODE, e.getResultCode().getCode())
+                    .addKeyValue(ERROR_MESSAGE, "Invalid password")
+                    .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
+                    .log("Login failed - invalid credentials");
+            }
+            throw e;
+        }
     }
 
     public void checkDuplicateLoginId(String loginId) {
