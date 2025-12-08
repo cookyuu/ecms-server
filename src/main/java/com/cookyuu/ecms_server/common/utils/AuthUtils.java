@@ -19,8 +19,4 @@ public class AuthUtils {
             throw new BadCredentialsException("[checkMemberPw] Password is not matched.");
         }
     }
-
-    public String encPassword(String password) {
-        return passwordEncoder.encode(password);
-    }
 }
