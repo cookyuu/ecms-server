@@ -19,6 +19,7 @@ import com.cookyuu.ecms_server.domain.seller.entity.Seller;
 import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -71,6 +72,9 @@ class OrderServiceTest {
 
     @Mock
     private RedisUtils redisUtils;
+
+    @Mock
+    private AuthorizationService authorizationService;
 
     @AfterEach
     void tearDown() {
@@ -364,6 +368,7 @@ class OrderServiceTest {
         CancelOrderDto.Request cancelRequest = new CancelOrderDto.Request("TEST_ORDER_NUMBER", "단순 변심");
 
         when(orderRepository.findByOrderNumberWithProductsForUpdate(anyString())).thenReturn(Optional.of(order));
+        doNothing().when(authorizationService).validateResourceOwnership(anyLong(), anyLong(), any(ResultCode.class));
 
         // When
         ResultCode result = orderService.cancelOrder(user, cancelRequest);
@@ -432,6 +437,7 @@ class OrderServiceTest {
         CancelOrderDto.Request cancelRequest = new CancelOrderDto.Request("TEST_ORDER_NUMBER", "단순 변심");
 
         when(orderRepository.findByOrderNumberWithProductsForUpdate(anyString())).thenReturn(Optional.of(order));
+        doNothing().when(authorizationService).validateResourceOwnership(anyLong(), anyLong(), any(ResultCode.class));
 
         // When & Then
         assertThatThrownBy(() -> orderService.cancelOrder(user, cancelRequest))
@@ -464,6 +470,8 @@ class OrderServiceTest {
         CancelOrderDto.Request cancelRequest = new CancelOrderDto.Request("TEST_ORDER_NUMBER", "단순 변심");
 
         when(orderRepository.findByOrderNumberWithProductsForUpdate(anyString())).thenReturn(Optional.of(order));
+        doThrow(new BusinessException(ResultCode.ORDER_BUYER_UNMATCHED))
+                .when(authorizationService).validateResourceOwnership(eq(userId), eq(2L), any(ResultCode.class));
 
         // When & Then
         assertThatThrownBy(() -> orderService.cancelOrder(user, cancelRequest))
@@ -515,6 +523,7 @@ class OrderServiceTest {
                 .thenReturn(Arrays.asList(newProduct));
         doNothing().when(orderLineRepository).deleteAll(anyList());
         when(orderLineRepository.saveAll(anyList())).thenReturn(new ArrayList<>());
+        doNothing().when(authorizationService).validateResourceOwnership(anyLong(), anyLong(), any(ResultCode.class));
 
         // When
         ResultCode result = orderService.reviseOrder(user, reviseRequest);
@@ -636,6 +645,7 @@ class OrderServiceTest {
         when(productService.findProductsByIdInWithLock(anyList()))
                 .thenReturn(Arrays.asList(oldProduct))
                 .thenReturn(new ArrayList<>());
+        doNothing().when(authorizationService).validateResourceOwnership(anyLong(), anyLong(), any(ResultCode.class));
 
         // When & Then
         assertThatThrownBy(() -> orderService.reviseOrder(user, reviseRequest))
@@ -669,6 +679,8 @@ class OrderServiceTest {
         ReviseOrderDto.Request reviseRequest = new ReviseOrderDto.Request("TEST_ORDER_NUMBER", Arrays.asList(newOrderItem), 0);
 
         when(orderRepository.findByOrderNumberWithProductsForUpdate(anyString())).thenReturn(Optional.of(order));
+        doThrow(new BusinessException(ResultCode.ORDER_BUYER_UNMATCHED))
+                .when(authorizationService).validateResourceOwnership(eq(userId), eq(2L), any(ResultCode.class));
 
         // When & Then
         assertThatThrownBy(() -> orderService.reviseOrder(user, reviseRequest))
@@ -738,6 +750,8 @@ class OrderServiceTest {
                 .build();
 
         when(orderRepository.getOrderDetail(orderNumber)).thenReturn(orderDetail);
+        when(authorizationService.getUserRole(user)).thenReturn(RoleType.USER);
+        doNothing().when(authorizationService).validateOrderBuyerAccess(user, userId);
 
         // When
         OrderDetailDto result = orderService.getOrderDetailCacheable(user, orderNumber);
@@ -778,6 +792,8 @@ class OrderServiceTest {
                 .build();
 
         when(orderRepository.getOrderDetail(orderNumber)).thenReturn(orderDetail);
+        when(authorizationService.getUserRole(user)).thenReturn(RoleType.SELLER);
+        doNothing().when(authorizationService).validateOrderSellerAccess(eq(user), anyList());
 
         // When
         OrderDetailDto result = orderService.getOrderDetailCacheable(user, orderNumber);
@@ -817,6 +833,9 @@ class OrderServiceTest {
                 .build();
 
         when(orderRepository.getOrderDetail(orderNumber)).thenReturn(orderDetail);
+        when(authorizationService.getUserRole(user)).thenReturn(RoleType.USER);
+        doThrow(new BusinessException(ResultCode.ORDER_BUYER_UNMATCHED))
+                .when(authorizationService).validateOrderBuyerAccess(user, 2L);
 
         // When & Then
         assertThatThrownBy(() -> orderService.getOrderDetailCacheable(user, orderNumber))
@@ -853,6 +872,9 @@ class OrderServiceTest {
                 .build();
 
         when(orderRepository.getOrderDetail(orderNumber)).thenReturn(orderDetail);
+        when(authorizationService.getUserRole(user)).thenReturn(RoleType.SELLER);
+        doThrow(new BusinessException(ResultCode.ORDER_SELLER_UNMATCHED))
+                .when(authorizationService).validateOrderSellerAccess(eq(user), anyList());
 
         // When & Then
         assertThatThrownBy(() -> orderService.getOrderDetailCacheable(user, orderNumber))

@@ -21,7 +21,7 @@ import com.cookyuu.ecms_server.domain.product.service.ProductService;
 import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
-import com.cookyuu.ecms_server.common.utils.JwtUtils;
+import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,6 +56,7 @@ public class OrderService {
     private final CartService cartService;
     private final ProductService productService;
     private final RedisUtils redisUtils;
+    private final AuthorizationService authorizationService;
 
     @Transactional
     public CreateOrderDto.Response createOrder(Long userId, CreateOrderDto.Request orderInfo) {
@@ -150,7 +151,7 @@ public class OrderService {
 
         Order order = findOrderByOrderNumberWithProductsForUpdate(cancelInfo.getOrderNumber());
         order.isCanceled();
-        checkBuyerOfOrder(userId, order.getBuyer().getId());
+        authorizationService.validateResourceOwnership(userId, order.getBuyer().getId(), ResultCode.ORDER_BUYER_UNMATCHED);
 
         boolean isPossibleCancel = OrderStatus.isPossibleOrderCancel(order.getStatus());
         if (isPossibleCancel) {
@@ -205,7 +206,7 @@ public class OrderService {
         }
 
         List<OrderLine> orderLines = order.getOrderLines();
-        checkBuyerOfOrder(Long.parseLong(user.getUsername()), order.getBuyer().getId());
+        authorizationService.validateResourceOwnership(Long.parseLong(user.getUsername()), order.getBuyer().getId(), ResultCode.ORDER_BUYER_UNMATCHED);
 
         List<Long> oldProductIds = orderLines.stream()
                 .map(orderLine -> orderLine.getProduct().getId())
@@ -287,57 +288,29 @@ public class OrderService {
             key = "'order:number:' + #orderNumber"
     )
     public OrderDetailDto getOrderDetailCacheable(UserDetails user , String orderNumber) {
-        String jwtRole = JwtUtils.getRoleFromUserDetails(user);
+        RoleType userRole = authorizationService.getUserRole(user);
         log.atDebug()
             .addKeyValue("operation", "getOrderDetail")
-            .addKeyValue(USER_ROLE, jwtRole)
+            .addKeyValue(USER_ROLE, userRole.name())
             .addKeyValue(ORDER_NUMBER, orderNumber)
             .log("Fetching order detail");
+
         OrderDetailDto orderDetailInfo = getOrderDetailBy(orderNumber);
-        if (jwtRole.equals("ROLE_"+RoleType.USER.name())) {
-            Long buyerId = orderDetailInfo.getOrderInfo().getBuyerId();
-            checkBuyerOfOrder(Long.parseLong(user.getUsername()), buyerId);
-        } else if (jwtRole.equals("ROLE_"+RoleType.SELLER.name())) {
-            boolean isSellerOfOrder = orderDetailInfo.getOrderLines().stream().anyMatch(orderLineInfo -> checkSellerOfOrder(Long.parseLong(user.getUsername()), orderLineInfo.getSellerId()));
-            if (!isSellerOfOrder) {
-                throw new BusinessException(ResultCode.ORDER_SELLER_UNMATCHED);
-            }
+
+        if (userRole == RoleType.USER) {
+            authorizationService.validateOrderBuyerAccess(user, orderDetailInfo.getOrderInfo().getBuyerId());
+        } else if (userRole == RoleType.SELLER) {
+            List<Long> sellerIds = orderDetailInfo.getOrderLines().stream()
+                .map(orderLineInfo -> orderLineInfo.getSellerId())
+                .collect(Collectors.toList());
+            authorizationService.validateOrderSellerAccess(user, sellerIds);
         }
+
         return orderDetailInfo;
     }
 
     private OrderDetailDto getOrderDetailBy(String orderNumber) {
         return orderRepository.getOrderDetail(orderNumber);
-    }
-
-    private void checkBuyerOfOrder(Long reqUserId, Long buyerId) {
-        log.atDebug()
-            .addKeyValue("operation", "checkBuyerOfOrder")
-            .addKeyValue("buyer_id", buyerId)
-            .addKeyValue("request_user_id", reqUserId)
-            .log("Checking buyer authorization");
-        if (!buyerId.equals(reqUserId)) {
-            log.atWarn()
-                .addKeyValue(EVENT, AUTHORIZATION_ERROR)
-                .addKeyValue("buyer_id", buyerId)
-                .addKeyValue("request_user_id", reqUserId)
-                .addKeyValue(ERROR_CODE, ResultCode.ORDER_BUYER_UNMATCHED.getCode())
-                .log("Order buyer authorization failed - user mismatch");
-            throw new BusinessException(ResultCode.ORDER_BUYER_UNMATCHED);
-        }
-        log.atDebug()
-            .addKeyValue("operation", "checkBuyerOfOrder")
-            .addKeyValue(USER_ID, reqUserId)
-            .log("Buyer authorization verified");
-    }
-
-    private boolean checkSellerOfOrder(long reqUserId, Long sellerId) {
-        log.atDebug()
-            .addKeyValue("operation", "checkSellerOfOrder")
-            .addKeyValue(SELLER_ID, sellerId)
-            .addKeyValue("request_user_id", reqUserId)
-            .log("Checking seller authorization");
-        return sellerId.equals(reqUserId);
     }
 
     private void compareQuantityAndStockQuantity(int quantity, Integer stockQuantity) {

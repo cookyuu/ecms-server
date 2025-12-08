@@ -10,10 +10,11 @@ import com.cookyuu.ecms_server.domain.payment.dto.PaymentDetailDto;
 import com.cookyuu.ecms_server.domain.payment.entity.Payment;
 import com.cookyuu.ecms_server.domain.payment.enums.PaymentMethod;
 import com.cookyuu.ecms_server.domain.payment.repository.PaymentRepository;
+import com.cookyuu.ecms_server.domain.member.enums.RoleType;
 import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
-import com.cookyuu.ecms_server.common.utils.JwtUtils;
+import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +26,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
 import static com.cookyuu.ecms_server.common.logging.LogFields.*;
@@ -41,6 +41,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderService orderService;
     private final RedisUtils redisUtils;
+    private final AuthorizationService authorizationService;
 
     @Transactional
     public CreatePaymentDto.ResponseServ createPayment(UserDetails user, CreatePaymentDto.Request paymentInfo) {
@@ -127,52 +128,33 @@ public class PaymentService {
     @Transactional(readOnly = true)
     public List<PaymentDetailDto> getPaymentDetail(UserDetails user, String paymentNumber) {
         Long reqUserId = Long.parseLong(user.getUsername());
-        String reqUserRole = JwtUtils.getRoleFromUserDetails(user);
+        RoleType userRole = authorizationService.getUserRole(user);
 
         log.atDebug()
             .addKeyValue("operation", "getPaymentDetail")
             .addKeyValue(USER_ID, reqUserId)
-            .addKeyValue(USER_ROLE, reqUserRole)
+            .addKeyValue(USER_ROLE, userRole.name())
             .addKeyValue(PAYMENT_NUMBER, paymentNumber)
             .log("Fetching payment detail");
 
         List<PaymentDetailDto> resPaymentDetail = getPaymentInfo(paymentNumber);
-        if (reqUserRole.equals("ROLE_USER")) {
-            boolean hasAccess = resPaymentDetail.stream()
-                    .anyMatch(paymentDetail -> paymentDetail.getBuyerId().equals(reqUserId));
-            if (!hasAccess) {
-                log.atWarn()
-                    .addKeyValue(EVENT, AUTHORIZATION_ERROR)
-                    .addKeyValue(USER_ID, reqUserId)
-                    .addKeyValue(PAYMENT_NUMBER, paymentNumber)
-                    .addKeyValue(ERROR_CODE, ResultCode.PAYMENT_INACCESSIBLE_DETAIL.getCode())
-                    .log("Payment detail access denied - buyer mismatch");
-                throw new BusinessException(ResultCode.PAYMENT_INACCESSIBLE_DETAIL);
-            }
-        } else if (reqUserRole.equals("ROLE_SELLER")) {
-            resPaymentDetail.removeIf(paymentDetail -> !paymentDetail.getSellerId().equals(reqUserId));
-            if (resPaymentDetail.isEmpty()) {
-                log.atWarn()
-                    .addKeyValue(EVENT, AUTHORIZATION_ERROR)
-                    .addKeyValue(USER_ID, reqUserId)
-                    .addKeyValue(PAYMENT_NUMBER, paymentNumber)
-                    .addKeyValue(ERROR_CODE, ResultCode.PAYMENT_INACCESSIBLE_DETAIL.getCode())
-                    .log("Payment detail access denied - seller mismatch");
-                throw new BusinessException(ResultCode.PAYMENT_INACCESSIBLE_DETAIL);
-            }
-        } else if (reqUserRole.equals("ROLE_ADMIN")) {
-            log.atDebug()
-                .addKeyValue("operation", "getPaymentDetail")
-                .addKeyValue(USER_ROLE, reqUserRole)
-                .log("Admin access granted for payment detail");
-        } else {
-            log.atWarn()
-                .addKeyValue(EVENT, AUTHORIZATION_ERROR)
-                .addKeyValue(USER_ID, reqUserId)
-                .addKeyValue(USER_ROLE, reqUserRole)
-                .addKeyValue(ERROR_CODE, ResultCode.PAYMENT_INACCESSIBLE_DETAIL.getCode())
-                .log("Payment detail access denied - invalid role");
-            throw new BusinessException(ResultCode.PAYMENT_INACCESSIBLE_DETAIL);
+
+        if (userRole == RoleType.USER) {
+            authorizationService.validateUserAccess(
+                user,
+                resPaymentDetail,
+                reqUserId,
+                paymentDetail -> paymentDetail.getBuyerId().equals(reqUserId),
+                ResultCode.PAYMENT_INACCESSIBLE_DETAIL
+            );
+        } else if (userRole == RoleType.SELLER) {
+            resPaymentDetail = authorizationService.filterResourcesByRole(
+                user,
+                resPaymentDetail,
+                reqUserId,
+                paymentDetail -> paymentDetail.getSellerId().equals(reqUserId),
+                ResultCode.PAYMENT_INACCESSIBLE_DETAIL
+            );
         }
 
         log.atDebug()
@@ -230,7 +212,12 @@ public class PaymentService {
     }
 
     private void checkPossiblePayment(Order order, Long paymentUserId) {
-        compareToBuyerPaymentUser(order.getBuyer().getId(), paymentUserId);
+        authorizationService.validateResourceOwnership(
+            paymentUserId,
+            order.getBuyer().getId(),
+            ResultCode.PAYMENT_BUYER_UNMATCHED
+        );
+
         List<OrderStatus> paymentPossibleOrderStatuses = new ArrayList<>();
         paymentPossibleOrderStatuses.add(OrderStatus.ORDER_COMPLETE);
         paymentPossibleOrderStatuses.add(OrderStatus.PAYMENT_FAIL);
@@ -253,7 +240,12 @@ public class PaymentService {
     }
 
     private void checkPossiblePaymentCancel(Order order, Long paymentUserId) {
-        compareToBuyerPaymentUser(order.getBuyer().getId(), paymentUserId);
+        authorizationService.validateResourceOwnership(
+            paymentUserId,
+            order.getBuyer().getId(),
+            ResultCode.PAYMENT_BUYER_UNMATCHED
+        );
+
         if (!order.getStatus().equals(OrderStatus.PAYMENT_COMPLETE)) {
             log.atWarn()
                 .addKeyValue(EVENT, VALIDATION_ERROR)
@@ -272,22 +264,5 @@ public class PaymentService {
 
     private Payment findPaymentByPaymentNumber(String paymentNumber) {
         return paymentRepository.findByPaymentNumber(paymentNumber).orElseThrow(() -> new BusinessException(ResultCode.PAYMENT_NOT_FOUND));
-    }
-
-    private void compareToBuyerPaymentUser(Long buyerId, Long paymentUserId) {
-        log.atDebug()
-            .addKeyValue("operation", "compareBuyerAndPaymentUser")
-            .addKeyValue("buyer_id", buyerId)
-            .addKeyValue("payment_user_id", paymentUserId)
-            .log("Checking buyer and payment user match");
-        if (!Objects.equals(buyerId, paymentUserId)) {
-            log.atWarn()
-                .addKeyValue(EVENT, AUTHORIZATION_ERROR)
-                .addKeyValue("buyer_id", buyerId)
-                .addKeyValue("payment_user_id", paymentUserId)
-                .addKeyValue(ERROR_CODE, ResultCode.PAYMENT_BUYER_UNMATCHED.getCode())
-                .log("Payment authorization failed - buyer mismatch");
-            throw new BusinessException(ResultCode.PAYMENT_BUYER_UNMATCHED);
-        }
     }
 }
