@@ -102,13 +102,13 @@ public class Order extends BaseTimeEntity {
         this.totalPrice = totalPrice;
     }
 
-    public void isCanceled() {
+    public void validateNotCanceled() {
         if (isCanceled) {
             throw new BusinessException(ResultCode.ALREADY_CANCELED_ORDER);
         }
     }
 
-    public void isPaymentComplete() {
+    public void validatePaymentComplete() {
         if (!this.status.equals(OrderStatus.PAYMENT_COMPLETE)) {
             throw new BusinessException(ResultCode.ORDER_STATUS_ERROR);
         }

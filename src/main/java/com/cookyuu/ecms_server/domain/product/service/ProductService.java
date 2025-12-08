@@ -109,7 +109,7 @@ public class ProductService {
         if (!isProductOwnedBySeller(product, sellerId)) {
             throw new BusinessException(ResultCode.PRODUCT_OWNER_UNMATCHED);
         }
-        product.isDeleted();
+        product.validateNotDeleted();
         product.delete();
         log.atInfo()
                 .addKeyValue(EVENT, PRODUCT_DELETED)

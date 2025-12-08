@@ -31,7 +31,7 @@ public class ShipmentService {
     @Transactional
     public CreateShipmentDto.Response createShipment(CreateShipmentDto.Request shipmentInfo) {
         Order order = orderService.findOrderByOrderNumber(shipmentInfo.getOrderNumber());
-        order.isPaymentComplete();
+        order.validatePaymentComplete();
         String shipmentNumber = createShipmentNumber();
 
         Shipment shipment = shipmentInfo.toEntity(shipmentNumber, order);

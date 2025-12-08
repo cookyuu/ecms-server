@@ -46,7 +46,7 @@ public class CartService {
     public void updateCartItem(UserDetails user, UpdateCartItemDto.Request cartItemInfo) {
         Member member = memberService.findMemberById(Long.parseLong(user.getUsername()));
         Product product = productService.findProductById(cartItemInfo.getProductId());
-        product.isDeleted();
+        product.validateNotDeleted();
         Cart cart = cartRepository.findByMemberId(member.getId()).orElseThrow(() -> new BusinessException(ResultCode.CART_NOT_FOUND));
         if (cartItemInfo.getQuantity() < 1) {
             log.atError()

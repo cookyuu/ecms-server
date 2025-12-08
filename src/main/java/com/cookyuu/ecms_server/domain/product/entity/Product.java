@@ -127,7 +127,7 @@ public class Product extends BaseTimeEntity {
         this.stockQuantity += quantity;
     }
 
-    public void isDeleted() {
+    public void validateNotDeleted() {
         if (isDeleted) {
             throw new BusinessException(ResultCode.ALREADY_DELETED_PRODUCT, "이미 삭제된 상품입니다. productId : " + id);
         }

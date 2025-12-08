@@ -84,7 +84,7 @@ public class OrderService {
                     .log("Order creation failed - product not found");
                 throw new BusinessException(ResultCode.PRODUCT_NOT_FOUND);
             }
-            product.isDeleted();
+            product.validateNotDeleted();
             int quantity = orderItemInfo.getQuantity();
             int price = orderItemInfo.getPrice();
             totalPrice += (quantity*price);
@@ -150,7 +150,7 @@ public class OrderService {
         Long userId = Long.parseLong(user.getUsername());
 
         Order order = findOrderByOrderNumberWithProductsForUpdate(cancelInfo.getOrderNumber());
-        order.isCanceled();
+        order.validateNotCanceled();
         authorizationService.validateResourceOwnership(userId, order.getBuyer().getId(), ResultCode.ORDER_BUYER_UNMATCHED);
 
         boolean isPossibleCancel = OrderStatus.isPossibleOrderCancel(order.getStatus());
@@ -192,7 +192,7 @@ public class OrderService {
     )
     public ResultCode reviseOrder(UserDetails user, ReviseOrderDto.Request reviseOrderInfo) {
         Order order = findOrderByOrderNumberWithProductsForUpdate(reviseOrderInfo.getOrderNumber());
-        order.isCanceled();
+        order.validateNotCanceled();
         boolean isPossibleRevise = OrderStatus.isPossibleOrderRevise(order.getStatus());
         if (!isPossibleRevise) {
             log.atWarn()
@@ -242,7 +242,7 @@ public class OrderService {
             if (product == null) {
                 throw new BusinessException(ResultCode.PRODUCT_NOT_FOUND);
             }
-            product.isDeleted();
+            product.validateNotDeleted();
             int quantity = orderItemInfo.getQuantity();
             int price = orderItemInfo.getPrice();
             totalPrice += (quantity*price);
