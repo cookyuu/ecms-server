@@ -10,13 +10,11 @@ import com.cookyuu.ecms_server.domain.shipment.entity.Shipment;
 import com.cookyuu.ecms_server.domain.shipment.enums.ShipmentStatus;
 import com.cookyuu.ecms_server.domain.shipment.repository.ShipmentRepository;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
 import static com.cookyuu.ecms_server.common.logging.LogFields.*;
@@ -27,12 +25,13 @@ import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 public class ShipmentService {
     private final ShipmentRepository shipmentRepository;
     private final OrderService orderService;
+    private final BusinessNumberGenerator businessNumberGenerator;
 
     @Transactional
     public CreateShipmentDto.Response createShipment(CreateShipmentDto.Request shipmentInfo) {
         Order order = orderService.findOrderByOrderNumber(shipmentInfo.getOrderNumber());
         order.validatePaymentComplete();
-        String shipmentNumber = createShipmentNumber();
+        String shipmentNumber = businessNumberGenerator.generateShipmentNumber();
 
         Shipment shipment = shipmentInfo.toEntity(shipmentNumber, order);
         try {
@@ -87,20 +86,5 @@ public class ShipmentService {
 
     private Shipment findShipmentByShipmentNumber(String shipmentNumber) {
         return shipmentRepository.findByShipmentNumber(shipmentNumber).orElseThrow(() -> new BusinessException(ResultCode.SHIPMENT_NOT_FOUND));
-    }
-
-    private String createShipmentNumber() {
-        StringBuilder sb = new StringBuilder();
-        String formatDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"));
-        sb.append("SP").append(formatDate);
-        for (int i = 0; i < 5; i++) {
-            int random = (int) (Math.random() * 10);
-            sb.append(random);
-        }
-        String shipmentNumber = sb.toString();
-        log.atDebug()
-                .addKeyValue(SHIPMENT_NUMBER, shipmentNumber)
-                .log("Shipment number generated");
-        return shipmentNumber;
     }
 }

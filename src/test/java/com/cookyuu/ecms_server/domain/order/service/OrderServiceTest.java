@@ -19,6 +19,7 @@ import com.cookyuu.ecms_server.domain.seller.entity.Seller;
 import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
 import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -76,6 +77,9 @@ class OrderServiceTest {
     @Mock
     private AuthorizationService authorizationService;
 
+    @Mock
+    private BusinessNumberGenerator businessNumberGenerator;
+
     @AfterEach
     void tearDown() {
         MDC.clear();
@@ -129,6 +133,7 @@ class OrderServiceTest {
         when(memberService.findMemberById(userId)).thenReturn(buyer);
         when(cartService.findCartByMemberIdWithCartItemsAndProducts(userId)).thenReturn(cart);
         when(productService.findProductsByIdInWithLock(anyList())).thenReturn(Arrays.asList(product));
+        when(businessNumberGenerator.generateOrderNumber(any(), any())).thenReturn("TEST_ORDER_NUMBER");
         when(redisUtils.getData(anyString())).thenReturn(null);
         doNothing().when(redisUtils).setDataExpire(anyString(), anyString(), anyLong());
         when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);

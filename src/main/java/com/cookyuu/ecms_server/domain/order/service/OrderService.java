@@ -21,6 +21,7 @@ import com.cookyuu.ecms_server.domain.product.service.ProductService;
 import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
 import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
@@ -32,8 +33,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,8 +46,6 @@ import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 @RequiredArgsConstructor
 public class OrderService {
     private static final int ORDER_NUMBER_EXPIRATION_SECONDS = 61;
-    private static final int ORDER_NUMBER_RANDOM_SUFFIX_LENGTH = 5;
-    private static final int RANDOM_DIGIT_BOUND = 10;
 
     private final OrderRepository orderRepository;
     private final OrderLineRepository orderLineRepository;
@@ -57,6 +54,7 @@ public class OrderService {
     private final ProductService productService;
     private final RedisUtils redisUtils;
     private final AuthorizationService authorizationService;
+    private final BusinessNumberGenerator businessNumberGenerator;
 
     @Transactional
     public CreateOrderDto.Response createOrder(Long userId, CreateOrderDto.Request orderInfo) {
@@ -95,9 +93,9 @@ public class OrderService {
             orderItemInfo.addProduct(product);
         }
 
-        String orderNumber = createOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
+        String orderNumber = businessNumberGenerator.generateOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
         while (redisUtils.getData(RedisKeyCode.ORDER_NUMBER.getSeparator()+orderNumber) != null) {
-            orderNumber = createOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
+            orderNumber = businessNumberGenerator.generateOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
         }
 
         try {
@@ -387,17 +385,6 @@ public class OrderService {
                 .filter(cartItem -> cartItem.getProduct().equals(product))
                 .findFirst()
                 .orElse(null);
-    }
-
-    private String createOrderNumber(OrderCode order, CouponCode coopon) {
-        StringBuilder sb = new StringBuilder();
-        String formatDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"));
-        sb.append(order.getCode()).append(formatDate).append(coopon.getCode());
-        for (int i = 0; i < ORDER_NUMBER_RANDOM_SUFFIX_LENGTH; i++) {
-            int random = (int) (Math.random() * RANDOM_DIGIT_BOUND);
-            sb.append(random);
-        }
-        return sb.toString();
     }
 
     public Order findOrderByOrderNumber(String orderNumber) {

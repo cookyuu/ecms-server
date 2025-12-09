@@ -7,6 +7,7 @@ import com.cookyuu.ecms_server.domain.coupon.repository.CouponRepository;
 import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import com.cookyuu.ecms_server.common.utils.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -15,9 +16,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
 import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 
@@ -25,16 +23,14 @@ import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 @Service
 @RequiredArgsConstructor
 public class CouponService {
-    private static final int COUPON_NUMBER_RANDOM_SUFFIX_LENGTH = 5;
-    private static final int RANDOM_DIGIT_BOUND = 10;
-
     private final CouponRepository couponRepository;
     private final RedisTemplate redisTemplate;
     private final RedisUtils redisUtils;
+    private final BusinessNumberGenerator businessNumberGenerator;
 
     @Transactional
     public CreateCouponDto.Response createCoupon(CreateCouponDto.Request couponInfo) {
-        String couponNumber = makeCouponNumber(CouponCode.of(couponInfo.getCouponCode()));
+        String couponNumber = businessNumberGenerator.generateCouponNumber(CouponCode.of(couponInfo.getCouponCode()));
         log.atDebug()
                 .addKeyValue(COUPON_NUMBER, couponNumber)
                 .addKeyValue(COUPON_CODE, couponInfo.getCouponCode())
@@ -72,17 +68,6 @@ public class CouponService {
             throw new BusinessException(ResultCode.COUPON_PRICE_EMPTY);
         }
         return price;
-    }
-
-    private String makeCouponNumber(CouponCode couponCode) {
-        StringBuilder sb = new StringBuilder();
-        String formatDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"));
-        sb.append("CP").append(couponCode.getCode()).append(formatDate);
-        for (int i = 0; i < COUPON_NUMBER_RANDOM_SUFFIX_LENGTH; i++) {
-            int random = (int) (Math.random() * RANDOM_DIGIT_BOUND);
-            sb.append(random);
-        }
-        return sb.toString();
     }
 
     @Transactional

@@ -7,6 +7,7 @@ import com.cookyuu.ecms_server.domain.coupon.repository.CouponRepository;
 import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,6 +45,9 @@ class CouponServiceTest {
     @Mock
     private RedisUtils redisUtils;
 
+    @Mock
+    private BusinessNumberGenerator businessNumberGenerator;
+
     @AfterEach
     void tearDown() {
         MDC.clear();
@@ -73,6 +77,7 @@ class CouponServiceTest {
                 .build();
         ReflectionTestUtils.setField(savedCoupon, "id", 1L);
 
+        when(businessNumberGenerator.generateCouponNumber(CouponCode.FIX_PRICE_DISCOUNT)).thenReturn("CPM240101000012345");
         when(couponRepository.save(any(Coupon.class))).thenReturn(savedCoupon);
         doNothing().when(redisUtils).setData(anyString(), anyString());
 
@@ -118,6 +123,7 @@ class CouponServiceTest {
                 .build();
         ReflectionTestUtils.setField(savedCoupon, "id", 1L);
 
+        when(businessNumberGenerator.generateCouponNumber(CouponCode.TEN__PERCENT_DISCOUNT)).thenReturn("CPC240101000012345");
         when(couponRepository.save(any(Coupon.class))).thenReturn(savedCoupon);
         doNothing().when(redisUtils).setData(anyString(), anyString());
 
@@ -152,6 +158,8 @@ class CouponServiceTest {
                 null
         );
 
+        when(businessNumberGenerator.generateCouponNumber(CouponCode.FIX_PRICE_DISCOUNT)).thenReturn("CPM240101000012345");
+
         // When & Then
         assertThatThrownBy(() -> couponService.createCoupon(request))
                 .isInstanceOf(BusinessException.class)
@@ -170,6 +178,8 @@ class CouponServiceTest {
                 100,
                 0
         );
+
+        when(businessNumberGenerator.generateCouponNumber(CouponCode.FIX_PRICE_DISCOUNT)).thenReturn("CPM240101000012345");
 
         // When & Then
         assertThatThrownBy(() -> couponService.createCoupon(request))

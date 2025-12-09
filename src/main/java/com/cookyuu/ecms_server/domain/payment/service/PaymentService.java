@@ -11,19 +11,16 @@ import com.cookyuu.ecms_server.domain.payment.entity.Payment;
 import com.cookyuu.ecms_server.domain.payment.enums.PaymentMethod;
 import com.cookyuu.ecms_server.domain.payment.repository.PaymentRepository;
 import com.cookyuu.ecms_server.domain.member.enums.RoleType;
-import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
 import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
-import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,14 +31,10 @@ import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 @Slf4j
 @RequiredArgsConstructor
 public class PaymentService {
-    private static final int PAYMENT_NUMBER_EXPIRATION_SECONDS = 61;
-    private static final int PAYMENT_NUMBER_RANDOM_SUFFIX_LENGTH = 5;
-    private static final int RANDOM_DIGIT_BOUND = 10;
-
     private final PaymentRepository paymentRepository;
     private final OrderService orderService;
-    private final RedisUtils redisUtils;
     private final AuthorizationService authorizationService;
+    private final BusinessNumberGenerator businessNumberGenerator;
 
     @Transactional
     public CreatePaymentDto.ResponseServ createPayment(UserDetails user, CreatePaymentDto.Request paymentInfo) {
@@ -50,7 +43,7 @@ public class PaymentService {
 
         Order order = orderService.findOrderByOrderNumberWithAll(paymentInfo.getOrderNumber());
         checkPossiblePayment(order, userId);
-        String paymentNumber = createAndSavePaymentNumberInRedis(paymentInfo.getPaymentMethod());
+        String paymentNumber = businessNumberGenerator.generatePaymentNumber(paymentInfo.getPaymentMethod());
 
         List<OrderLine> orderLines = order.getOrderLines();
         if (paymentInfo.getPaymentPrice().equals(order.getTotalPrice())) {
@@ -167,48 +160,6 @@ public class PaymentService {
 
     private List<PaymentDetailDto> getPaymentInfo(String paymentNumber) {
         return paymentRepository.getPaymentDetail(paymentNumber);
-    }
-
-    private String createAndSavePaymentNumberInRedis(PaymentMethod paymentMethod) {
-        String paymentNumber = createPaymentNumber(paymentMethod);
-        while (redisUtils.getData(RedisKeyCode.PAYMENT_NUMBER.getSeparator()+paymentNumber) != null) {
-            paymentNumber = createPaymentNumber(paymentMethod);
-            log.atDebug()
-                .addKeyValue("operation", "createPaymentNumber")
-                .addKeyValue(PAYMENT_NUMBER, paymentNumber)
-                .log("Payment number duplicated, regenerating");
-        }
-
-        try {
-            String redisValueOfPayment = "true";
-            redisUtils.setDataExpire(RedisKeyCode.PAYMENT_NUMBER.getSeparator()+paymentNumber, redisValueOfPayment, PAYMENT_NUMBER_EXPIRATION_SECONDS);
-            log.atDebug()
-                .addKeyValue("operation", "createPaymentNumber")
-                .addKeyValue(PAYMENT_NUMBER, paymentNumber)
-                .log("Payment number saved to Redis");
-
-        } catch (Exception e) {
-            redisUtils.deleteData(RedisKeyCode.PAYMENT_NUMBER.getSeparator() + paymentNumber);
-            log.atError()
-                .addKeyValue(EVENT, SYSTEM_ERROR)
-                .addKeyValue(PAYMENT_NUMBER, paymentNumber)
-                .addKeyValue(ERROR_MESSAGE, "Redis transaction failed, rolling back")
-                .setCause(e)
-                .log("Payment number creation failed - Redis error");
-            throw e;
-        }
-        return paymentNumber;
-    }
-
-    private String createPaymentNumber(PaymentMethod paymentMethod) {
-        StringBuilder sb = new StringBuilder();
-        String formatDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"));
-        sb.append(paymentMethod.getCode()).append(formatDate);
-        for (int i = 0; i < PAYMENT_NUMBER_RANDOM_SUFFIX_LENGTH; i++) {
-            int random = (int) (Math.random() * RANDOM_DIGIT_BOUND);
-            sb.append(random);
-        }
-        return sb.toString();
     }
 
     private void checkPossiblePayment(Order order, Long paymentUserId) {
