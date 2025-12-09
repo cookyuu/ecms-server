@@ -7,6 +7,7 @@ import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import com.cookyuu.ecms_server.common.utils.RedissonUtils;
 import com.cookyuu.ecms_server.domain.coupon.entity.Coupon;
 import com.cookyuu.ecms_server.domain.coupon.enums.CouponCode;
+import com.cookyuu.ecms_server.domain.coupon.logging.CouponLogHelper;
 import com.cookyuu.ecms_server.domain.coupon.service.CouponService;
 import com.cookyuu.ecms_server.domain.coupon.service.IssueCouponService;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
@@ -57,6 +58,9 @@ class CouponFacadeTest {
 
     @Mock
     private RedissonUtils redissonUtils;
+
+    @Mock
+    private CouponLogHelper couponLogHelper;
 
     @AfterEach
     void tearDown() {

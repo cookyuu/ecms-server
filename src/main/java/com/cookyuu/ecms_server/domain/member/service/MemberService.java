@@ -4,25 +4,22 @@ import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
 import com.cookyuu.ecms_server.domain.member.dto.MemberDetailDto;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.enums.RoleType;
+import com.cookyuu.ecms_server.domain.member.logging.MemberLogHelper;
 import com.cookyuu.ecms_server.domain.member.repository.MemberRepository;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.AuthenticationException;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
-import static com.cookyuu.ecms_server.common.logging.LogFields.*;
-
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberService {
     private final MemberRepository memberRepository;
     private final AuthUtils authUtils;
+    private final MemberLogHelper memberLogHelper;
 
     @Transactional
     public Member save(Member member) {
@@ -31,24 +28,13 @@ public class MemberService {
         try {
             Member savedMember = memberRepository.save(member);
 
-            log.atInfo()
-                .addKeyValue(EVENT, MEMBER_REGISTERED)
-                .addKeyValue(MEMBER_ID, savedMember.getId())
-                .addKeyValue(LOGIN_ID, savedMember.getLoginId())
-                .addKeyValue(EMAIL, savedMember.getEmail())
-                .addKeyValue(USER_ROLE, savedMember.getRole().name())
-                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
-                .log("Member registered successfully");
+            memberLogHelper.logMemberRegistered(savedMember.getId(), savedMember.getLoginId(),
+                savedMember.getEmail(), savedMember.getRole().name(), System.currentTimeMillis() - startTime);
 
             return savedMember;
         } catch (Exception e) {
-            log.atError()
-                .addKeyValue(EVENT, BUSINESS_ERROR)
-                .addKeyValue(LOGIN_ID, member.getLoginId())
-                .addKeyValue(ERROR_MESSAGE, e.getMessage())
-                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
-                .setCause(e)
-                .log("Member registration failed");
+            memberLogHelper.logMemberRegistrationFailed(member.getLoginId(), e.getMessage(),
+                System.currentTimeMillis() - startTime, e);
             throw e;
         }
     }
@@ -67,14 +53,8 @@ public class MemberService {
         RoleType roleType = RoleType.valueOf(role);
         member.updateRole(roleType);
 
-        log.atInfo()
-            .addKeyValue(EVENT, MEMBER_ROLE_CHANGED)
-            .addKeyValue(MEMBER_ID, member.getId())
-            .addKeyValue(LOGIN_ID, loginId)
-            .addKeyValue("old_role", oldRole.name())
-            .addKeyValue("new_role", roleType.name())
-            .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
-            .log("Member role updated successfully");
+        memberLogHelper.logMemberRoleChanged(member.getId(), loginId, oldRole.name(),
+            roleType.name(), System.currentTimeMillis() - startTime);
     }
 
     public JWTUserInfo checkLoginCredentials(String loginId, String password) {
@@ -82,25 +62,15 @@ public class MemberService {
 
         try {
             Member member = memberRepository.findByLoginId(loginId).orElseThrow(() -> {
-                log.atWarn()
-                    .addKeyValue(EVENT, LOGIN_FAILED)
-                    .addKeyValue(LOGIN_ID, loginId)
-                    .addKeyValue(ERROR_CODE, ResultCode.MEMBER_NOT_FOUND.getCode())
-                    .addKeyValue(ERROR_MESSAGE, "Member not found")
-                    .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
-                    .log("Login failed - member not found");
+                memberLogHelper.logLoginFailedMemberNotFound(loginId, ResultCode.MEMBER_NOT_FOUND,
+                    System.currentTimeMillis() - startTime);
                 return new AuthenticationException(ResultCode.MEMBER_NOT_FOUND);
             });
 
             authUtils.checkPassword(member.getPassword(), password);
 
-            log.atInfo()
-                .addKeyValue(EVENT, LOGIN_SUCCESS)
-                .addKeyValue(MEMBER_ID, member.getId())
-                .addKeyValue(LOGIN_ID, member.getLoginId())
-                .addKeyValue(USER_ROLE, member.getRole().name())
-                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
-                .log("Login successful");
+            memberLogHelper.logLoginSuccess(member.getId(), member.getLoginId(),
+                member.getRole().name(), System.currentTimeMillis() - startTime);
 
             JWTUserInfo userInfo = new JWTUserInfo();
             userInfo.of(member);
@@ -108,13 +78,8 @@ public class MemberService {
 
         } catch (AuthenticationException e) {
             if (!e.getResultCode().equals(ResultCode.MEMBER_NOT_FOUND)) {
-                log.atWarn()
-                    .addKeyValue(EVENT, LOGIN_FAILED)
-                    .addKeyValue(LOGIN_ID, loginId)
-                    .addKeyValue(ERROR_CODE, e.getResultCode().getCode())
-                    .addKeyValue(ERROR_MESSAGE, "Invalid password")
-                    .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
-                    .log("Login failed - invalid credentials");
+                memberLogHelper.logLoginFailedInvalidPassword(loginId, e.getResultCode(),
+                    System.currentTimeMillis() - startTime);
             }
             throw e;
         }

@@ -8,6 +8,7 @@ import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
 import com.cookyuu.ecms_server.domain.member.dto.MemberDetailDto;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.enums.RoleType;
+import com.cookyuu.ecms_server.domain.member.logging.MemberLogHelper;
 import com.cookyuu.ecms_server.domain.member.repository.MemberRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -39,6 +40,9 @@ class MemberServiceTest {
 
     @Mock
     private AuthUtils authUtils;
+
+    @Mock
+    private MemberLogHelper memberLogHelper;
 
     @AfterEach
     void tearDown() {

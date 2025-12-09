@@ -12,6 +12,7 @@ import com.cookyuu.ecms_server.domain.product.dto.SearchProductDto;
 import com.cookyuu.ecms_server.domain.product.dto.UpdateProductDto;
 import com.cookyuu.ecms_server.domain.product.entity.Category;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
+import com.cookyuu.ecms_server.domain.product.logging.ProductLogHelper;
 import com.cookyuu.ecms_server.domain.product.repository.ProductRepository;
 import com.cookyuu.ecms_server.domain.seller.entity.Seller;
 import com.cookyuu.ecms_server.domain.seller.service.SellerService;
@@ -65,6 +66,9 @@ class ProductServiceTest {
 
     @Mock
     private CookieUtils cookieUtils;
+
+    @Mock
+    private ProductLogHelper productLogHelper;
 
     @Mock
     private HttpServletRequest request;

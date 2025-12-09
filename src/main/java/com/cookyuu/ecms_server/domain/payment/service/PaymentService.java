@@ -8,7 +8,7 @@ import com.cookyuu.ecms_server.domain.payment.dto.CancelPaymentDto;
 import com.cookyuu.ecms_server.domain.payment.dto.CreatePaymentDto;
 import com.cookyuu.ecms_server.domain.payment.dto.PaymentDetailDto;
 import com.cookyuu.ecms_server.domain.payment.entity.Payment;
-import com.cookyuu.ecms_server.domain.payment.enums.PaymentMethod;
+import com.cookyuu.ecms_server.domain.payment.logging.PaymentLogHelper;
 import com.cookyuu.ecms_server.domain.payment.repository.PaymentRepository;
 import com.cookyuu.ecms_server.domain.member.enums.RoleType;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
@@ -16,7 +16,6 @@ import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
 import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,17 +23,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
-import static com.cookyuu.ecms_server.common.logging.LogFields.*;
-
 @Service
-@Slf4j
 @RequiredArgsConstructor
 public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderService orderService;
     private final AuthorizationService authorizationService;
     private final BusinessNumberGenerator businessNumberGenerator;
+    private final PaymentLogHelper paymentLogHelper;
 
     @Transactional
     public CreatePaymentDto.ResponseServ createPayment(UserDetails user, CreatePaymentDto.Request paymentInfo) {
@@ -54,34 +50,17 @@ public class PaymentService {
             paymentRepository.saveAll(paymentList);
             order.successPayment();
 
-            log.atInfo()
-                .addKeyValue(EVENT, PAYMENT_COMPLETED)
-                .addKeyValue(USER_ID, userId)
-                .addKeyValue(ORDER_ID, order.getId())
-                .addKeyValue(ORDER_NUMBER, order.getOrderNumber())
-                .addKeyValue(PAYMENT_NUMBER, paymentNumber)
-                .addKeyValue(PAYMENT_METHOD, paymentInfo.getPaymentMethod().name())
-                .addKeyValue(PAYMENT_AMOUNT, paymentInfo.getPaymentPrice())
-                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
-                .log("Payment completed successfully");
+            paymentLogHelper.logPaymentCompleted(userId, order.getId(), order.getOrderNumber(),
+                paymentNumber, paymentInfo.getPaymentMethod().name(), paymentInfo.getPaymentPrice(),
+                System.currentTimeMillis() - startTime);
 
             return CreatePaymentDto.ResponseServ.toDto(paymentNumber);
         } else {
             order.failPayment(ResultCode.PAYMENT_PRICE_UNMATCHED.getMessage());
 
-            log.atWarn()
-                .addKeyValue(EVENT, PAYMENT_FAILED)
-                .addKeyValue(USER_ID, userId)
-                .addKeyValue(ORDER_ID, order.getId())
-                .addKeyValue(ORDER_NUMBER, order.getOrderNumber())
-                .addKeyValue(PAYMENT_NUMBER, paymentNumber)
-                .addKeyValue(PAYMENT_METHOD, paymentInfo.getPaymentMethod().name())
-                .addKeyValue(REQUESTED_AMOUNT, paymentInfo.getPaymentPrice())
-                .addKeyValue(EXPECTED_AMOUNT, order.getTotalPrice())
-                .addKeyValue(ERROR_CODE, ResultCode.PAYMENT_PRICE_UNMATCHED.getCode())
-                .addKeyValue(ERROR_MESSAGE, "Payment amount mismatch")
-                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
-                .log("Payment failed - amount mismatch");
+            paymentLogHelper.logPaymentFailedAmountMismatch(userId, order.getId(), order.getOrderNumber(),
+                paymentNumber, paymentInfo.getPaymentMethod().name(), paymentInfo.getPaymentPrice(),
+                order.getTotalPrice(), ResultCode.PAYMENT_PRICE_UNMATCHED, System.currentTimeMillis() - startTime);
 
             return CreatePaymentDto.ResponseServ.toDto(paymentNumber, ResultCode.PAYMENT_PRICE_UNMATCHED);
         }
@@ -92,13 +71,8 @@ public class PaymentService {
         long startTime = System.currentTimeMillis();
         Long userId = Long.parseLong(user.getUsername());
 
-        log.atDebug()
-            .addKeyValue(EVENT, PAYMENT_CANCELLED)
-            .addKeyValue(USER_ID, userId)
-            .addKeyValue(ORDER_NUMBER, paymentInfo.getOrderNumber())
-            .addKeyValue(PAYMENT_NUMBER, paymentInfo.getPaymentNumber())
-            .addKeyValue(CANCEL_REASON, paymentInfo.getCancelReason())
-            .log("Payment cancellation requested");
+        paymentLogHelper.logPaymentCancellationRequested(userId, paymentInfo.getOrderNumber(),
+            paymentInfo.getPaymentNumber(), paymentInfo.getCancelReason());
 
         Order order = orderService.findOrderByOrderNumberWithBuyer(paymentInfo.getOrderNumber());
         checkPossiblePaymentCancel(order, userId);
@@ -106,14 +80,8 @@ public class PaymentService {
         payment.cancel(paymentInfo.getCancelReason());
         order.cancelPayment();
 
-        log.atInfo()
-            .addKeyValue(EVENT, PAYMENT_CANCELLED)
-            .addKeyValue(USER_ID, userId)
-            .addKeyValue(ORDER_NUMBER, paymentInfo.getOrderNumber())
-            .addKeyValue(PAYMENT_NUMBER, paymentInfo.getPaymentNumber())
-            .addKeyValue(CANCEL_REASON, paymentInfo.getCancelReason())
-            .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
-            .log("Payment cancelled successfully");
+        paymentLogHelper.logPaymentCancelled(userId, paymentInfo.getOrderNumber(),
+            paymentInfo.getPaymentNumber(), paymentInfo.getCancelReason(), System.currentTimeMillis() - startTime);
 
         return CancelPaymentDto.Response.toDto(payment);
     }
@@ -123,12 +91,7 @@ public class PaymentService {
         Long reqUserId = Long.parseLong(user.getUsername());
         RoleType userRole = authorizationService.getUserRole(user);
 
-        log.atDebug()
-            .addKeyValue("operation", "getPaymentDetail")
-            .addKeyValue(USER_ID, reqUserId)
-            .addKeyValue(USER_ROLE, userRole.name())
-            .addKeyValue(PAYMENT_NUMBER, paymentNumber)
-            .log("Fetching payment detail");
+        paymentLogHelper.logPaymentDetailFetch(reqUserId, userRole.name(), paymentNumber);
 
         List<PaymentDetailDto> resPaymentDetail = getPaymentInfo(paymentNumber);
 
@@ -150,11 +113,7 @@ public class PaymentService {
             );
         }
 
-        log.atDebug()
-            .addKeyValue("operation", "getPaymentDetail")
-            .addKeyValue(USER_ID, reqUserId)
-            .addKeyValue(PAYMENT_NUMBER, paymentNumber)
-            .log("Payment detail fetched successfully");
+        paymentLogHelper.logPaymentDetailFetched(reqUserId, paymentNumber);
         return resPaymentDetail;
     }
 
@@ -174,20 +133,11 @@ public class PaymentService {
         paymentPossibleOrderStatuses.add(OrderStatus.PAYMENT_FAIL);
 
         if (!paymentPossibleOrderStatuses.contains(order.getStatus())) {
-            log.atWarn()
-                .addKeyValue(EVENT, VALIDATION_ERROR)
-                .addKeyValue(ORDER_ID, order.getId())
-                .addKeyValue(ORDER_STATUS, order.getStatus().name())
-                .addKeyValue(ERROR_CODE, ResultCode.PAYMENT_IMPOSSIBLE_STATUS.getCode())
-                .log("Payment validation failed - invalid order status");
+            paymentLogHelper.logPaymentValidationFailed(order.getId(), order.getStatus().name(),
+                ResultCode.PAYMENT_IMPOSSIBLE_STATUS);
             throw new BusinessException(ResultCode.PAYMENT_IMPOSSIBLE_STATUS);
         }
-        log.atDebug()
-            .addKeyValue("operation", "checkPossiblePayment")
-            .addKeyValue(ORDER_ID, order.getId())
-            .addKeyValue(ORDER_STATUS, order.getStatus().name())
-            .log("Payment validation passed");
-
+        paymentLogHelper.logPaymentValidationPassed(order.getId(), order.getStatus().name());
     }
 
     private void checkPossiblePaymentCancel(Order order, Long paymentUserId) {
@@ -198,19 +148,11 @@ public class PaymentService {
         );
 
         if (!order.getStatus().equals(OrderStatus.PAYMENT_COMPLETE)) {
-            log.atWarn()
-                .addKeyValue(EVENT, VALIDATION_ERROR)
-                .addKeyValue(ORDER_ID, order.getId())
-                .addKeyValue(ORDER_STATUS, order.getStatus().name())
-                .addKeyValue(ERROR_CODE, ResultCode.PAYMENT_IMPOSSIBLE_STATUS.getCode())
-                .log("Payment cancellation validation failed - invalid order status");
+            paymentLogHelper.logPaymentCancellationValidationFailed(order.getId(),
+                order.getStatus().name(), ResultCode.PAYMENT_IMPOSSIBLE_STATUS);
             throw new BusinessException(ResultCode.PAYMENT_IMPOSSIBLE_STATUS);
         }
-        log.atDebug()
-            .addKeyValue("operation", "checkPossiblePaymentCancel")
-            .addKeyValue(ORDER_ID, order.getId())
-            .addKeyValue(ORDER_STATUS, order.getStatus().name())
-            .log("Payment cancellation validation passed");
+        paymentLogHelper.logPaymentCancellationValidationPassed(order.getId(), order.getStatus().name());
     }
 
     private Payment findPaymentByPaymentNumber(String paymentNumber) {

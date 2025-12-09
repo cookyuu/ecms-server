@@ -4,6 +4,7 @@ import com.cookyuu.ecms_server.domain.cart.dto.DeleteCartItemDto;
 import com.cookyuu.ecms_server.domain.cart.dto.UpdateCartItemDto;
 import com.cookyuu.ecms_server.domain.cart.entity.Cart;
 import com.cookyuu.ecms_server.domain.cart.entity.CartItem;
+import com.cookyuu.ecms_server.domain.cart.logging.CartLogHelper;
 import com.cookyuu.ecms_server.domain.cart.repository.CartItemRepository;
 import com.cookyuu.ecms_server.domain.cart.repository.CartRepository;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
@@ -54,6 +55,9 @@ class CartServiceTest {
 
     @Mock
     private ProductService productService;
+
+    @Mock
+    private CartLogHelper cartLogHelper;
 
     @AfterEach
     void tearDown() {
