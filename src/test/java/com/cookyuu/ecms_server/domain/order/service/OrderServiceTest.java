@@ -22,6 +22,8 @@ import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
 import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
+import com.cookyuu.ecms_server.domain.order.service.OrderValidator;
+import com.cookyuu.ecms_server.domain.order.service.OrderStockManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -53,7 +55,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
 
-    @InjectMocks
     private OrderService orderService;
 
     @Mock
@@ -79,6 +80,28 @@ class OrderServiceTest {
 
     @Mock
     private BusinessNumberGenerator businessNumberGenerator;
+
+    private OrderValidator orderValidator;
+
+    private OrderStockManager orderStockManager;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        orderValidator = new OrderValidator();
+        orderStockManager = new OrderStockManager();
+        orderService = new OrderService(
+            orderRepository,
+            orderLineRepository,
+            memberService,
+            cartService,
+            productService,
+            redisUtils,
+            authorizationService,
+            businessNumberGenerator,
+            orderValidator,
+            orderStockManager
+        );
+    }
 
     @AfterEach
     void tearDown() {

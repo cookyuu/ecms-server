@@ -55,6 +55,8 @@ public class OrderService {
     private final RedisUtils redisUtils;
     private final AuthorizationService authorizationService;
     private final BusinessNumberGenerator businessNumberGenerator;
+    private final OrderValidator orderValidator;
+    private final OrderStockManager orderStockManager;
 
     @Transactional
     public CreateOrderDto.Response createOrder(Long userId, CreateOrderDto.Request orderInfo) {
@@ -87,8 +89,8 @@ public class OrderService {
             int price = orderItemInfo.getPrice();
             totalPrice += (quantity*price);
 
-            compareQuantityAndStockQuantity(quantity, product.getStockQuantity());
-            comparePriceAndCurrentPrice(price, product.getPrice(), product.getId());
+            orderValidator.validateStockQuantity(quantity, product.getStockQuantity());
+            orderValidator.validateProductPrice(price, product.getPrice(), product.getId());
             updateCartWithOrderItems(cart, product, orderItemInfo);
             orderItemInfo.addProduct(product);
         }
@@ -109,11 +111,7 @@ public class OrderService {
 
             orderLineRepository.saveAll(CreateOrderLineMapper.toEntityList(orderInfo.getOrderItemList(), order));
 
-            for (CreateOrderItemInfo orderItemInfo : orderInfo.getOrderItemList()) {
-                Product product = orderItemInfo.getProduct();
-                int quantity = orderItemInfo.getQuantity();
-                product.subQuantity(quantity);
-            }
+            orderStockManager.decreaseStockForOrder(orderInfo.getOrderItemList());
 
             log.atInfo()
                 .addKeyValue(EVENT, ORDER_CREATED)
@@ -153,8 +151,7 @@ public class OrderService {
 
         boolean isPossibleCancel = OrderStatus.isPossibleOrderCancel(order.getStatus());
         if (isPossibleCancel) {
-            order.getOrderLines().forEach(orderLine ->
-                orderLine.getProduct().addQuantity(orderLine.getQuantity()));
+            orderStockManager.restoreStockForCancel(order.getOrderLines());
             order.cancel(cancelInfo.getCancelReason());
 
             log.atInfo()
@@ -214,17 +211,7 @@ public class OrderService {
         Map<Long, Product> oldProductMap = oldProducts.stream()
                 .collect(Collectors.toMap(Product::getId, product -> product));
 
-        for (OrderLine orderLine : orderLines) {
-            Product product = oldProductMap.get(orderLine.getProduct().getId());
-            if (product != null) {
-                product.addQuantity(orderLine.getQuantity());
-                log.atDebug()
-                    .addKeyValue(EVENT, ORDER_REVISED)
-                    .addKeyValue(PRODUCT_ID, product.getId())
-                    .addKeyValue(QUANTITY, orderLine.getQuantity())
-                    .log("Restored product quantity for order revision");
-            }
-        }
+        orderStockManager.restoreStockForRevision(orderLines);
 
         List<Long> newProductIds = reviseOrderInfo.getOrderItemList().stream()
                 .map(ReviseOrderItemInfo::getProductId)
@@ -249,19 +236,15 @@ public class OrderService {
                 .addKeyValue(PRODUCT_ID, product.getId())
                 .addKeyValue(PRODUCT_PRICE, price)
                 .log("Comparing product price for order revision");
-            compareQuantityAndStockQuantity(quantity, product.getStockQuantity());
-            comparePriceAndCurrentPrice(price, product.getPrice(), product.getId());
+            orderValidator.validateStockQuantity(quantity, product.getStockQuantity());
+            orderValidator.validateProductPrice(price, product.getPrice(), product.getId());
             orderItemInfo.addProduct(product);
         }
         orderLineRepository.deleteAll(orderLines);
         orderLineRepository.saveAll(ReviseOrderLineMapper.toEntityList(reviseOrderInfo.getOrderItemList(), order));
         order.reviseOrder(totalPrice);
 
-        for (ReviseOrderItemInfo orderItemInfo : reviseOrderInfo.getOrderItemList()) {
-            Product product = orderItemInfo.getProduct();
-            int quantity = orderItemInfo.getQuantity();
-            product.subQuantity(quantity);
-        }
+        orderStockManager.decreaseStockForRevision(reviseOrderInfo.getOrderItemList());
 
         log.atInfo()
             .addKeyValue(EVENT, ORDER_REVISED)
@@ -311,31 +294,6 @@ public class OrderService {
         return orderRepository.getOrderDetail(orderNumber);
     }
 
-    private void compareQuantityAndStockQuantity(int quantity, Integer stockQuantity) {
-        if (stockQuantity == 0) {
-            log.atError()
-                .addKeyValue(EVENT, PRODUCT_OUT_OF_STOCK)
-                .addKeyValue(STOCK_QUANTITY, stockQuantity)
-                .addKeyValue(QUANTITY, quantity)
-                .addKeyValue(ERROR_CODE, ResultCode.PRODUCT_SOLD_OUT.getCode())
-                .log("Product sold out - zero stock");
-            throw new BusinessException(ResultCode.PRODUCT_SOLD_OUT, "주문하신 상품의 재고 수량이 없습니다.");
-        }
-        if (quantity > stockQuantity) {
-            log.atError()
-                .addKeyValue(EVENT, PRODUCT_OUT_OF_STOCK)
-                .addKeyValue(STOCK_QUANTITY, stockQuantity)
-                .addKeyValue(QUANTITY, quantity)
-                .addKeyValue(ERROR_CODE, ResultCode.PRODUCT_SOLD_OUT.getCode())
-                .log("Insufficient stock - order quantity exceeds available stock");
-            throw new BusinessException(ResultCode.PRODUCT_SOLD_OUT, "주문하신 상품의 재고 수량이 부족합니다. 재고 수량 : " + stockQuantity);
-        }
-        log.atDebug()
-            .addKeyValue("operation", "compareStockQuantity")
-            .addKeyValue(STOCK_QUANTITY, stockQuantity)
-            .addKeyValue(QUANTITY, quantity)
-            .log("Stock quantity validation passed");
-    }
     private void updateCartWithOrderItems(Cart cart, Product product, CreateOrderItemInfo orderItemInfo) {
         CartItem cartItem = findCartItemByCartAndProduct(cart, product);
         if (cartItem == null) {
@@ -351,33 +309,6 @@ public class OrderService {
         } else {
             cartItem.updateQuantity(cartItem.getQuantity() - orderItemInfo.getQuantity());
         }
-    }
-
-    private void comparePriceAndCurrentPrice(int price, Integer currentPrice, Long productId) {
-        if (currentPrice == null) {
-            log.atError()
-                .addKeyValue(EVENT, VALIDATION_ERROR)
-                .addKeyValue(PRODUCT_ID, productId)
-                .addKeyValue(ERROR_CODE, ORDER_PROCESS_FAIL.getCode())
-                .addKeyValue(ERROR_MESSAGE, "Product price not set")
-                .log("Product price validation failed - price not set");
-            throw new BusinessException(ORDER_PROCESS_FAIL, "가격이 아직 책정되지 않은 상품이 있습니다.");
-        }
-        if (price != currentPrice) {
-            log.atError()
-                .addKeyValue(EVENT, VALIDATION_ERROR)
-                .addKeyValue(PRODUCT_ID, productId)
-                .addKeyValue("order_price", price)
-                .addKeyValue("current_price", currentPrice)
-                .addKeyValue(ERROR_CODE, ORDER_PROCESS_FAIL.getCode())
-                .log("Price validation failed - order price and current price mismatch");
-            throw new BusinessException(ORDER_PROCESS_FAIL, "상품의 현재 가격과 주문 가격이 일치하지 않습니다.");
-        }
-        log.atDebug()
-            .addKeyValue("operation", "comparePriceAndCurrentPrice")
-            .addKeyValue(PRODUCT_ID, productId)
-            .addKeyValue(PRODUCT_PRICE, currentPrice)
-            .log("Price validation passed");
     }
 
     private CartItem findCartItemByCartAndProduct(Cart cart, Product product) {
