@@ -22,6 +22,7 @@ import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
 import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
+import com.cookyuu.ecms_server.domain.order.logging.OrderLogHelper;
 import com.cookyuu.ecms_server.domain.order.service.OrderValidator;
 import com.cookyuu.ecms_server.domain.order.service.OrderStockManager;
 import org.junit.jupiter.api.AfterEach;
@@ -85,10 +86,13 @@ class OrderServiceTest {
 
     private OrderStockManager orderStockManager;
 
+    private OrderLogHelper orderLogHelper;
+
     @org.junit.jupiter.api.BeforeEach
     void setUp() {
-        orderValidator = new OrderValidator();
-        orderStockManager = new OrderStockManager();
+        orderLogHelper = new OrderLogHelper();
+        orderValidator = new OrderValidator(orderLogHelper);
+        orderStockManager = new OrderStockManager(orderLogHelper);
         orderService = new OrderService(
             orderRepository,
             orderLineRepository,
@@ -99,7 +103,8 @@ class OrderServiceTest {
             authorizationService,
             businessNumberGenerator,
             orderValidator,
-            orderStockManager
+            orderStockManager,
+            orderLogHelper
         );
     }
 

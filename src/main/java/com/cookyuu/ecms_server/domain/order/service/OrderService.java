@@ -24,8 +24,8 @@ import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
 import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
+import com.cookyuu.ecms_server.domain.order.logging.OrderLogHelper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -37,11 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.cookyuu.ecms_server.common.enums.ResultCode.ORDER_PROCESS_FAIL;
-import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
-import static com.cookyuu.ecms_server.common.logging.LogFields.*;
-
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -57,6 +52,7 @@ public class OrderService {
     private final BusinessNumberGenerator businessNumberGenerator;
     private final OrderValidator orderValidator;
     private final OrderStockManager orderStockManager;
+    private final OrderLogHelper orderLogHelper;
 
     @Transactional
     public CreateOrderDto.Response createOrder(Long userId, CreateOrderDto.Request orderInfo) {
@@ -76,12 +72,7 @@ public class OrderService {
         for (CreateOrderItemInfo orderItemInfo : orderInfo.getOrderItemList()) {
             Product product = productMap.get(orderItemInfo.getProductId());
             if (product == null) {
-                log.atError()
-                    .addKeyValue(EVENT, BUSINESS_ERROR)
-                    .addKeyValue(USER_ID, userId)
-                    .addKeyValue(PRODUCT_ID, orderItemInfo.getProductId())
-                    .addKeyValue(ERROR_CODE, ResultCode.PRODUCT_NOT_FOUND.getCode())
-                    .log("Order creation failed - product not found");
+                orderLogHelper.logProductNotFoundError(userId, orderItemInfo.getProductId());
                 throw new BusinessException(ResultCode.PRODUCT_NOT_FOUND);
             }
             product.validateNotDeleted();
@@ -89,7 +80,7 @@ public class OrderService {
             int price = orderItemInfo.getPrice();
             totalPrice += (quantity*price);
 
-            orderValidator.validateStockQuantity(quantity, product.getStockQuantity());
+            orderValidator.validateStockQuantity(quantity, product.getStockQuantity(), product.getId());
             orderValidator.validateProductPrice(price, product.getPrice(), product.getId());
             updateCartWithOrderItems(cart, product, orderItemInfo);
             orderItemInfo.addProduct(product);
@@ -113,29 +104,16 @@ public class OrderService {
 
             orderStockManager.decreaseStockForOrder(orderInfo.getOrderItemList());
 
-            log.atInfo()
-                .addKeyValue(EVENT, ORDER_CREATED)
-                .addKeyValue(USER_ID, userId)
-                .addKeyValue(ORDER_ID, order.getId())
-                .addKeyValue(ORDER_NUMBER, order.getOrderNumber())
-                .addKeyValue(TOTAL_AMOUNT, order.getTotalPrice())
-                .addKeyValue(ITEM_COUNT, order.getOrderLines().size())
-                .addKeyValue(ORDER_STATUS, order.getStatus().name())
-                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
-                .log("Order created successfully");
+            orderLogHelper.logOrderCreated(userId, order.getId(), order.getOrderNumber(),
+                order.getTotalPrice(), order.getOrderLines().size(), order.getStatus().name(),
+                System.currentTimeMillis() - startTime);
 
             return CreateOrderDto.Response.toDto(order);
         } catch (Exception e) {
             redisUtils.deleteData(RedisKeyCode.ORDER_NUMBER.getSeparator() + orderNumber);
 
-            log.atError()
-                .addKeyValue(EVENT, SYSTEM_ERROR)
-                .addKeyValue(USER_ID, userId)
-                .addKeyValue(ORDER_NUMBER, orderNumber)
-                .addKeyValue(ERROR_MESSAGE, e.getMessage())
-                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
-                .setCause(e)
-                .log("Order creation failed - transaction error");
+            orderLogHelper.logOrderCreationFailed(userId, orderNumber, e.getMessage(),
+                System.currentTimeMillis() - startTime, e);
             throw e;
         }
     }
@@ -154,27 +132,14 @@ public class OrderService {
             orderStockManager.restoreStockForCancel(order.getOrderLines());
             order.cancel(cancelInfo.getCancelReason());
 
-            log.atInfo()
-                .addKeyValue(EVENT, ORDER_CANCELLED)
-                .addKeyValue(USER_ID, userId)
-                .addKeyValue(ORDER_ID, order.getId())
-                .addKeyValue(ORDER_NUMBER, order.getOrderNumber())
-                .addKeyValue(ORDER_STATUS, order.getStatus().name())
-                .addKeyValue(CANCEL_REASON, cancelInfo.getCancelReason())
-                .addKeyValue(DURATION_MS, System.currentTimeMillis() - startTime)
-                .log("Order cancelled successfully");
+            orderLogHelper.logOrderCancelled(userId, order.getId(), order.getOrderNumber(),
+                order.getStatus().name(), cancelInfo.getCancelReason(),
+                System.currentTimeMillis() - startTime);
 
             return ResultCode.ORDER_CANCEL_SUCCESS;
         } else {
-            log.atWarn()
-                .addKeyValue(EVENT, BUSINESS_ERROR)
-                .addKeyValue(USER_ID, userId)
-                .addKeyValue(ORDER_ID, order.getId())
-                .addKeyValue(ORDER_NUMBER, order.getOrderNumber())
-                .addKeyValue(ORDER_STATUS, order.getStatus().name())
-                .addKeyValue(ERROR_CODE, ResultCode.ORDER_CANCEL_FAIL.getCode())
-                .addKeyValue(ERROR_MESSAGE, "Cannot cancel order in current status")
-                .log("Order cancellation failed - invalid status");
+            orderLogHelper.logOrderCancellationFailed(userId, order.getId(), order.getOrderNumber(),
+                order.getStatus().name(), ResultCode.ORDER_CANCEL_FAIL);
 
             throw new BusinessException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
         }
@@ -190,13 +155,8 @@ public class OrderService {
         order.validateNotCanceled();
         boolean isPossibleRevise = OrderStatus.isPossibleOrderRevise(order.getStatus());
         if (!isPossibleRevise) {
-            log.atWarn()
-                .addKeyValue(EVENT, BUSINESS_ERROR)
-                .addKeyValue(ORDER_ID, order.getId())
-                .addKeyValue(ORDER_STATUS, order.getStatus().name())
-                .addKeyValue(ERROR_CODE, ResultCode.ORDER_CANCEL_FAIL.getCode())
-                .addKeyValue(ERROR_MESSAGE, "Cannot revise order in current status")
-                .log("Order revision failed - invalid status");
+            orderLogHelper.logOrderRevisionFailed(order.getId(), order.getStatus().name(),
+                ResultCode.ORDER_CANCEL_FAIL);
             throw new BusinessException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
         }
 
@@ -231,12 +191,8 @@ public class OrderService {
             int quantity = orderItemInfo.getQuantity();
             int price = orderItemInfo.getPrice();
             totalPrice += (quantity*price);
-            log.atDebug()
-                .addKeyValue(EVENT, ORDER_REVISED)
-                .addKeyValue(PRODUCT_ID, product.getId())
-                .addKeyValue(PRODUCT_PRICE, price)
-                .log("Comparing product price for order revision");
-            orderValidator.validateStockQuantity(quantity, product.getStockQuantity());
+            orderLogHelper.logPriceComparison(product.getId(), price);
+            orderValidator.validateStockQuantity(quantity, product.getStockQuantity(), product.getId());
             orderValidator.validateProductPrice(price, product.getPrice(), product.getId());
             orderItemInfo.addProduct(product);
         }
@@ -246,14 +202,8 @@ public class OrderService {
 
         orderStockManager.decreaseStockForRevision(reviseOrderInfo.getOrderItemList());
 
-        log.atInfo()
-            .addKeyValue(EVENT, ORDER_REVISED)
-            .addKeyValue(USER_ID, Long.parseLong(user.getUsername()))
-            .addKeyValue(ORDER_ID, order.getId())
-            .addKeyValue(ORDER_NUMBER, order.getOrderNumber())
-            .addKeyValue(TOTAL_AMOUNT, totalPrice)
-            .addKeyValue(ITEM_COUNT, reviseOrderInfo.getOrderItemList().size())
-            .log("Order revised successfully");
+        orderLogHelper.logOrderRevised(Long.parseLong(user.getUsername()), order.getId(),
+            order.getOrderNumber(), totalPrice, reviseOrderInfo.getOrderItemList().size());
 
         return ResultCode.ORDER_REVISE_SUCCESS;
     }
@@ -270,11 +220,7 @@ public class OrderService {
     )
     public OrderDetailDto getOrderDetailCacheable(UserDetails user , String orderNumber) {
         RoleType userRole = authorizationService.getUserRole(user);
-        log.atDebug()
-            .addKeyValue("operation", "getOrderDetail")
-            .addKeyValue(USER_ROLE, userRole.name())
-            .addKeyValue(ORDER_NUMBER, orderNumber)
-            .log("Fetching order detail");
+        orderLogHelper.logOrderDetailFetch(userRole.name(), orderNumber);
 
         OrderDetailDto orderDetailInfo = getOrderDetailBy(orderNumber);
 
@@ -299,11 +245,7 @@ public class OrderService {
         if (cartItem == null) {
             return ;
         }
-        log.atDebug()
-            .addKeyValue("operation", "updateCart")
-            .addKeyValue(CART_ID, cart.getId())
-            .addKeyValue(PRODUCT_ID, product.getId())
-            .log("Updating cart with ordered items");
+        orderLogHelper.logCartUpdate(cart.getId(), product.getId());
         if (cartItem.getQuantity() <= orderItemInfo.getQuantity()) {
             cartService.deleteCartItem(cart, product);
         } else {

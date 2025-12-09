@@ -3,18 +3,18 @@ package com.cookyuu.ecms_server.domain.order.service;
 import com.cookyuu.ecms_server.domain.order.dto.CreateOrderItemInfo;
 import com.cookyuu.ecms_server.domain.order.dto.ReviseOrderItemInfo;
 import com.cookyuu.ecms_server.domain.order.entity.OrderLine;
+import com.cookyuu.ecms_server.domain.order.logging.OrderLogHelper;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
-import lombok.extern.slf4j.Slf4j;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
-import static com.cookyuu.ecms_server.common.logging.LogFields.*;
-
-@Slf4j
 @Component
+@RequiredArgsConstructor
 public class OrderStockManager {
+
+    private final OrderLogHelper orderLogHelper;
 
     /**
      * 주문 생성 시 상품 재고 차감
@@ -27,13 +27,8 @@ public class OrderStockManager {
             int quantity = orderItem.getQuantity();
 
             product.subQuantity(quantity);
-
-            log.atDebug()
-                .addKeyValue("operation", "decreaseStock")
-                .addKeyValue(PRODUCT_ID, product.getId())
-                .addKeyValue(QUANTITY, quantity)
-                .addKeyValue(STOCK_QUANTITY, product.getStockQuantity())
-                .log("Stock decreased for order creation");
+            orderLogHelper.logStockDecrease("decreaseStockForOrder", product.getId(),
+                quantity, product.getStockQuantity());
         }
     }
 
@@ -48,13 +43,8 @@ public class OrderStockManager {
             int quantity = orderLine.getQuantity();
 
             product.addQuantity(quantity);
-
-            log.atDebug()
-                .addKeyValue("operation", "restoreStock")
-                .addKeyValue(PRODUCT_ID, product.getId())
-                .addKeyValue(QUANTITY, quantity)
-                .addKeyValue(STOCK_QUANTITY, product.getStockQuantity())
-                .log("Stock restored for order cancellation");
+            orderLogHelper.logStockRestore("restoreStockForCancel", product.getId(),
+                quantity, product.getStockQuantity());
         }
     }
 
@@ -69,13 +59,7 @@ public class OrderStockManager {
             int quantity = orderLine.getQuantity();
 
             product.addQuantity(quantity);
-
-            log.atDebug()
-                .addKeyValue(EVENT, ORDER_REVISED)
-                .addKeyValue(PRODUCT_ID, product.getId())
-                .addKeyValue(QUANTITY, quantity)
-                .addKeyValue(STOCK_QUANTITY, product.getStockQuantity())
-                .log("Restored product quantity for order revision");
+            orderLogHelper.logStockRestoreForRevision(product.getId(), quantity, product.getStockQuantity());
         }
     }
 
@@ -90,13 +74,7 @@ public class OrderStockManager {
             int quantity = orderItem.getQuantity();
 
             product.subQuantity(quantity);
-
-            log.atDebug()
-                .addKeyValue(EVENT, ORDER_REVISED)
-                .addKeyValue(PRODUCT_ID, product.getId())
-                .addKeyValue(QUANTITY, quantity)
-                .addKeyValue(STOCK_QUANTITY, product.getStockQuantity())
-                .log("Stock decreased for order revision");
+            orderLogHelper.logStockDecreaseForRevision(product.getId(), quantity, product.getStockQuantity());
         }
     }
 }
