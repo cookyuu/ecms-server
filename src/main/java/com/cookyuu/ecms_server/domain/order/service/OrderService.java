@@ -24,6 +24,7 @@ import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
 import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.utils.UserUtils;
 import com.cookyuu.ecms_server.domain.order.logging.OrderLogHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
@@ -53,6 +54,7 @@ public class OrderService {
     private final OrderValidator orderValidator;
     private final OrderStockManager orderStockManager;
     private final OrderLogHelper orderLogHelper;
+    private final UserUtils userUtils;
 
     @Transactional
     public CreateOrderDto.Response createOrder(Long userId, CreateOrderDto.Request orderInfo) {
@@ -121,7 +123,7 @@ public class OrderService {
     @Transactional
     public ResultCode cancelOrder(UserDetails user, CancelOrderDto.Request cancelInfo) {
         long startTime = System.currentTimeMillis();
-        Long userId = Long.parseLong(user.getUsername());
+        Long userId = userUtils.getUserId(user);
 
         Order order = findOrderByOrderNumberWithProductsForUpdate(cancelInfo.getOrderNumber());
         order.validateNotCanceled();
@@ -161,7 +163,7 @@ public class OrderService {
         }
 
         List<OrderLine> orderLines = order.getOrderLines();
-        authorizationService.validateResourceOwnership(Long.parseLong(user.getUsername()), order.getBuyer().getId(), ResultCode.ORDER_BUYER_UNMATCHED);
+        authorizationService.validateResourceOwnership(userUtils.getUserId(user), order.getBuyer().getId(), ResultCode.ORDER_BUYER_UNMATCHED);
 
         List<Long> oldProductIds = orderLines.stream()
                 .map(orderLine -> orderLine.getProduct().getId())
@@ -202,7 +204,7 @@ public class OrderService {
 
         orderStockManager.decreaseStockForRevision(reviseOrderInfo.getOrderItemList());
 
-        orderLogHelper.logOrderRevised(Long.parseLong(user.getUsername()), order.getId(),
+        orderLogHelper.logOrderRevised(userUtils.getUserId(user), order.getId(),
             order.getOrderNumber(), totalPrice, reviseOrderInfo.getOrderItemList().size());
 
         return ResultCode.ORDER_REVISE_SUCCESS;

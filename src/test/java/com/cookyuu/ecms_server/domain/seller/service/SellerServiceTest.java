@@ -4,6 +4,7 @@ import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.AuthenticationException;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.utils.AuthUtils;
+import com.cookyuu.ecms_server.common.utils.UserUtils;
 import com.cookyuu.ecms_server.common.utils.ValidateUtils;
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
 import com.cookyuu.ecms_server.domain.member.enums.RoleType;
@@ -14,6 +15,7 @@ import com.cookyuu.ecms_server.domain.seller.dto.UpdateSellerDto;
 import com.cookyuu.ecms_server.domain.seller.entity.Seller;
 import com.cookyuu.ecms_server.domain.seller.repository.SellerRepository;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +50,19 @@ class SellerServiceTest {
 
     @Mock
     private AuthUtils authUtils;
+
+    @Mock
+    private UserUtils userUtils;
+
+    @BeforeEach
+    void setUp() {
+        // Mock userUtils.getUserId to return Long from user.getUsername()
+        lenient().when(userUtils.getUserId(any(UserDetails.class)))
+            .thenAnswer(invocation -> {
+                UserDetails user = invocation.getArgument(0);
+                return Long.parseLong(user.getUsername());
+            });
+    }
 
     @AfterEach
     void tearDown() {

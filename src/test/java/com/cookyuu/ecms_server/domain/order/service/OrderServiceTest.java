@@ -22,6 +22,7 @@ import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
 import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.utils.UserUtils;
 import com.cookyuu.ecms_server.domain.order.logging.OrderLogHelper;
 import com.cookyuu.ecms_server.domain.order.service.OrderValidator;
 import com.cookyuu.ecms_server.domain.order.service.OrderStockManager;
@@ -82,6 +83,9 @@ class OrderServiceTest {
     @Mock
     private BusinessNumberGenerator businessNumberGenerator;
 
+    @Mock
+    private UserUtils userUtils;
+
     private OrderValidator orderValidator;
 
     private OrderStockManager orderStockManager;
@@ -104,8 +108,16 @@ class OrderServiceTest {
             businessNumberGenerator,
             orderValidator,
             orderStockManager,
-            orderLogHelper
+            orderLogHelper,
+            userUtils
         );
+
+        // Mock userUtils.getUserId to return Long from user.getUsername()
+        lenient().when(userUtils.getUserId(any(UserDetails.class)))
+            .thenAnswer(invocation -> {
+                UserDetails user = invocation.getArgument(0);
+                return Long.parseLong(user.getUsername());
+            });
     }
 
     @AfterEach

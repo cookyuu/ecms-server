@@ -12,6 +12,7 @@ import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.AuthenticationException;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.utils.AuthUtils;
+import com.cookyuu.ecms_server.common.utils.UserUtils;
 import com.cookyuu.ecms_server.common.utils.ValidateUtils;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class SellerService {
     private final SellerRepository sellerRepository;
     private final ValidateUtils validateUtils;
     private final AuthUtils authUtils;
+    private final UserUtils userUtils;
 
     public Seller findSellerById(Long sellerId) {
         log.atDebug()
@@ -55,7 +57,7 @@ public class SellerService {
     @Transactional
     public void updateSellerInfo(UserDetails user, UpdateSellerDto.Request sellerInfo) {
         sellerInfo.chkAllNull();
-        Seller seller = findSellerById(Long.parseLong(user.getUsername()));
+        Seller seller = findSellerById(userUtils.getUserId(user));
         String reqPw = sellerInfo.getPassword();
         String jwtPw = user.getPassword();
         authUtils.checkPassword(jwtPw, reqPw);
@@ -73,7 +75,7 @@ public class SellerService {
         if (!sellerInfo.getPassword().equalsIgnoreCase(sellerInfo.getConfirmPassword())) {
             throw new BusinessException(ResultCode.CONFIRM_PASSWORD_UNMATCHED);
         }
-        Seller seller = findSellerById(Long.parseLong(user.getUsername()));
+        Seller seller = findSellerById(userUtils.getUserId(user));
         authUtils.checkPassword(seller.getPassword(), sellerInfo.getPassword());
         seller.delete();
         log.atInfo()

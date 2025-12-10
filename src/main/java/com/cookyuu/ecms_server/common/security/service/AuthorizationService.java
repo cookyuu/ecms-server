@@ -4,6 +4,8 @@ import com.cookyuu.ecms_server.domain.member.enums.RoleType;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.utils.JwtUtils;
+import com.cookyuu.ecms_server.common.utils.UserUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -17,7 +19,9 @@ import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class AuthorizationService {
+    private final UserUtils userUtils;
 
     public void validateResourceOwnership(Long requestUserId, Long resourceOwnerId, ResultCode errorCode) {
         log.atDebug()
@@ -185,7 +189,7 @@ public class AuthorizationService {
 
     public void validateOrderBuyerAccess(UserDetails user, Long buyerId) {
         RoleType userRole = getUserRole(user);
-        Long requestUserId = Long.parseLong(user.getUsername());
+        Long requestUserId = userUtils.getUserId(user);
 
         log.atDebug()
             .addKeyValue("operation", "validateOrderBuyerAccess")
@@ -206,7 +210,7 @@ public class AuthorizationService {
 
     public void validateOrderSellerAccess(UserDetails user, List<Long> sellerIds) {
         RoleType userRole = getUserRole(user);
-        Long requestUserId = Long.parseLong(user.getUsername());
+        Long requestUserId = userUtils.getUserId(user);
 
         log.atDebug()
             .addKeyValue("operation", "validateOrderSellerAccess")

@@ -14,6 +14,7 @@ import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class CartService {
     private final MemberService memberService;
     private final ProductService productService;
     private final CartLogHelper cartLogHelper;
+    private final UserUtils userUtils;
 
     @Transactional
     public void makeCart(Member member) {
@@ -37,7 +39,7 @@ public class CartService {
 
     @Transactional
     public void updateCartItem(UserDetails user, UpdateCartItemDto.Request cartItemInfo) {
-        Member member = memberService.findMemberById(Long.parseLong(user.getUsername()));
+        Member member = memberService.findMemberById(userUtils.getUserId(user));
         Product product = productService.findProductById(cartItemInfo.getProductId());
         product.validateNotDeleted();
         Cart cart = cartRepository.findByMemberId(member.getId()).orElseThrow(() -> new BusinessException(ResultCode.CART_NOT_FOUND));
@@ -61,7 +63,7 @@ public class CartService {
 
     @Transactional
     public void deleteCartItem(UserDetails user, DeleteCartItemDto.Request cartItemInfo) {
-        Member member = memberService.findMemberById(Long.parseLong(user.getUsername()));
+        Member member = memberService.findMemberById(userUtils.getUserId(user));
         Product product = productService.findProductById(cartItemInfo.getProductId());
         Cart cart = cartRepository.findByMemberId(member.getId()).orElseThrow(() -> new BusinessException(ResultCode.CART_NOT_FOUND));
         CartItem cartItem = findCartItemByCartAndProduct(cart, product);

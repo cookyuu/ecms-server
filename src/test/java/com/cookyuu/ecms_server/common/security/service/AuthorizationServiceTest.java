@@ -3,7 +3,9 @@ package com.cookyuu.ecms_server.common.security.service;
 import com.cookyuu.ecms_server.domain.member.enums.RoleType;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.utils.UserUtils;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,12 +24,26 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthorizationServiceTest {
 
     @InjectMocks
     private AuthorizationService authorizationService;
+
+    @Mock
+    private UserUtils userUtils;
+
+    @BeforeEach
+    void setUp() {
+        // Mock userUtils.getUserId to return Long from user.getUsername()
+        lenient().when(userUtils.getUserId(any(UserDetails.class)))
+            .thenAnswer(invocation -> {
+                UserDetails user = invocation.getArgument(0);
+                return Long.parseLong(user.getUsername());
+            });
+    }
 
     @AfterEach
     void tearDown() {

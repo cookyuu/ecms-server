@@ -2,6 +2,7 @@ package com.cookyuu.ecms_server.domain.order.controller;
 
 import com.cookyuu.ecms_server.domain.order.dto.*;
 import com.cookyuu.ecms_server.domain.order.service.OrderService;
+import com.cookyuu.ecms_server.common.utils.UserUtils;
 import com.cookyuu.ecms_server.common.web.dto.ApiResponse;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +20,11 @@ import java.util.List;
 @RequestMapping("/api/v1/order")
 public class OrderController {
     private final OrderService orderService;
+    private final UserUtils userUtils;
 
     @PostMapping
     public ResponseEntity<ApiResponse<CreateOrderDto.Response>> createOrder(@AuthenticationPrincipal UserDetails user, @RequestBody CreateOrderDto.Request orderInfo) {
-        CreateOrderDto.Response res = orderService.createOrder(Long.parseLong(user.getUsername()), orderInfo);
+        CreateOrderDto.Response res = orderService.createOrder(userUtils.getUserId(user), orderInfo);
         return ResponseEntity.ok(ApiResponse.success(res));
     }
 

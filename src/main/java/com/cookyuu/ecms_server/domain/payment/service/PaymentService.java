@@ -15,6 +15,7 @@ import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
 import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
+import com.cookyuu.ecms_server.common.utils.UserUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
@@ -31,11 +32,12 @@ public class PaymentService {
     private final AuthorizationService authorizationService;
     private final BusinessNumberGenerator businessNumberGenerator;
     private final PaymentLogHelper paymentLogHelper;
+    private final UserUtils userUtils;
 
     @Transactional
     public CreatePaymentDto.ResponseServ createPayment(UserDetails user, CreatePaymentDto.Request paymentInfo) {
         long startTime = System.currentTimeMillis();
-        Long userId = Long.parseLong(user.getUsername());
+        Long userId = userUtils.getUserId(user);
 
         Order order = orderService.findOrderByOrderNumberWithAll(paymentInfo.getOrderNumber());
         checkPossiblePayment(order, userId);
@@ -69,7 +71,7 @@ public class PaymentService {
     @Transactional
     public CancelPaymentDto.Response cancelPayment(UserDetails user, CancelPaymentDto.Request paymentInfo) {
         long startTime = System.currentTimeMillis();
-        Long userId = Long.parseLong(user.getUsername());
+        Long userId = userUtils.getUserId(user);
 
         paymentLogHelper.logPaymentCancellationRequested(userId, paymentInfo.getOrderNumber(),
             paymentInfo.getPaymentNumber(), paymentInfo.getCancelReason());
@@ -88,7 +90,7 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public List<PaymentDetailDto> getPaymentDetail(UserDetails user, String paymentNumber) {
-        Long reqUserId = Long.parseLong(user.getUsername());
+        Long reqUserId = userUtils.getUserId(user);
         RoleType userRole = authorizationService.getUserRole(user);
 
         paymentLogHelper.logPaymentDetailFetch(reqUserId, userRole.name(), paymentNumber);

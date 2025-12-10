@@ -16,6 +16,7 @@ import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.utils.CookieUtils;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.utils.UserUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -41,11 +42,12 @@ public class ProductService {
     private final RedisUtils redisUtil;
     private final CookieUtils cookieUtils;
     private final ProductLogHelper productLogHelper;
+    private final UserUtils userUtils;
 
     @Transactional
     public Long registerProduct(UserDetails user, RegisterProductDto.Request productInfo) {
         try {
-            Seller seller = sellerService.findSellerById(Long.parseLong(user.getUsername()));
+            Seller seller = sellerService.findSellerById(userUtils.getUserId(user));
             Category category = categoryService.findByName(productInfo.getCategoryName());
             Product registerProduct = Product.of(
                     productInfo.getName(),
@@ -59,7 +61,7 @@ public class ProductService {
                 category.getName(), product.getPrice(), product.getStockQuantity());
             return product.getId();
         } catch (Exception e) {
-            productLogHelper.logProductRegistrationFailed(Long.parseLong(user.getUsername()),
+            productLogHelper.logProductRegistrationFailed(userUtils.getUserId(user),
                 ResultCode.PRODUCT_EXISTS_ALREADY, e);
             throw new BusinessException(ResultCode.PRODUCT_EXISTS_ALREADY, e);
         }
@@ -73,7 +75,7 @@ public class ProductService {
     public void updateProduct(Long productId, UserDetails user, UpdateProductDto.Request productInfo) {
         productInfo.chkAllNull();
         Product product = findProductById(productId);
-        Long sellerId = Long.parseLong(user.getUsername());
+        Long sellerId = userUtils.getUserId(user);
         if (!isProductOwnedBySeller(product, sellerId)) {
             throw new BusinessException(ResultCode.PRODUCT_OWNER_UNMATCHED);
         }
@@ -88,7 +90,7 @@ public class ProductService {
     @Transactional
     public void deleteProduct(Long productId, UserDetails user) {
         Product product = findProductById(productId);
-        Long sellerId = Long.parseLong(user.getUsername());
+        Long sellerId = userUtils.getUserId(user);
         if (!isProductOwnedBySeller(product, sellerId)) {
             throw new BusinessException(ResultCode.PRODUCT_OWNER_UNMATCHED);
         }

@@ -6,6 +6,7 @@ import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.utils.CookieUtils;
 import com.cookyuu.ecms_server.common.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.utils.UserUtils;
 import com.cookyuu.ecms_server.domain.product.dto.FindProductDetailDto;
 import com.cookyuu.ecms_server.domain.product.dto.RegisterProductDto;
 import com.cookyuu.ecms_server.domain.product.dto.SearchProductDto;
@@ -21,6 +22,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,10 +73,23 @@ class ProductServiceTest {
     private ProductLogHelper productLogHelper;
 
     @Mock
+    private UserUtils userUtils;
+
+    @Mock
     private HttpServletRequest request;
 
     @Mock
     private HttpServletResponse response;
+
+    @BeforeEach
+    void setUp() {
+        // Mock userUtils.getUserId to return Long from user.getUsername()
+        lenient().when(userUtils.getUserId(any(UserDetails.class)))
+            .thenAnswer(invocation -> {
+                UserDetails user = invocation.getArgument(0);
+                return Long.parseLong(user.getUsername());
+            });
+    }
 
     @AfterEach
     void tearDown() {
