@@ -8,6 +8,8 @@ import com.cookyuu.ecms_server.common.exception.BusinessException;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +22,7 @@ import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
+    @CacheEvict(value = {"categoryById", "categoryByName"}, allEntries = true)
     @Transactional
     public Long registerCategory(CategoryInfoDto.Request categoryInfo) {
         Category parentCategory = null;
@@ -39,6 +42,7 @@ public class CategoryService {
         return category.getId();
     }
 
+    @CacheEvict(value = {"categoryById", "categoryByName"}, allEntries = true)
     @Transactional
     public void updateCategory(Long categoryId, CategoryInfoDto.Request categoryInfo) {
         Category category = findById(categoryId);
@@ -54,6 +58,7 @@ public class CategoryService {
                 .log("Category updated successfully");
     }
 
+    @CacheEvict(value = {"categoryById", "categoryByName"}, allEntries = true)
     @Transactional
     public void deleteCategory(Long categoryId) {
         Category category = findById(categoryId);
@@ -65,6 +70,7 @@ public class CategoryService {
                 .log("Category deleted successfully");
     }
 
+    @Cacheable(value = "categoryByName", key = "#name")
     public Category findByName(String name) {
         Category category = categoryRepository.findByName(name).orElseThrow(() -> new BusinessException(ResultCode.CATEGORY_NOT_FOUND));
         log.atDebug()
@@ -74,6 +80,7 @@ public class CategoryService {
         return category;
     }
 
+    @Cacheable(value = "categoryById", key = "#categoryId")
     public Category findById(Long categoryId) {
         Category category = categoryRepository.findById(categoryId).orElseThrow(() -> new BusinessException(ResultCode.CATEGORY_NOT_FOUND));
         log.atDebug()

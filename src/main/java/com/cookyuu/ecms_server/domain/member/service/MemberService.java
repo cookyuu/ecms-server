@@ -11,6 +11,8 @@ import com.cookyuu.ecms_server.common.exception.AuthenticationException;
 import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.cookyuu.ecms_server.common.utils.AuthUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,11 +41,13 @@ public class MemberService {
         }
     }
 
+    @Cacheable(value = "memberDetail", key = "#loginId")
     @Transactional(readOnly = true)
     public MemberDetailDto getMemberDetail(String loginId) {
         return memberRepository.getMemberDetail(loginId);
     }
 
+    @CacheEvict(value = "memberDetail", key = "#loginId")
     @Transactional
     public void updateRole(String role, String loginId) {
         long startTime = System.currentTimeMillis();

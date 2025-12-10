@@ -17,6 +17,8 @@ import com.cookyuu.ecms_server.common.utils.ValidateUtils;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -54,6 +56,7 @@ public class SellerService {
         return SellerRegistrationMapper.toDto(seller);
     }
 
+    @CacheEvict(value = "sellerDetail", key = "#user.username")
     @Transactional
     public void updateSellerInfo(UserDetails user, UpdateSellerDto.Request sellerInfo) {
         sellerInfo.chkAllNull();
@@ -70,6 +73,7 @@ public class SellerService {
                 .log("Seller information updated successfully");
     }
 
+    @CacheEvict(value = "sellerDetail", key = "#user.username")
     @Transactional
     public void deleteSeller(UserDetails user, DeleteSellerDto.Request sellerInfo) {
         if (!sellerInfo.getPassword().equalsIgnoreCase(sellerInfo.getConfirmPassword())) {
@@ -85,6 +89,7 @@ public class SellerService {
                 .log("Seller account deleted");
     }
 
+    @Cacheable(value = "sellerDetail", key = "#reqUserId")
     @Transactional(readOnly = true)
     public SellerDetailDto getSellerDetail(Long reqUserId) {
         return sellerRepository.getSellerDetail(reqUserId);
