@@ -20,7 +20,6 @@ public class RedisUtils {
 
     private final StringRedisTemplate redisTemplate;
 
-    // key를 통해 Value 리턴
     public String getData(String key) {
         try {
             ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
@@ -31,7 +30,6 @@ public class RedisUtils {
         }
     }
 
-    // 유효시간 동안 key,value 저장
     public void setDataExpire(String key, String value, long durationSec) {
         try {
             ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
@@ -59,7 +57,6 @@ public class RedisUtils {
         hashOperations.put(key, hashKey, "1");
     }
 
-    // 삭제
     public void deleteData(String key) {
         try {
             redisTemplate.delete(key);

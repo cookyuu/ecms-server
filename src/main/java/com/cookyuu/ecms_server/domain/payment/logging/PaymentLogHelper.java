@@ -11,9 +11,6 @@ import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 @Component
 public class PaymentLogHelper {
 
-    /**
-     * 결제 완료 Info 로그
-     */
     public void logPaymentCompleted(Long userId, Long orderId, String orderNumber, String paymentNumber,
                                     String paymentMethod, int paymentAmount, long durationMs) {
         log.atInfo()
@@ -28,9 +25,6 @@ public class PaymentLogHelper {
             .log("Payment completed successfully");
     }
 
-    /**
-     * 결제 실패 - 금액 불일치 Warn 로그
-     */
     public void logPaymentFailedAmountMismatch(Long userId, Long orderId, String orderNumber, String paymentNumber,
                                                String paymentMethod, int requestedAmount, int expectedAmount,
                                                ResultCode resultCode, long durationMs) {
@@ -49,9 +43,6 @@ public class PaymentLogHelper {
             .log("Payment failed - amount mismatch");
     }
 
-    /**
-     * 결제 취소 요청 Debug 로그
-     */
     public void logPaymentCancellationRequested(Long userId, String orderNumber, String paymentNumber, String cancelReason) {
         log.atDebug()
             .addKeyValue(EVENT, PAYMENT_CANCELLED)
@@ -62,9 +53,6 @@ public class PaymentLogHelper {
             .log("Payment cancellation requested");
     }
 
-    /**
-     * 결제 취소 성공 Info 로그
-     */
     public void logPaymentCancelled(Long userId, String orderNumber, String paymentNumber,
                                     String cancelReason, long durationMs) {
         log.atInfo()
@@ -77,9 +65,6 @@ public class PaymentLogHelper {
             .log("Payment cancelled successfully");
     }
 
-    /**
-     * 결제 상세 조회 Debug 로그
-     */
     public void logPaymentDetailFetch(Long userId, String userRole, String paymentNumber) {
         log.atDebug()
             .addKeyValue("operation", "getPaymentDetail")
@@ -89,9 +74,6 @@ public class PaymentLogHelper {
             .log("Fetching payment detail");
     }
 
-    /**
-     * 결제 상세 조회 완료 Debug 로그
-     */
     public void logPaymentDetailFetched(Long userId, String paymentNumber) {
         log.atDebug()
             .addKeyValue("operation", "getPaymentDetail")
@@ -100,9 +82,6 @@ public class PaymentLogHelper {
             .log("Payment detail fetched successfully");
     }
 
-    /**
-     * 결제 가능 여부 검증 실패 Warn 로그
-     */
     public void logPaymentValidationFailed(Long orderId, String orderStatus, ResultCode resultCode) {
         log.atWarn()
             .addKeyValue(EVENT, VALIDATION_ERROR)
@@ -112,9 +91,6 @@ public class PaymentLogHelper {
             .log("Payment validation failed - invalid order status");
     }
 
-    /**
-     * 결제 가능 여부 검증 성공 Debug 로그
-     */
     public void logPaymentValidationPassed(Long orderId, String orderStatus) {
         log.atDebug()
             .addKeyValue("operation", "checkPossiblePayment")
@@ -123,9 +99,6 @@ public class PaymentLogHelper {
             .log("Payment validation passed");
     }
 
-    /**
-     * 결제 취소 가능 여부 검증 실패 Warn 로그
-     */
     public void logPaymentCancellationValidationFailed(Long orderId, String orderStatus, ResultCode resultCode) {
         log.atWarn()
             .addKeyValue(EVENT, VALIDATION_ERROR)
@@ -135,9 +108,6 @@ public class PaymentLogHelper {
             .log("Payment cancellation validation failed - invalid order status");
     }
 
-    /**
-     * 결제 취소 가능 여부 검증 성공 Debug 로그
-     */
     public void logPaymentCancellationValidationPassed(Long orderId, String orderStatus) {
         log.atDebug()
             .addKeyValue("operation", "checkPossiblePaymentCancel")

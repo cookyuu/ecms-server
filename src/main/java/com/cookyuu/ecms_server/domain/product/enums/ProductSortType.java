@@ -2,9 +2,6 @@ package com.cookyuu.ecms_server.domain.product.enums;
 
 import lombok.Getter;
 
-/**
- * 상품 정렬 옵션
- */
 @Getter
 public enum ProductSortType {
     CREATED_DESC("최신순", "createdAt", "DESC"),

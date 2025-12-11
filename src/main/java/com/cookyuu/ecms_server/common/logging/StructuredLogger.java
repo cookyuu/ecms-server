@@ -6,10 +6,6 @@ import java.math.BigDecimal;
 
 import static net.logstash.logback.argument.StructuredArguments.keyValue;
 
-/**
- * 구조화된 로깅을 위한 유틸리티 클래스
- * LogEvents와 LogFields를 활용한 JSON 로그 생성
- */
 public final class StructuredLogger {
 
     private StructuredLogger() {

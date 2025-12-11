@@ -11,9 +11,6 @@ import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 @Component
 public class OrderLogHelper {
 
-    /**
-     * 재고 부족 에러 로그
-     */
     public void logStockError(int quantity, int stockQuantity, ResultCode resultCode, String message) {
         log.atError()
             .addKeyValue(EVENT, PRODUCT_OUT_OF_STOCK)
@@ -23,9 +20,6 @@ public class OrderLogHelper {
             .log(message);
     }
 
-    /**
-     * 가격 검증 에러 로그
-     */
     public void logPriceError(Long productId, int orderPrice, Integer currentPrice, ResultCode resultCode, String message) {
         log.atError()
             .addKeyValue(EVENT, VALIDATION_ERROR)
@@ -36,9 +30,6 @@ public class OrderLogHelper {
             .log(message);
     }
 
-    /**
-     * 검증 성공 Debug 로그 (간결한 형태)
-     */
     public void logValidationSuccess(String operation, Long productId, Integer quantity, Integer stockQuantity) {
         log.atDebug()
             .addKeyValue("operation", operation)
@@ -48,9 +39,6 @@ public class OrderLogHelper {
             .log("Validation passed");
     }
 
-    /**
-     * 재고 차감 Debug 로그
-     */
     public void logStockDecrease(String operation, Long productId, int quantity, Integer stockQuantity) {
         log.atDebug()
             .addKeyValue("operation", operation)
@@ -60,9 +48,6 @@ public class OrderLogHelper {
             .log("Stock decreased");
     }
 
-    /**
-     * 재고 복구 Debug 로그
-     */
     public void logStockRestore(String operation, Long productId, int quantity, Integer stockQuantity) {
         log.atDebug()
             .addKeyValue("operation", operation)
@@ -72,9 +57,6 @@ public class OrderLogHelper {
             .log("Stock restored");
     }
 
-    /**
-     * 주문 수정 시 재고 복구 Info 로그
-     */
     public void logStockRestoreForRevision(Long productId, int quantity, Integer stockQuantity) {
         log.atDebug()
             .addKeyValue(EVENT, ORDER_REVISED)
@@ -84,9 +66,6 @@ public class OrderLogHelper {
             .log("Restored product quantity for order revision");
     }
 
-    /**
-     * 주문 수정 시 재고 차감 Debug 로그
-     */
     public void logStockDecreaseForRevision(Long productId, int quantity, Integer stockQuantity) {
         log.atDebug()
             .addKeyValue(EVENT, ORDER_REVISED)
@@ -96,11 +75,6 @@ public class OrderLogHelper {
             .log("Stock decreased for order revision");
     }
 
-    // ===== 주문 생성 관련 로그 =====
-
-    /**
-     * 상품을 찾을 수 없음 에러 로그
-     */
     public void logProductNotFoundError(Long userId, Long productId) {
         log.atError()
             .addKeyValue(EVENT, BUSINESS_ERROR)
@@ -110,9 +84,6 @@ public class OrderLogHelper {
             .log("Order creation failed - product not found");
     }
 
-    /**
-     * 주문 생성 성공 Info 로그
-     */
     public void logOrderCreated(Long userId, Long orderId, String orderNumber, int totalAmount,
                                 int itemCount, String orderStatus, long durationMs) {
         log.atInfo()
@@ -127,9 +98,6 @@ public class OrderLogHelper {
             .log("Order created successfully");
     }
 
-    /**
-     * 주문 생성 실패 Error 로그
-     */
     public void logOrderCreationFailed(Long userId, String orderNumber, String errorMessage,
                                        long durationMs, Exception e) {
         log.atError()
@@ -142,11 +110,6 @@ public class OrderLogHelper {
             .log("Order creation failed - transaction error");
     }
 
-    // ===== 주문 취소 관련 로그 =====
-
-    /**
-     * 주문 취소 성공 Info 로그
-     */
     public void logOrderCancelled(Long userId, Long orderId, String orderNumber,
                                   String orderStatus, String cancelReason, long durationMs) {
         log.atInfo()
@@ -160,9 +123,6 @@ public class OrderLogHelper {
             .log("Order cancelled successfully");
     }
 
-    /**
-     * 주문 취소 실패 Warn 로그
-     */
     public void logOrderCancellationFailed(Long userId, Long orderId, String orderNumber,
                                            String orderStatus, ResultCode resultCode) {
         log.atWarn()
@@ -176,11 +136,6 @@ public class OrderLogHelper {
             .log("Order cancellation failed - invalid status");
     }
 
-    // ===== 주문 수정 관련 로그 =====
-
-    /**
-     * 주문 수정 실패 Warn 로그
-     */
     public void logOrderRevisionFailed(Long orderId, String orderStatus, ResultCode resultCode) {
         log.atWarn()
             .addKeyValue(EVENT, BUSINESS_ERROR)
@@ -191,9 +146,6 @@ public class OrderLogHelper {
             .log("Order revision failed - invalid status");
     }
 
-    /**
-     * 주문 수정 성공 Info 로그
-     */
     public void logOrderRevised(Long userId, Long orderId, String orderNumber,
                                 int totalAmount, int itemCount) {
         log.atInfo()
@@ -206,11 +158,6 @@ public class OrderLogHelper {
             .log("Order revised successfully");
     }
 
-    // ===== Debug 로그 =====
-
-    /**
-     * 주문 상세 조회 Debug 로그
-     */
     public void logOrderDetailFetch(String userRole, String orderNumber) {
         log.atDebug()
             .addKeyValue("operation", "getOrderDetail")
@@ -219,9 +166,6 @@ public class OrderLogHelper {
             .log("Fetching order detail");
     }
 
-    /**
-     * 장바구니 업데이트 Debug 로그
-     */
     public void logCartUpdate(Long cartId, Long productId) {
         log.atDebug()
             .addKeyValue("operation", "updateCart")
@@ -230,9 +174,6 @@ public class OrderLogHelper {
             .log("Updating cart with ordered items");
     }
 
-    /**
-     * 가격 비교 Debug 로그 (주문 수정 시)
-     */
     public void logPriceComparison(Long productId, int price) {
         log.atDebug()
             .addKeyValue(EVENT, ORDER_REVISED)

@@ -1,10 +1,5 @@
 package com.cookyuu.ecms_server.common.logging;
 
-/**
- * 표준화된 로그 필드명 정의
- * JSON 로그에서 일관된 필드명 사용을 위한 상수
- * 네이밍 규칙: snake_case
- */
 public final class LogFields {
 
     private LogFields() {

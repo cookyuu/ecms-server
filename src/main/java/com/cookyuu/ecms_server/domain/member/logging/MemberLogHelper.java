@@ -11,9 +11,6 @@ import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 @Component
 public class MemberLogHelper {
 
-    /**
-     * 회원 등록 성공 Info 로그
-     */
     public void logMemberRegistered(Long memberId, String loginId, String email, String role, long durationMs) {
         log.atInfo()
             .addKeyValue(EVENT, MEMBER_REGISTERED)
@@ -25,9 +22,6 @@ public class MemberLogHelper {
             .log("Member registered successfully");
     }
 
-    /**
-     * 회원 등록 실패 Error 로그
-     */
     public void logMemberRegistrationFailed(String loginId, String errorMessage, long durationMs, Exception e) {
         log.atError()
             .addKeyValue(EVENT, BUSINESS_ERROR)
@@ -38,9 +32,6 @@ public class MemberLogHelper {
             .log("Member registration failed");
     }
 
-    /**
-     * 회원 역할 변경 Info 로그
-     */
     public void logMemberRoleChanged(Long memberId, String loginId, String oldRole, String newRole, long durationMs) {
         log.atInfo()
             .addKeyValue(EVENT, MEMBER_ROLE_CHANGED)
@@ -52,9 +43,6 @@ public class MemberLogHelper {
             .log("Member role updated successfully");
     }
 
-    /**
-     * 로그인 성공 Info 로그
-     */
     public void logLoginSuccess(Long memberId, String loginId, String role, long durationMs) {
         log.atInfo()
             .addKeyValue(EVENT, LOGIN_SUCCESS)
@@ -65,9 +53,6 @@ public class MemberLogHelper {
             .log("Login successful");
     }
 
-    /**
-     * 로그인 실패 - 회원을 찾을 수 없음 Warn 로그
-     */
     public void logLoginFailedMemberNotFound(String loginId, ResultCode resultCode, long durationMs) {
         log.atWarn()
             .addKeyValue(EVENT, LOGIN_FAILED)
@@ -78,9 +63,6 @@ public class MemberLogHelper {
             .log("Login failed - member not found");
     }
 
-    /**
-     * 로그인 실패 - 잘못된 비밀번호 Warn 로그
-     */
     public void logLoginFailedInvalidPassword(String loginId, ResultCode resultCode, long durationMs) {
         log.atWarn()
             .addKeyValue(EVENT, LOGIN_FAILED)

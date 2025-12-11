@@ -19,18 +19,16 @@ public class SearchProductDto {
     @AllArgsConstructor
     @NoArgsConstructor
     public static class Request {
-        // 기존 검색 옵션
         private String option;
         private String keyword;
         private SortType sortType;
         private Pageable pageable;
 
-        // 고급 필터 옵션
-        private Integer minPrice;              // 최소 가격
-        private Integer maxPrice;              // 최대 가격
-        private StockStatus stockStatus;       // 재고 상태
-        private List<Long> categoryIds;        // 카테고리 ID 리스트 (다중 선택)
-        private ProductSortType productSortType; // 확장 정렬 옵션
+        private Integer minPrice;
+        private Integer maxPrice;
+        private StockStatus stockStatus;
+        private List<Long> categoryIds;
+        private ProductSortType productSortType;
     }
 
     @Getter

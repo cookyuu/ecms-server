@@ -57,21 +57,19 @@ public class RedisConfig {
 
     @Bean
     public RedisCacheManager redisCacheManager() {
-        // 기본 캐시 설정
         RedisCacheConfiguration defaultCacheConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new GenericJackson2JsonRedisSerializer()))
                 .entryTtl(Duration.ofDays(1L));
 
-        // 도메인별 캐시 설정
         RedisCacheConfiguration memberCacheConfig = defaultCacheConfig
-                .entryTtl(Duration.ofMinutes(30L));  // 회원 정보: 30분
+                .entryTtl(Duration.ofMinutes(30L));
 
         RedisCacheConfiguration sellerCacheConfig = defaultCacheConfig
-                .entryTtl(Duration.ofMinutes(30L));  // 판매자 정보: 30분
+                .entryTtl(Duration.ofMinutes(30L));
 
         RedisCacheConfiguration categoryCacheConfig = defaultCacheConfig
-                .entryTtl(Duration.ofHours(24L));    // 카테고리 정보: 24시간
+                .entryTtl(Duration.ofHours(24L));
 
         return RedisCacheManager.RedisCacheManagerBuilder.fromConnectionFactory(redisConnectionFactory())
                 .cacheDefaults(defaultCacheConfig)

@@ -56,10 +56,10 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                 .where(
                         isNotDeleted(),
                         optionEq(request.getOption(), request.getKeyword()),
-                        priceGoe(request.getMinPrice()),           // 최소 가격
-                        priceLoe(request.getMaxPrice()),           // 최대 가격
-                        stockStatusEq(request.getStockStatus()),   // 재고 상태
-                        categoryIdIn(request.getCategoryIds())     // 카테고리 필터
+                        priceGoe(request.getMinPrice()),
+                        priceLoe(request.getMaxPrice()),
+                        stockStatusEq(request.getStockStatus()),
+                        categoryIdIn(request.getCategoryIds())
                 )
                 .orderBy(createOrderSpecifier(request.getSortType(), request.getProductSortType()))
                 .offset(request.getPageable().getOffset())
@@ -122,7 +122,6 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
     }
 
     private OrderSpecifier createOrderSpecifier(SortType sortType, ProductSortType productSortType) {
-        // ProductSortType이 우선순위
         if (productSortType != null) {
             return switch (productSortType) {
                 case CREATED_DESC -> new OrderSpecifier<>(Order.DESC, product.createdAt);
@@ -130,11 +129,10 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                 case PRICE_ASC -> new OrderSpecifier<>(Order.ASC, product.price);
                 case PRICE_DESC -> new OrderSpecifier<>(Order.DESC, product.price);
                 case HIT_COUNT_DESC -> new OrderSpecifier<>(Order.DESC, product.hitCount);
-                case POPULAR -> new OrderSpecifier<>(Order.DESC, product.createdAt); // TODO: 주문 수 기준 정렬 구현 필요
+                case POPULAR -> new OrderSpecifier<>(Order.DESC, product.createdAt);
             };
         }
 
-        // 레거시 SortType 지원
         if (sortType == null) {
             return new OrderSpecifier<>(Order.DESC, product.createdAt);
         }

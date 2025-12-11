@@ -11,9 +11,6 @@ import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 @Component
 public class CouponLogHelper {
 
-    /**
-     * 쿠폰 발급 성공 Info 로그
-     */
     public void logCouponIssued(Long userId, String couponNumber, long durationMs) {
         log.atInfo()
             .addKeyValue(EVENT, COUPON_ISSUED)
@@ -24,9 +21,6 @@ public class CouponLogHelper {
             .log("Coupon issued successfully");
     }
 
-    /**
-     * 쿠폰 발급 실패 Error 로그
-     */
     public void logCouponIssueFailed(Long userId, String couponNumber, ResultCode resultCode,
                                      String errorMessage, long durationMs, Exception e) {
         log.atError()
@@ -41,9 +35,6 @@ public class CouponLogHelper {
             .log("Coupon issue failed");
     }
 
-    /**
-     * 쿠폰 검증 성공 Debug 로그
-     */
     public void logCouponValidationPassed(String couponNumber) {
         log.atDebug()
             .addKeyValue("operation", "validateCouponRequest")
@@ -51,9 +42,6 @@ public class CouponLogHelper {
             .log("Coupon validation passed");
     }
 
-    /**
-     * 쿠폰 발급 가능 여부 검증 - 중복 발급 Warn 로그
-     */
     public void logCouponDuplicateIssue(Long userId, String couponNumber, ResultCode resultCode) {
         log.atWarn()
             .addKeyValue(EVENT, COUPON_ISSUE_FAILED)
@@ -64,9 +52,6 @@ public class CouponLogHelper {
             .log("Coupon issue validation failed - duplicate issue");
     }
 
-    /**
-     * 쿠폰 발급 가능 여부 검증 - 쿠폰 소진 Warn 로그
-     */
     public void logCouponSoldOut(Long userId, String couponNumber, String availableCount, ResultCode resultCode) {
         log.atWarn()
             .addKeyValue(EVENT, COUPON_ISSUE_FAILED)
@@ -77,9 +62,6 @@ public class CouponLogHelper {
             .log("Coupon issue validation failed - sold out");
     }
 
-    /**
-     * 쿠폰 발급 가능 여부 검증 성공 Debug 로그
-     */
     public void logCouponIssuableValidationPassed(Long userId, String couponNumber, String availableCount) {
         log.atDebug()
             .addKeyValue("operation", "checkIssuable")
@@ -89,9 +71,6 @@ public class CouponLogHelper {
             .log("Coupon issuable validation passed");
     }
 
-    /**
-     * 쿠폰 발급 처리 완료 Debug 로그
-     */
     public void logCouponIssueProcessed(Long userId, String couponNumber) {
         log.atDebug()
             .addKeyValue("operation", "processIssue")
@@ -100,9 +79,6 @@ public class CouponLogHelper {
             .log("Coupon issue process completed");
     }
 
-    /**
-     * 실제 쿠폰 발급 처리 완료 Debug 로그
-     */
     public void logActualCouponIssueProcessed(Long userId, Long couponId, String couponNumber, int remainingCount) {
         log.atDebug()
             .addKeyValue("operation", "processActualCouponIssue")
@@ -113,9 +89,6 @@ public class CouponLogHelper {
             .log("Actual coupon issue process completed");
     }
 
-    /**
-     * 실제 쿠폰 발급 실패 Error 로그
-     */
     public void logActualCouponIssueFailed(Long userId, Long couponId, String couponNumber,
                                            String errorMessage, Exception e) {
         log.atError()
@@ -128,9 +101,6 @@ public class CouponLogHelper {
             .log("Actual coupon issue failed - transaction error");
     }
 
-    /**
-     * 쿠폰 발급 롤백 Debug 로그
-     */
     public void logCouponIssueRollback(Long userId, String couponNumber) {
         log.atDebug()
             .addKeyValue("operation", "rollbackCouponIssue")
@@ -139,9 +109,6 @@ public class CouponLogHelper {
             .log("Coupon issue rollback completed");
     }
 
-    /**
-     * 쿠폰 발급 성공 상태 기록 Debug 로그
-     */
     public void logCouponIssueSuccessRecorded(String couponNumber) {
         log.atDebug()
             .addKeyValue("operation", "recordIssueCouponStatus")
@@ -150,9 +117,6 @@ public class CouponLogHelper {
             .log("Coupon issue success recorded");
     }
 
-    /**
-     * 쿠폰 발급 실패 상태 기록 Debug 로그
-     */
     public void logCouponIssueFailureRecorded(String couponNumber) {
         log.atDebug()
             .addKeyValue("operation", "recordIssueCouponStatus")

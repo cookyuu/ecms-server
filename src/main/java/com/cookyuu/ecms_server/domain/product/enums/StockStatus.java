@@ -2,9 +2,6 @@ package com.cookyuu.ecms_server.domain.product.enums;
 
 import lombok.Getter;
 
-/**
- * 재고 상태 필터
- */
 @Getter
 public enum StockStatus {
     ALL("전체", null),           // 전체 조회

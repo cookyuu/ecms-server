@@ -1,6 +1,5 @@
 package com.cookyuu.ecms_server.common.exception;
 
-//import com.cookyuu.ecms_server.domain.alert.service.SlackService;
 import com.cookyuu.ecms_server.common.enums.ResultCode;
 import com.cookyuu.ecms_server.common.web.dto.ApiResponse;
 import com.cookyuu.ecms_server.common.web.filter.RequestContextFilter;
@@ -24,37 +23,18 @@ import java.sql.SQLException;
 import java.time.format.DateTimeParseException;
 import java.util.NoSuchElementException;
 
-/**
- * 전역 예외 처리 핸들러
- *
- * 예외 처리 우선순위:
- * 1. 커스텀 예외 (BusinessException, AuthenticationException, ExternalApiException)
- * 2. Spring Security 예외 (BadCredentialsException, AccessDeniedException)
- * 3. Validation 예외 (MethodArgumentNotValidException)
- * 4. 표준 Java 예외 (IllegalArgumentException, NullPointerException 등)
- * 5. 최후의 Exception (모든 예외)
- */
 @Primary
 @Slf4j
 @RestControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
-//    private final SlackService slackService;
 
-    // ========== 헬퍼 메서드 ==========
-
-    /**
-     * ApiResponse에 컨텍스트 정보(path, traceId) 추가
-     */
     private <T> ApiResponse<T> addContext(ApiResponse<T> response, HttpServletRequest request) {
         String path = extractRequestPath(request);
         String traceId = extractTraceId(request);
         return response.withContext(path, traceId);
     }
 
-    /**
-     * 요청 경로 추출 (쿼리 파라미터 포함)
-     */
     private String extractRequestPath(HttpServletRequest request) {
         String uri = request.getRequestURI();
         String queryString = request.getQueryString();
@@ -66,20 +46,11 @@ public class GlobalExceptionHandler {
         return uri;
     }
 
-    /**
-     * Request Attribute에서 traceId 추출
-     */
     private String extractTraceId(HttpServletRequest request) {
         Object traceId = request.getAttribute(RequestContextFilter.TRACE_ID_ATTRIBUTE);
         return traceId != null ? traceId.toString() : null;
     }
 
-    // ========== 커스텀 예외 처리 ==========
-
-    /**
-     * 비즈니스 로직 예외 처리
-     * 주문, 결제, 상품 등 모든 도메인의 비즈니스 예외를 처리
-     */
     @ExceptionHandler(value = BusinessException.class)
     public ResponseEntity<ApiResponse<Object>> handleBusinessException(HttpServletRequest request, BusinessException e) {
         String errMsg = e.getMessage() != null ? e.getMessage() : e.getResultCode().getMessage();
@@ -94,10 +65,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, e.getResultCode().getStatus());
     }
 
-    /**
-     * 인증/인가 예외 처리
-     * JWT 토큰, 로그인, 권한 검증 실패 시 처리
-     */
     @ExceptionHandler(value = AuthenticationException.class)
     public ResponseEntity<ApiResponse<Object>> handleAuthenticationException(HttpServletRequest request, AuthenticationException e) {
         String errMsg = e.getMessage() != null ? e.getMessage() : e.getResultCode().getMessage();
@@ -108,10 +75,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, e.getResultCode().getStatus());
     }
 
-    /**
-     * 외부 API 호출 실패 예외 처리
-     * Slack, PG사, 배송 조회 등 외부 시스템 연동 실패 시 처리
-     */
     @ExceptionHandler(value = ExternalApiException.class)
     public ResponseEntity<ApiResponse<Object>> handleExternalApiException(HttpServletRequest request, ExternalApiException e) {
         log.error("[ExternalApiException] api={}, code={}, externalCode={}, retryable={}, message={}",
@@ -122,7 +85,6 @@ public class GlobalExceptionHandler {
                   e.getMessage(),
                   e);
 
-        // 외부 API 실패는 클라이언트에게 간결한 메시지만 전달
         var response = ApiResponse.failure(
             e.getResultCode(),
             "외부 서비스 연동 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요."
@@ -130,8 +92,6 @@ public class GlobalExceptionHandler {
         response = addContext(response, request);
         return new ResponseEntity<>(response, e.getResultCode().getStatus());
     }
-
-    // ========== Spring Security 예외 처리 ==========
 
     @ExceptionHandler(value = BadCredentialsException.class)
     public ResponseEntity<ApiResponse<Object>> handleBadCredentialsException(HttpServletRequest request, BadCredentialsException e) {
@@ -248,7 +208,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse<Object>> handleException(HttpServletRequest request, Exception e) {
         log.error("[Exception] ", e);
-//        slackService.sendErrorForSlack(e);
         var response = ApiResponse.failure(ResultCode.INTERNAL_SERVER_ERROR, e.getMessage());
         response = addContext(response, request);
         return new ResponseEntity<>(response, ResultCode.INTERNAL_SERVER_ERROR.getStatus());

@@ -1,9 +1,5 @@
 package com.cookyuu.ecms_server.common.logging;
 
-/**
- * 표준화된 로그 이벤트 타입 정의
- * Grafana Loki 및 Prometheus 모니터링을 위한 이벤트 상수
- */
 public final class LogEvents {
 
     private LogEvents() {

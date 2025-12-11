@@ -15,24 +15,9 @@ import java.util.UUID;
 
 import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 
-/**
- * HTTP 요청마다 MDC(Mapped Diagnostic Context)에 추적 정보를 자동으로 설정하는 필터
- *
- * 설정하는 MDC 필드:
- * - trace_id: 요청 추적용 고유 ID (UUID)
- * - request_id: 요청 식별자 (UUID)
- * - user_id: 인증된 사용자 ID
- * - ip_address: 클라이언트 IP 주소
- * - user_agent: User-Agent 헤더
- * - http_method: HTTP 메서드 (GET, POST 등)
- * - http_path: 요청 경로
- *
- * logback-spring.xml의 includeMdcKeyName 설정에 의해
- * 이 필드들이 모든 로그에 자동으로 포함됩니다.
- */
 @Slf4j
 @Component
-@Order(1) // 가장 먼저 실행되도록 설정
+@Order(1)
 public class LoggingFilter implements Filter {
 
     @Override
@@ -64,9 +49,6 @@ public class LoggingFilter implements Filter {
         }
     }
 
-    /**
-     * MDC에 요청 추적 정보 설정
-     */
     private void setupMDC(HttpServletRequest request) {
         // Trace ID: 요청 전체 추적용 (헤더에서 가져오거나 새로 생성)
         String traceId = request.getHeader("X-Trace-Id");
@@ -108,9 +90,6 @@ public class LoggingFilter implements Filter {
         MDC.put(HTTP_PATH, request.getRequestURI());
     }
 
-    /**
-     * 클라이언트 IP 주소 추출 (프록시 고려)
-     */
     private String getClientIpAddress(HttpServletRequest request) {
         String[] headers = {
             "X-Forwarded-For",
@@ -140,9 +119,6 @@ public class LoggingFilter implements Filter {
         return request.getRemoteAddr();
     }
 
-    /**
-     * HTTP 요청 로깅
-     */
     private void logRequest(HttpServletRequest request) {
         // 정적 리소스나 헬스체크는 로그 제외
         String path = request.getRequestURI();
@@ -158,9 +134,6 @@ public class LoggingFilter implements Filter {
             .log("HTTP request received");
     }
 
-    /**
-     * HTTP 응답 로깅
-     */
     private void logResponse(HttpServletRequest request, HttpServletResponse response, long duration) {
         // 정적 리소스나 헬스체크는 로그 제외
         String path = request.getRequestURI();
@@ -208,9 +181,6 @@ public class LoggingFilter implements Filter {
         }
     }
 
-    /**
-     * 로깅을 스킵할 경로 판별
-     */
     private boolean shouldSkipLogging(String path) {
         return path.startsWith("/actuator/") ||
                path.startsWith("/static/") ||
@@ -222,9 +192,6 @@ public class LoggingFilter implements Filter {
                path.startsWith("/v3/api-docs");
     }
 
-    /**
-     * MDC 클리어 (메모리 누수 방지)
-     */
     private void clearMDC() {
         MDC.clear();
     }

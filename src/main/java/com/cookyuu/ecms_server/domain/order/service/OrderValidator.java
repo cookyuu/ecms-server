@@ -14,14 +14,6 @@ public class OrderValidator {
 
     private final OrderLogHelper orderLogHelper;
 
-    /**
-     * 주문 수량과 재고 수량을 비교하여 검증
-     *
-     * @param quantity 주문 수량
-     * @param stockQuantity 재고 수량
-     * @param productId 상품 ID (로깅용)
-     * @throws BusinessException 재고가 없거나 부족한 경우
-     */
     public void validateStockQuantity(int quantity, Integer stockQuantity, Long productId) {
         if (stockQuantity == 0) {
             orderLogHelper.logStockError(quantity, stockQuantity, ResultCode.PRODUCT_SOLD_OUT,
@@ -37,14 +29,6 @@ public class OrderValidator {
         orderLogHelper.logValidationSuccess("validateStockQuantity", productId, quantity, stockQuantity);
     }
 
-    /**
-     * 주문 가격과 현재 상품 가격을 비교하여 검증
-     *
-     * @param orderPrice 주문 시점의 가격
-     * @param currentPrice 현재 상품 가격
-     * @param productId 상품 ID
-     * @throws BusinessException 가격이 설정되지 않았거나 일치하지 않는 경우
-     */
     public void validateProductPrice(int orderPrice, Integer currentPrice, Long productId) {
         if (currentPrice == null) {
             orderLogHelper.logPriceError(productId, orderPrice, null, ORDER_PROCESS_FAIL,

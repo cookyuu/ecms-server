@@ -11,9 +11,6 @@ import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 @Component
 public class ProductLogHelper {
 
-    /**
-     * 상품 등록 성공 Info 로그
-     */
     public void logProductRegistered(Long productId, String productName, Long sellerId,
                                      String category, Integer price, Integer stockQuantity) {
         log.atInfo()
@@ -27,9 +24,6 @@ public class ProductLogHelper {
             .log("Product registered successfully");
     }
 
-    /**
-     * 상품 등록 실패 Error 로그
-     */
     public void logProductRegistrationFailed(Long sellerId, ResultCode resultCode, Exception e) {
         log.atError()
             .addKeyValue(EVENT, BUSINESS_ERROR)
@@ -39,9 +33,6 @@ public class ProductLogHelper {
             .log("Product registration failed");
     }
 
-    /**
-     * 상품 수정 성공 Info 로그
-     */
     public void logProductUpdated(Long productId, Long sellerId) {
         log.atInfo()
             .addKeyValue(EVENT, PRODUCT_UPDATED)
@@ -50,9 +41,6 @@ public class ProductLogHelper {
             .log("Product updated successfully");
     }
 
-    /**
-     * 상품 삭제 성공 Info 로그
-     */
     public void logProductDeleted(Long productId, Long sellerId) {
         log.atInfo()
             .addKeyValue(EVENT, PRODUCT_DELETED)
@@ -61,9 +49,6 @@ public class ProductLogHelper {
             .log("Product deleted successfully");
     }
 
-    /**
-     * 상품 조회수 증가 Debug 로그
-     */
     public void logProductViewed(Long productId) {
         log.atDebug()
             .addKeyValue(EVENT, PRODUCT_VIEWED)
@@ -71,9 +56,6 @@ public class ProductLogHelper {
             .log("Product hit count increased");
     }
 
-    /**
-     * 상품 소유권 확인 Debug 로그
-     */
     public void logCheckProductOwnership(Long productId, Long sellerId) {
         log.atDebug()
             .addKeyValue(PRODUCT_ID, productId)
@@ -81,9 +63,6 @@ public class ProductLogHelper {
             .log("Checking product ownership");
     }
 
-    /**
-     * 상품 조회 쿠키 검증 Debug 로그
-     */
     public void logValidatePostView(Long productId) {
         log.atDebug()
             .addKeyValue(PRODUCT_ID, productId)

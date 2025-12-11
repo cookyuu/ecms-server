@@ -27,13 +27,6 @@ public class BusinessNumberGenerator {
 
     private final RedisUtils redisUtils;
 
-    /**
-     * 주문번호 생성
-     *
-     * @param orderCode 주문 타입 코드
-     * @param couponCode 쿠폰 코드
-     * @return 생성된 주문번호 (예: ORD24120816120012345)
-     */
     public String generateOrderNumber(OrderCode orderCode, CouponCode couponCode) {
         String prefix = orderCode.getCode();
         String suffix = couponCode.getCode();
@@ -49,12 +42,6 @@ public class BusinessNumberGenerator {
         return orderNumber;
     }
 
-    /**
-     * 결제번호 생성 (Redis 기반 중복 방지)
-     *
-     * @param paymentMethod 결제 수단
-     * @return 생성된 결제번호 (예: CARD24120816120012345)
-     */
     public String generatePaymentNumber(PaymentMethod paymentMethod) {
         String paymentNumber = generateUniqueNumber(
             paymentMethod.getCode(),
@@ -71,11 +58,6 @@ public class BusinessNumberGenerator {
         return paymentNumber;
     }
 
-    /**
-     * 배송번호 생성
-     *
-     * @return 생성된 배송번호 (예: SP24120816120012345)
-     */
     public String generateShipmentNumber() {
         String shipmentNumber = generateNumber("SP", DEFAULT_RANDOM_LENGTH);
 
@@ -87,12 +69,6 @@ public class BusinessNumberGenerator {
         return shipmentNumber;
     }
 
-    /**
-     * 쿠폰번호 생성
-     *
-     * @param couponCode 쿠폰 타입 코드
-     * @return 생성된 쿠폰번호 (예: CPM24120816120012345)
-     */
     public String generateCouponNumber(CouponCode couponCode) {
         String couponNumber = generateNumber("CP" + couponCode.getCode(), DEFAULT_RANDOM_LENGTH);
 
@@ -105,10 +81,6 @@ public class BusinessNumberGenerator {
         return couponNumber;
     }
 
-    /**
-     * 기본 번호 생성
-     * 포맷: {prefix}{yyMMddHHmm}{랜덤숫자}
-     */
     private String generateNumber(String prefix, int randomLength) {
         StringBuilder sb = new StringBuilder();
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_FORMAT));
@@ -117,10 +89,6 @@ public class BusinessNumberGenerator {
         return sb.toString();
     }
 
-    /**
-     * 중간에 suffix가 포함된 번호 생성
-     * 포맷: {prefix}{yyMMddHHmm}{middleSuffix}{랜덤숫자}
-     */
     private String generateWithMiddleSuffix(String prefix, String middleSuffix, int randomLength) {
         StringBuilder sb = new StringBuilder();
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_FORMAT));
@@ -129,9 +97,6 @@ public class BusinessNumberGenerator {
         return sb.toString();
     }
 
-    /**
-     * Redis를 통한 중복 체크와 함께 고유 번호 생성
-     */
     private String generateUniqueNumber(String prefix, RedisKeyCode keyCode, int randomLength) {
         String number;
         int attemptCount = 0;
@@ -166,9 +131,6 @@ public class BusinessNumberGenerator {
         return number;
     }
 
-    /**
-     * StringBuilder에 랜덤 숫자 추가
-     */
     private void appendRandomDigits(StringBuilder sb, int length) {
         for (int i = 0; i < length; i++) {
             sb.append((int) (Math.random() * RANDOM_DIGIT_BOUND));
