@@ -1,7 +1,7 @@
 package com.cookyuu.ecms_server.domain.alert.service;
 
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.domain.ExternalApiException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.ExternalApiException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slack.api.Slack;
 import com.slack.api.webhook.WebhookResponse;
@@ -49,7 +49,7 @@ public class SlackAlertService implements SlackService{
             response = slack.send(slackAlertWebhookUrl, objectMapper.writeValueAsString(slackMessage));
             return "[Alert::Slack] ECMS slack alert message sent : " + response.getCode();
         } catch (IOException e) {
-            throw new ExternalApiException(ResultCode.FAIL_ALERT_SLACK, e);
+            throw new ExternalApiException("Slack", ResultCode.FAIL_ALERT_SLACK, e, true);
         }
     }
 }

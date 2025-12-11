@@ -36,9 +36,11 @@ public class SecurityConfig {
         "/api/v1/auth/validation/**",
         "/api/v1/seller/registration",
         "/api/v1/member/role",
+        "/swagger-ui.html",
         "/swagger-ui/**",
         "/swagger-resources/**",
-        "/v3/api-docs/**"
+        "/v3/api-docs/**",
+        "/webjars/**"
     };
 
     private static final String[] AUTH_ADMIN = {
