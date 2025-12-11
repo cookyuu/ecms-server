@@ -13,6 +13,4 @@ public class AlertController {
     public void test() throws Exception {
         throw new Exception("Alert Test Exception.");
     }
-
-
 }
