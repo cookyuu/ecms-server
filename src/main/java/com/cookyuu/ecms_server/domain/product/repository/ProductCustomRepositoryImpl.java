@@ -2,10 +2,12 @@ package com.cookyuu.ecms_server.domain.product.repository;
 
 import com.cookyuu.ecms_server.domain.product.dto.FindProductDetailDto;
 import com.cookyuu.ecms_server.domain.product.dto.SearchProductDto;
-import com.cookyuu.ecms_server.domain.product.entity.SearchOption;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.entity.SortType;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
+import com.cookyuu.ecms_server.domain.product.enums.ProductSearchOption;
+import com.cookyuu.ecms_server.domain.product.enums.ProductSortType;
+import com.cookyuu.ecms_server.domain.product.enums.StockStatus;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.enums.SortType;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
@@ -22,7 +24,7 @@ import java.util.List;
 import static com.cookyuu.ecms_server.domain.order.entity.QOrder.order;
 import static com.cookyuu.ecms_server.domain.product.entity.QCategory.category;
 import static com.cookyuu.ecms_server.domain.product.entity.QProduct.product;
-import static com.cookyuu.ecms_server.domain.product.entity.SearchOption.*;
+import static com.cookyuu.ecms_server.domain.product.enums.ProductSearchOption.*;
 import static com.cookyuu.ecms_server.domain.seller.entity.QSeller.seller;
 
 @RequiredArgsConstructor
@@ -51,18 +53,30 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
                 .from(product)
                 .leftJoin(product.seller, seller)
                 .leftJoin(product.category, category)
-                .where(optionEq(request.getOption(), request.getKeyword()))
-                .where(isNotDeleted())
-                .orderBy(createOrderSpecifier(request.getSortType()))
+                .where(
+                        isNotDeleted(),
+                        optionEq(request.getOption(), request.getKeyword()),
+                        priceGoe(request.getMinPrice()),
+                        priceLoe(request.getMaxPrice()),
+                        stockStatusEq(request.getStockStatus()),
+                        categoryIdIn(request.getCategoryIds())
+                )
+                .orderBy(createOrderSpecifier(request.getSortType(), request.getProductSortType()))
                 .offset(request.getPageable().getOffset())
                 .limit(request.getPageable().getPageSize())
                 .fetch();
 
         JPAQuery<Long> countQuery = queryFactory
-                .select(order.count())
-                .from(order)
-                .where(optionEq(request.getOption(), request.getKeyword()))
-                .where(isNotDeleted());
+                .select(product.count())
+                .from(product)
+                .where(
+                        isNotDeleted(),
+                        optionEq(request.getOption(), request.getKeyword()),
+                        priceGoe(request.getMinPrice()),
+                        priceLoe(request.getMaxPrice()),
+                        stockStatusEq(request.getStockStatus()),
+                        categoryIdIn(request.getCategoryIds())
+                );
 
         return PageableExecutionUtils.getPage(content, request.getPageable(), countQuery::fetchOne);
     }
@@ -107,7 +121,18 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
         };
     }
 
-    private OrderSpecifier createOrderSpecifier(SortType sortType) {
+    private OrderSpecifier createOrderSpecifier(SortType sortType, ProductSortType productSortType) {
+        if (productSortType != null) {
+            return switch (productSortType) {
+                case CREATED_DESC -> new OrderSpecifier<>(Order.DESC, product.createdAt);
+                case CREATED_ASC -> new OrderSpecifier<>(Order.ASC, product.createdAt);
+                case PRICE_ASC -> new OrderSpecifier<>(Order.ASC, product.price);
+                case PRICE_DESC -> new OrderSpecifier<>(Order.DESC, product.price);
+                case HIT_COUNT_DESC -> new OrderSpecifier<>(Order.DESC, product.hitCount);
+                case POPULAR -> new OrderSpecifier<>(Order.DESC, product.createdAt);
+            };
+        }
+
         if (sortType == null) {
             return new OrderSpecifier<>(Order.DESC, product.createdAt);
         }
@@ -117,7 +142,7 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
         };
     }
 
-    private SearchOption convertToSearchOption(String option) {
+    private ProductSearchOption convertToSearchOption(String option) {
         if (option.equals(PRODUCT_NAME.getName())){
             return PRODUCT_NAME;
         } else if (option.equals(CATEGORY_NAME.getName())){
@@ -125,11 +150,35 @@ public class ProductCustomRepositoryImpl implements ProductCustomRepository {
         } else if (option.equals(SELLER_NAME.getName())) {
             return SELLER_NAME;
         }
-        throw new ECMSOrderException(ResultCode.BAD_REQUEST, "[Product::Search] 검색 할 수 없는 옵션입니다. Option : " + option);
+        throw new BusinessException(ResultCode.BAD_REQUEST, "[Product::Search] 검색 할 수 없는 옵션입니다. Option : " + option);
     }
 
     private BooleanExpression productIdEq(Long productId) {
         return product.id.eq(productId);
+    }
+
+    private BooleanExpression priceGoe(Integer minPrice) {
+        return minPrice != null ? product.price.goe(minPrice) : null;
+    }
+
+    private BooleanExpression priceLoe(Integer maxPrice) {
+        return maxPrice != null ? product.price.loe(maxPrice) : null;
+    }
+
+    private BooleanExpression stockStatusEq(StockStatus stockStatus) {
+        if (stockStatus == null || stockStatus == StockStatus.ALL) {
+            return null;
+        }
+        if (stockStatus == StockStatus.IN_STOCK) {
+            return product.stockQuantity.gt(0);
+        }
+        return product.stockQuantity.eq(0);
+    }
+
+    private BooleanExpression categoryIdIn(List<Long> categoryIds) {
+        return (categoryIds != null && !categoryIds.isEmpty())
+                ? product.category.id.in(categoryIds)
+                : null;
     }
 
 }

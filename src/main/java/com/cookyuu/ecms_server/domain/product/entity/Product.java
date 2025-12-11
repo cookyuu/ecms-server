@@ -3,9 +3,9 @@ package com.cookyuu.ecms_server.domain.product.entity;
 import com.cookyuu.ecms_server.domain.cart.entity.CartItem;
 import com.cookyuu.ecms_server.domain.order.entity.OrderLine;
 import com.cookyuu.ecms_server.domain.seller.entity.Seller;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSProductException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.domain.BaseTimeEntity;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,34 +27,53 @@ import java.util.List;
 @Table(
         name = "ecms_product",
         indexes = {
-                @Index(name = "ecms_product_search_idx_1", columnList = "name", unique = true)
+                @Index(name = "ecms_product_search_idx_1", columnList = "name"),
+                @Index(name = "ecms_product_search_idx_2", columnList = "seller_id"),
+                @Index(name = "ecms_product_search_idx_3", columnList = "category_id"),
+                @Index(name = "ecms_product_search_idx_4", columnList = "isDeleted")
         }
 )
 public class Product extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false, length = 200)
     private String name;
+
+    @Column(length = 2000)
     private String description;
+
+    @Column(nullable = false)
     private Integer price;
+
+    @Column(nullable = false)
     private Integer stockQuantity;
 
-    @Column(name = "hit_count", columnDefinition = "INT DEFAULT 0")
-    private Integer hitCount;
+    @Version
+    @Column(name = "version")
+    private Long version;
+
+    @Column(name = "hit_count", nullable = false)
+    @ColumnDefault("0")
+    @Builder.Default
+    private Integer hitCount = 0;
 
     @ColumnDefault("false")
-    @Column(name = "is_deleted", columnDefinition = "TINYINT(1)")
-    private boolean isDeleted;
+    @Column(name = "is_deleted", nullable = false, columnDefinition = "TINYINT(1)")
+    @Builder.Default
+    private boolean isDeleted = false;
 
     @Column(name = "deleted_at")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-mm-dd HH:mm:ss", timezone = "Asia/Seoul")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime deletedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id")
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "category_id", nullable = false, foreignKey = @ForeignKey(name = "fk_product_category"))
     private Category category;
-    @ManyToOne
-    @JoinColumn(name = "seller_id")
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "seller_id", nullable = false, foreignKey = @ForeignKey(name = "fk_product_seller"))
     private Seller seller;
 
     @OneToMany(mappedBy = "product")
@@ -91,16 +110,26 @@ public class Product extends BaseTimeEntity {
     }
 
     public void subQuantity(int quantity) {
+        if (quantity < 0) {
+            throw new BusinessException(ResultCode.BAD_REQUEST, "차감할 수량은 0보다 커야 합니다.");
+        }
+        if (this.stockQuantity < quantity) {
+            throw new BusinessException(ResultCode.PRODUCT_SOLD_OUT,
+                "재고가 부족합니다. 현재 재고: " + this.stockQuantity + ", 요청 수량: " + quantity);
+        }
         this.stockQuantity -= quantity;
     }
 
     public void addQuantity(int quantity) {
+        if (quantity < 0) {
+            throw new BusinessException(ResultCode.BAD_REQUEST, "추가할 수량은 0보다 커야 합니다.");
+        }
         this.stockQuantity += quantity;
     }
 
-    public void isDeleted() {
+    public void validateNotDeleted() {
         if (isDeleted) {
-            throw new ECMSProductException(ResultCode.ALREADY_DELETED_PRODUCT, "이미 삭제된 상품입니다. productId : " + id);
+            throw new BusinessException(ResultCode.ALREADY_DELETED_PRODUCT, "이미 삭제된 상품입니다. productId : " + id);
         }
     }
 

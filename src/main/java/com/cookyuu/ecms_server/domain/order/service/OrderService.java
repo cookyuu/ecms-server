@@ -3,28 +3,30 @@ package com.cookyuu.ecms_server.domain.order.service;
 import com.cookyuu.ecms_server.domain.cart.entity.Cart;
 import com.cookyuu.ecms_server.domain.cart.entity.CartItem;
 import com.cookyuu.ecms_server.domain.cart.service.CartService;
-import com.cookyuu.ecms_server.domain.coupon.entity.CouponCode;
+import com.cookyuu.ecms_server.domain.coupon.enums.CouponCode;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
-import com.cookyuu.ecms_server.domain.member.entity.RoleType;
+import com.cookyuu.ecms_server.domain.member.enums.RoleType;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.domain.order.dto.*;
 import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.domain.order.entity.OrderLine;
-import com.cookyuu.ecms_server.domain.order.entity.OrderCode;
-import com.cookyuu.ecms_server.domain.order.entity.OrderStatus;
+import com.cookyuu.ecms_server.domain.order.enums.OrderCode;
+import com.cookyuu.ecms_server.domain.order.enums.OrderStatus;
 import com.cookyuu.ecms_server.domain.order.mapper.CreateOrderLineMapper;
 import com.cookyuu.ecms_server.domain.order.mapper.ReviseOrderLineMapper;
 import com.cookyuu.ecms_server.domain.order.repository.OrderLineRepository;
 import com.cookyuu.ecms_server.domain.order.repository.OrderRepository;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
 import com.cookyuu.ecms_server.domain.product.service.ProductService;
-import com.cookyuu.ecms_server.global.code.RedisKeyCode;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
-import com.cookyuu.ecms_server.global.utils.JwtUtils;
-import com.cookyuu.ecms_server.global.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.generator.BusinessNumberGenerator;
+import com.cookyuu.ecms_server.common.security.service.AuthorizationService;
+import com.cookyuu.ecms_server.common.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.utils.UserUtils;
+import com.cookyuu.ecms_server.domain.order.logging.OrderLogHelper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -32,82 +34,117 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import static com.cookyuu.ecms_server.global.code.ResultCode.ORDER_PROCESS_FAIL;
-
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+    private static final int ORDER_NUMBER_EXPIRATION_SECONDS = 61;
+
     private final OrderRepository orderRepository;
     private final OrderLineRepository orderLineRepository;
     private final MemberService memberService;
     private final CartService cartService;
     private final ProductService productService;
     private final RedisUtils redisUtils;
+    private final AuthorizationService authorizationService;
+    private final BusinessNumberGenerator businessNumberGenerator;
+    private final OrderValidator orderValidator;
+    private final OrderStockManager orderStockManager;
+    private final OrderLogHelper orderLogHelper;
+    private final UserUtils userUtils;
 
     @Transactional
     public CreateOrderDto.Response createOrder(Long userId, CreateOrderDto.Request orderInfo) {
+        long startTime = System.currentTimeMillis();
+
         Member buyer = memberService.findMemberById(userId);
-        Cart cart = cartService.findCartByMemberId(buyer.getId());
+        Cart cart = cartService.findCartByMemberIdWithCartItemsAndProducts(buyer.getId());
+        List<Long> productIds = orderInfo.getOrderItemList().stream()
+                .map(CreateOrderItemInfo::getProductId)
+                .collect(Collectors.toList());
+        List<Product> products = productService.findProductsByIdInWithLock(productIds);
+
+        Map<Long, Product> productMap = products.stream()
+                .collect(Collectors.toMap(Product::getId, product -> product));
+
         int totalPrice = 0;
         for (CreateOrderItemInfo orderItemInfo : orderInfo.getOrderItemList()) {
-            Product product = productService.findProductById(orderItemInfo.getProductId());
-            product.isDeleted();
+            Product product = productMap.get(orderItemInfo.getProductId());
+            if (product == null) {
+                orderLogHelper.logProductNotFoundError(userId, orderItemInfo.getProductId());
+                throw new BusinessException(ResultCode.PRODUCT_NOT_FOUND);
+            }
+            product.validateNotDeleted();
             int quantity = orderItemInfo.getQuantity();
             int price = orderItemInfo.getPrice();
             totalPrice += (quantity*price);
-            log.info("[Order::CreateOrder] Compare product price, productId : {}", product.getId());
-            compareQuantityAndStockQuantity(quantity, product.getStockQuantity());
-            comparePriceAndCurrentPrice(price, product.getPrice(), product.getId());
+
+            orderValidator.validateStockQuantity(quantity, product.getStockQuantity(), product.getId());
+            orderValidator.validateProductPrice(price, product.getPrice(), product.getId());
             updateCartWithOrderItems(cart, product, orderItemInfo);
             orderItemInfo.addProduct(product);
-            product.subQuantity(quantity);
         }
-        String orderNumber = createOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
-        log.info("[Order::CreateOrder] Create order number, Order Number : {}", orderNumber);
+
+        String orderNumber = businessNumberGenerator.generateOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
         while (redisUtils.getData(RedisKeyCode.ORDER_NUMBER.getSeparator()+orderNumber) != null) {
-            orderNumber = createOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
-            log.debug("[Order::CreateOrder] Created order number is duplicated, Order Number : {}", orderNumber);
+            orderNumber = businessNumberGenerator.generateOrderNumber(OrderCode.NORMAL_ORDER, CouponCode.NO_COUPON);
         }
+
         try {
-            int orderNumberExp = 61;
             String redisValueOfOrderNumber = "true";
-            redisUtils.setDataExpire(RedisKeyCode.ORDER_NUMBER.getSeparator()+orderNumber, redisValueOfOrderNumber, orderNumberExp);
+            redisUtils.setDataExpire(RedisKeyCode.ORDER_NUMBER.getSeparator()+orderNumber, redisValueOfOrderNumber, ORDER_NUMBER_EXPIRATION_SECONDS);
 
             orderInfo.addTotalPrice(totalPrice);
             orderInfo.addBuyer(buyer);
             orderInfo.addOrderNumber(orderNumber);
             Order order = orderRepository.save(orderInfo.toEntity());
-            log.debug("[Order::CreateOrder] Save order info.");
+
             orderLineRepository.saveAll(CreateOrderLineMapper.toEntityList(orderInfo.getOrderItemList(), order));
+
+            orderStockManager.decreaseStockForOrder(orderInfo.getOrderItemList());
+
+            orderLogHelper.logOrderCreated(userId, order.getId(), order.getOrderNumber(),
+                order.getTotalPrice(), order.getOrderLines().size(), order.getStatus().name(),
+                System.currentTimeMillis() - startTime);
+
             return CreateOrderDto.Response.toDto(order);
         } catch (Exception e) {
             redisUtils.deleteData(RedisKeyCode.ORDER_NUMBER.getSeparator() + orderNumber);
-            log.error("[Order::Error] Transaction failed, rollback Redis key. Order Number : {}", orderNumber);
+
+            orderLogHelper.logOrderCreationFailed(userId, orderNumber, e.getMessage(),
+                System.currentTimeMillis() - startTime, e);
             throw e;
         }
     }
 
     @Transactional
     public ResultCode cancelOrder(UserDetails user, CancelOrderDto.Request cancelInfo) {
-        Order order = findOrderByOrderNumber(cancelInfo.getOrderNumber());
-        order.isCanceled();
-        checkBuyerOfOrder(Long.parseLong(user.getUsername()), order.getBuyer().getId());
+        long startTime = System.currentTimeMillis();
+        Long userId = userUtils.getUserId(user);
+
+        Order order = findOrderByOrderNumberWithProductsForUpdate(cancelInfo.getOrderNumber());
+        order.validateNotCanceled();
+        authorizationService.validateResourceOwnership(userId, order.getBuyer().getId(), ResultCode.ORDER_BUYER_UNMATCHED);
+
         boolean isPossibleCancel = OrderStatus.isPossibleOrderCancel(order.getStatus());
         if (isPossibleCancel) {
-            order.getOrderLines().forEach(orderLine -> orderLine.getProduct().addQuantity(orderLine.getQuantity()));
+            orderStockManager.restoreStockForCancel(order.getOrderLines());
             order.cancel(cancelInfo.getCancelReason());
-            log.info("[Order::Cancel] Cancel request of Order OK!, orderNumber : {}", order.getOrderNumber());
+
+            orderLogHelper.logOrderCancelled(userId, order.getId(), order.getOrderNumber(),
+                order.getStatus().name(), cancelInfo.getCancelReason(),
+                System.currentTimeMillis() - startTime);
+
+            return ResultCode.ORDER_CANCEL_SUCCESS;
         } else {
-            log.info("[Order::Cancel] Can not cancel order, order status is {}", order.getStatus());
-            throw new ECMSOrderException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
+            orderLogHelper.logOrderCancellationFailed(userId, order.getId(), order.getOrderNumber(),
+                order.getStatus().name(), ResultCode.ORDER_CANCEL_FAIL);
+
+            throw new BusinessException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
         }
-        log.debug("[Order::Cancel] Order cancel request is OK!");
-        return ResultCode.ORDER_CANCEL_SUCCESS;
     }
 
     @Transactional
@@ -116,33 +153,59 @@ public class OrderService {
             key = "'order:number:' + #reviseOrderInfo.orderNumber"
     )
     public ResultCode reviseOrder(UserDetails user, ReviseOrderDto.Request reviseOrderInfo) {
-        Order order = findOrderByOrderNumber(reviseOrderInfo.getOrderNumber());
-        order.isCanceled();
+        Order order = findOrderByOrderNumberWithProductsForUpdate(reviseOrderInfo.getOrderNumber());
+        order.validateNotCanceled();
         boolean isPossibleRevise = OrderStatus.isPossibleOrderRevise(order.getStatus());
         if (!isPossibleRevise) {
-            log.info("[Order::Revise] Can not revise order, order status is {}", order.getStatus());
-            throw new ECMSOrderException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
+            orderLogHelper.logOrderRevisionFailed(order.getId(), order.getStatus().name(),
+                ResultCode.ORDER_CANCEL_FAIL);
+            throw new BusinessException(ResultCode.ORDER_CANCEL_FAIL, "주문 취소 요청을 할 수 없는 상태입니다. ");
         }
 
         List<OrderLine> orderLines = order.getOrderLines();
-        checkBuyerOfOrder(Long.parseLong(user.getUsername()), order.getBuyer().getId());
-        orderLines.forEach(orderLine -> orderLine.getProduct().addQuantity(orderLine.getQuantity()));
-        orderLineRepository.deleteAll(orderLines);
+        authorizationService.validateResourceOwnership(userUtils.getUserId(user), order.getBuyer().getId(), ResultCode.ORDER_BUYER_UNMATCHED);
+
+        List<Long> oldProductIds = orderLines.stream()
+                .map(orderLine -> orderLine.getProduct().getId())
+                .collect(Collectors.toList());
+        List<Product> oldProducts = productService.findProductsByIdInWithLock(oldProductIds);
+
+        Map<Long, Product> oldProductMap = oldProducts.stream()
+                .collect(Collectors.toMap(Product::getId, product -> product));
+
+        orderStockManager.restoreStockForRevision(orderLines);
+
+        List<Long> newProductIds = reviseOrderInfo.getOrderItemList().stream()
+                .map(ReviseOrderItemInfo::getProductId)
+                .collect(Collectors.toList());
+        List<Product> newProducts = productService.findProductsByIdInWithLock(newProductIds);
+
+        Map<Long, Product> newProductMap = newProducts.stream()
+                .collect(Collectors.toMap(Product::getId, product -> product));
 
         int totalPrice = 0;
         for (ReviseOrderItemInfo orderItemInfo : reviseOrderInfo.getOrderItemList()) {
-            Product product = productService.findProductById(orderItemInfo.getProductId());
+            Product product = newProductMap.get(orderItemInfo.getProductId());
+            if (product == null) {
+                throw new BusinessException(ResultCode.PRODUCT_NOT_FOUND);
+            }
+            product.validateNotDeleted();
             int quantity = orderItemInfo.getQuantity();
             int price = orderItemInfo.getPrice();
             totalPrice += (quantity*price);
-            log.info("[Order::Revise] Compare product price, productId : {}", product.getId());
-            compareQuantityAndStockQuantity(quantity, product.getStockQuantity());
-            comparePriceAndCurrentPrice(price, product.getPrice(), product.getId());
+            orderLogHelper.logPriceComparison(product.getId(), price);
+            orderValidator.validateStockQuantity(quantity, product.getStockQuantity(), product.getId());
+            orderValidator.validateProductPrice(price, product.getPrice(), product.getId());
             orderItemInfo.addProduct(product);
         }
+        orderLineRepository.deleteAll(orderLines);
         orderLineRepository.saveAll(ReviseOrderLineMapper.toEntityList(reviseOrderInfo.getOrderItemList(), order));
         order.reviseOrder(totalPrice);
-        log.info("[Order::Revise] Revise order info is OK!, orderNumber : {}", order.getOrderNumber());
+
+        orderStockManager.decreaseStockForRevision(reviseOrderInfo.getOrderItemList());
+
+        orderLogHelper.logOrderRevised(userUtils.getUserId(user), order.getId(),
+            order.getOrderNumber(), totalPrice, reviseOrderInfo.getOrderItemList().size());
 
         return ResultCode.ORDER_REVISE_SUCCESS;
     }
@@ -158,76 +221,38 @@ public class OrderService {
             key = "'order:number:' + #orderNumber"
     )
     public OrderDetailDto getOrderDetailCacheable(UserDetails user , String orderNumber) {
-        String jwtRole = JwtUtils.getRoleFromUserDetails(user);
-        log.debug("[Order::getDetail] ROLE : {}", jwtRole);
+        RoleType userRole = authorizationService.getUserRole(user);
+        orderLogHelper.logOrderDetailFetch(userRole.name(), orderNumber);
+
         OrderDetailDto orderDetailInfo = getOrderDetailBy(orderNumber);
-        if (jwtRole.equals("ROLE_"+RoleType.USER.name())) {
-            Long buyerId = orderDetailInfo.getOrderInfo().getBuyerId();
-            checkBuyerOfOrder(Long.parseLong(user.getUsername()), buyerId);
-        } else if (jwtRole.equals("ROLE_"+RoleType.SELLER.name())) {
-            boolean isSellerOfOrder = orderDetailInfo.getOrderLines().stream().anyMatch(orderLineInfo -> checkSellerOfOrder(Long.parseLong(user.getUsername()), orderLineInfo.getSellerId()));
-            if (!isSellerOfOrder) {
-                throw new ECMSOrderException(ResultCode.ORDER_SELLER_UNMATCHED);
-            }
+
+        if (userRole == RoleType.USER) {
+            authorizationService.validateOrderBuyerAccess(user, orderDetailInfo.getOrderInfo().getBuyerId());
+        } else if (userRole == RoleType.SELLER) {
+            List<Long> sellerIds = orderDetailInfo.getOrderLines().stream()
+                .map(orderLineInfo -> orderLineInfo.getSellerId())
+                .collect(Collectors.toList());
+            authorizationService.validateOrderSellerAccess(user, sellerIds);
         }
+
         return orderDetailInfo;
     }
-
-    /*
-    * 주문 상태 업데이트시 redis 확인 후 없으면 말고 있으면 제거
-    * */
 
     private OrderDetailDto getOrderDetailBy(String orderNumber) {
         return orderRepository.getOrderDetail(orderNumber);
     }
 
-    private void checkBuyerOfOrder(Long reqUserId, Long buyerId) {
-        log.debug("[Order::BuyerMatch] Unmatched Order's buyer Info and request User Info, buyerId : {}, reqUserId : {}", buyerId, reqUserId);
-        if (!buyerId.equals(reqUserId)) {
-            throw new ECMSOrderException(ResultCode.ORDER_BUYER_UNMATCHED);
-        }
-        log.info("[Order::BuyerMatch] Match buyer id and request user id OK!");
-    }
-
-    private boolean checkSellerOfOrder(long reqUserId, Long sellerId) {
-        log.debug("[Order::SellerMatch] Unmatched Order's seller Info and request User Info, sellerId : {}, reqUserId : {}", sellerId, reqUserId);
-        return sellerId.equals(reqUserId);
-    }
-
-    private void compareQuantityAndStockQuantity(int quantity, Integer stockQuantity) {
-        if (stockQuantity == 0) {
-            log.error("[Order::Error] This product stock quantity is zero, Product Sold out!");
-            throw new ECMSOrderException(ResultCode.PRODUCT_SOLD_OUT, "주문하신 상품의 재고 수량이 없습니다.");
-        }
-        if (quantity > stockQuantity) {
-            log.error("[Order::Error] This product stock quantity is less than order quantity, stockQuantity : {}, orderQuantity : {}", stockQuantity, quantity);
-            throw new ECMSOrderException(ResultCode.PRODUCT_SOLD_OUT, "주문하신 상품의 재고 수량이 부족합니다. 재고 수량 : " + stockQuantity);
-        }
-        log.info("[Order::CompareStockQuantity] This product ");
-    }
     private void updateCartWithOrderItems(Cart cart, Product product, CreateOrderItemInfo orderItemInfo) {
         CartItem cartItem = findCartItemByCartAndProduct(cart, product);
-        log.debug("[Order::UpdateCart]");
         if (cartItem == null) {
             return ;
         }
+        orderLogHelper.logCartUpdate(cart.getId(), product.getId());
         if (cartItem.getQuantity() <= orderItemInfo.getQuantity()) {
             cartService.deleteCartItem(cart, product);
         } else {
             cartItem.updateQuantity(cartItem.getQuantity() - orderItemInfo.getQuantity());
         }
-    }
-
-    private void comparePriceAndCurrentPrice(int price, Integer currentPrice, Long productId) {
-        if (currentPrice == null) {
-            log.error("[Order::Error] Product price has not been set yet, productId : {}", productId);
-            throw new ECMSOrderException(ORDER_PROCESS_FAIL, "가격이 아직 책정되지 않은 상품이 있습니다.");
-        }
-        if (price != currentPrice) {
-            log.error("[Order::Error] Compare product order price and current price Fail!, productId : {}, orderPrice : {}, currentPrice : {}", productId, price, currentPrice);
-            throw new ECMSOrderException(ORDER_PROCESS_FAIL, "상품의 현재 가격과 주문 가격이 일치하지 않습니다.");
-        }
-        log.info("[CompareProductPriceForOrder] Compare product order price and current price OK!");
     }
 
     private CartItem findCartItemByCartAndProduct(Cart cart, Product product) {
@@ -237,18 +262,22 @@ public class OrderService {
                 .orElse(null);
     }
 
-    private String createOrderNumber(OrderCode order, CouponCode coopon) {
-        StringBuilder sb = new StringBuilder();
-        String formatDate = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmm"));
-        sb.append(order.getCode()).append(formatDate).append(coopon.getCode());
-        for (int i = 0; i < 5; i++) {
-            int random = (int) (Math.random() * 10);
-            sb.append(random);
-        }
-        return sb.toString();
+    public Order findOrderByOrderNumber(String orderNumber) {
+        return orderRepository.findByOrderNumber(orderNumber).orElseThrow(() -> new BusinessException(ResultCode.ORDER_NOT_FOUND));
     }
 
-    public Order findOrderByOrderNumber(String orderNumber) {
-        return orderRepository.findByOrderNumber(orderNumber).orElseThrow(ECMSOrderException::new);
+    public Order findOrderByOrderNumberWithBuyer(String orderNumber) {
+        return orderRepository.findByOrderNumberWithBuyer(orderNumber)
+                .orElseThrow(() -> new BusinessException(ResultCode.ORDER_NOT_FOUND));
+    }
+
+    public Order findOrderByOrderNumberWithProductsForUpdate(String orderNumber) {
+        return orderRepository.findByOrderNumberWithProductsForUpdate(orderNumber)
+                .orElseThrow(() -> new BusinessException(ResultCode.ORDER_NOT_FOUND));
+    }
+
+    public Order findOrderByOrderNumberWithAll(String orderNumber) {
+        return orderRepository.findByOrderNumberWithAll(orderNumber)
+                .orElseThrow(() -> new BusinessException(ResultCode.ORDER_NOT_FOUND));
     }
 }

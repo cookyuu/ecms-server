@@ -2,13 +2,11 @@ package com.cookyuu.ecms_server.domain.shipment.dto;
 
 import com.cookyuu.ecms_server.domain.order.entity.Order;
 import com.cookyuu.ecms_server.domain.shipment.entity.Shipment;
-import com.cookyuu.ecms_server.domain.shipment.entity.ShipmentStatus;
+import com.cookyuu.ecms_server.domain.shipment.enums.ShipmentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 public class CreateShipmentDto {
 

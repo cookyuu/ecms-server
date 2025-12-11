@@ -1,6 +1,7 @@
 package com.cookyuu.ecms_server.global.utils;
 
-import com.cookyuu.ecms_server.global.code.RedisKeyCode;
+import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
+import com.cookyuu.ecms_server.common.utils.RedisUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

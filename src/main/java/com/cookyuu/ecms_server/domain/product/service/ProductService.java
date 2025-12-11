@@ -6,21 +6,21 @@ import com.cookyuu.ecms_server.domain.product.dto.SearchProductDto;
 import com.cookyuu.ecms_server.domain.product.dto.UpdateProductDto;
 import com.cookyuu.ecms_server.domain.product.entity.Category;
 import com.cookyuu.ecms_server.domain.product.entity.Product;
+import com.cookyuu.ecms_server.domain.product.logging.ProductLogHelper;
 import com.cookyuu.ecms_server.domain.product.repository.ProductRepository;
 import com.cookyuu.ecms_server.domain.seller.entity.Seller;
 import com.cookyuu.ecms_server.domain.seller.service.SellerService;
-import com.cookyuu.ecms_server.global.code.CookieCode;
-import com.cookyuu.ecms_server.global.code.RedisKeyCode;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSProductException;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSSellerException;
-import com.cookyuu.ecms_server.global.utils.CookieUtils;
-import com.cookyuu.ecms_server.global.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.enums.CookieCode;
+import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.common.utils.CookieUtils;
+import com.cookyuu.ecms_server.common.utils.RedisUtils;
+import com.cookyuu.ecms_server.common.utils.UserUtils;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -28,22 +28,26 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
+    private static final int POST_VIEW_COOKIE_DURATION_SECONDS = 60 * 3;
+
     private final ProductRepository productRepository;
     private final CategoryService categoryService;
     private final SellerService sellerService;
     private final RedisUtils redisUtil;
     private final CookieUtils cookieUtils;
+    private final ProductLogHelper productLogHelper;
+    private final UserUtils userUtils;
 
     @Transactional
     public Long registerProduct(UserDetails user, RegisterProductDto.Request productInfo) {
         try {
-            Seller seller = sellerService.findSellerById(Long.parseLong(user.getUsername()));
+            Seller seller = sellerService.findSellerById(userUtils.getUserId(user));
             Category category = categoryService.findByName(productInfo.getCategoryName());
             Product registerProduct = Product.of(
                     productInfo.getName(),
@@ -53,11 +57,13 @@ public class ProductService {
                     category,
                     seller);
             Product product = productRepository.save(registerProduct);
-            log.info("[RegisterProduct] Product registration OK!");
+            productLogHelper.logProductRegistered(product.getId(), product.getName(), seller.getId(),
+                category.getName(), product.getPrice(), product.getStockQuantity());
             return product.getId();
         } catch (Exception e) {
-            log.error("[Product::Register::Error] Exception : ", e);
-            throw new ECMSProductException(ResultCode.PRODUCT_EXISTS_ALREADY, e);
+            productLogHelper.logProductRegistrationFailed(userUtils.getUserId(user),
+                ResultCode.PRODUCT_EXISTS_ALREADY, e);
+            throw new BusinessException(ResultCode.PRODUCT_EXISTS_ALREADY, e);
         }
     }
 
@@ -69,9 +75,9 @@ public class ProductService {
     public void updateProduct(Long productId, UserDetails user, UpdateProductDto.Request productInfo) {
         productInfo.chkAllNull();
         Product product = findProductById(productId);
-        Long sellerId = Long.parseLong(user.getUsername());
+        Long sellerId = userUtils.getUserId(user);
         if (!isProductOwnedBySeller(product, sellerId)) {
-            throw new ECMSSellerException(ResultCode.PRODUCT_OWNER_UNMATCHED);
+            throw new BusinessException(ResultCode.PRODUCT_OWNER_UNMATCHED);
         }
         if (!(productInfo.getCategoryName()==null || productInfo.getCategoryName().isBlank())) {
             Category category = categoryService.findByName(productInfo.getCategoryName());
@@ -79,18 +85,18 @@ public class ProductService {
         } else {
             product.updateInfo(productInfo.getName(), productInfo.getDescription(), productInfo.getPrice(), productInfo.getStockQuantity(), null);
         }
-        log.info("[UpdateProduct] Product update OK!, productId : {}", productId);
+        productLogHelper.logProductUpdated(productId, sellerId);
     }
     @Transactional
     public void deleteProduct(Long productId, UserDetails user) {
         Product product = findProductById(productId);
-        Long sellerId = Long.parseLong(user.getUsername());
+        Long sellerId = userUtils.getUserId(user);
         if (!isProductOwnedBySeller(product, sellerId)) {
-            throw new ECMSSellerException(ResultCode.PRODUCT_OWNER_UNMATCHED);
+            throw new BusinessException(ResultCode.PRODUCT_OWNER_UNMATCHED);
         }
-        product.isDeleted();
+        product.validateNotDeleted();
         product.delete();
-        log.info("[DeleteProduct] Product delete OK!, ProductId : {}", productId);
+        productLogHelper.logProductDeleted(productId, sellerId);
     }
 
     @Transactional(readOnly = true)
@@ -115,17 +121,27 @@ public class ProductService {
     }
 
     public Product findProductById(Long id) {
-        return productRepository.findById(id).orElseThrow(ECMSProductException::new);
+        return productRepository.findById(id).orElseThrow(() -> new BusinessException(ResultCode.PRODUCT_NOT_FOUND));
+    }
+
+    public Product findProductByIdWithLock(Long id) {
+        return productRepository.findByIdWithLock(id).orElseThrow(() -> new BusinessException(ResultCode.PRODUCT_NOT_FOUND));
+    }
+
+    public List<Product> findProductsByIdInWithLock(List<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return productRepository.findByIdInWithLock(ids);
     }
 
     private boolean isProductOwnedBySeller(Product product, Long sellerId) {
-        log.info("[CheckProductOwner] Check product owner, ProductId : {}, SellerId : {}", product.getId(), sellerId);
+        productLogHelper.logCheckProductOwnership(product.getId(), sellerId);
         return product.getSeller().getId().equals(sellerId);
     }
 
     private void validatePostView(Long productId, HttpServletRequest request, HttpServletResponse response) {
-        log.debug("[Product::Detail] Validate post view product in cookie.");
-        int postViewCookieDuration = 60*3;
+        productLogHelper.logValidatePostView(productId);
         Cookie oldCookie = null;
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
@@ -141,18 +157,18 @@ public class ProductService {
                 increaseProductHits(productId);
                 oldCookie.setValue(oldCookie.getValue() + "_[" + productId + "]");
                 oldCookie.setPath("/");
-                oldCookie.setMaxAge(postViewCookieDuration);
+                oldCookie.setMaxAge(POST_VIEW_COOKIE_DURATION_SECONDS);
                 response.addCookie(oldCookie);
             }
         } else {
             increaseProductHits(productId);
-            Cookie newCookie = cookieUtils.setCookieExpire(CookieCode.POST_VIEW, "[" + productId + "]", postViewCookieDuration);
+            Cookie newCookie = cookieUtils.setCookieExpire(CookieCode.POST_VIEW, "[" + productId + "]", POST_VIEW_COOKIE_DURATION_SECONDS);
             response.addCookie(newCookie);
         }
     }
 
     private void increaseProductHits(Long productId) {
-        log.debug("[Product::Detail] Product hit count increase");
+        productLogHelper.logProductViewed(productId);
         if (!redisUtil.hasKey(RedisKeyCode.PRODUCT_HIT_COUNT.getSeparator()+productId)) {
             redisUtil.setHashCountData(RedisKeyCode.PRODUCT_HIT_COUNT.getSeparator()+productId);
         } else {

@@ -1,5 +1,8 @@
 package com.cookyuu.ecms_server.domain.auth.service;
 
+import com.cookyuu.ecms_server.common.enums.CookieCode;
+import com.cookyuu.ecms_server.common.enums.RedisKeyCode;
+import com.cookyuu.ecms_server.common.utils.*;
 import com.cookyuu.ecms_server.domain.auth.dto.JWTUserInfo;
 import com.cookyuu.ecms_server.domain.auth.dto.LoginDto;
 import com.cookyuu.ecms_server.domain.auth.dto.SignupDto;
@@ -7,9 +10,6 @@ import com.cookyuu.ecms_server.domain.cart.service.CartService;
 import com.cookyuu.ecms_server.domain.member.entity.Member;
 import com.cookyuu.ecms_server.domain.member.service.MemberService;
 import com.cookyuu.ecms_server.domain.seller.service.SellerService;
-import com.cookyuu.ecms_server.global.code.CookieCode;
-import com.cookyuu.ecms_server.global.code.RedisKeyCode;
-import com.cookyuu.ecms_server.global.utils.*;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,6 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
+import static com.cookyuu.ecms_server.common.logging.LogFields.*;
 
 @Service
 @Slf4j
@@ -61,7 +64,14 @@ public class AuthService {
     public LoginDto.Response loginNormal(LoginDto.Request request, HttpServletResponse response) {
         JWTUserInfo userInfo = memberService.checkLoginCredentials(request.getLoginId(), request.getPassword());
 
-        log.info("[NormalLogin] Create Access/Refresh token ");
+        log.atInfo()
+            .addKeyValue(EVENT, TOKEN_ISSUED)
+            .addKeyValue(USER_ID, userInfo.getId())
+            .addKeyValue(LOGIN_ID, userInfo.getLoginId())
+            .addKeyValue(USER_ROLE, userInfo.getRole())
+            .addKeyValue(TOKEN_TYPE, "access/refresh")
+            .log("Access and refresh tokens issued for normal user");
+
         String accessToken = jwtUtils.createAccessToken(userInfo);
         String refreshToken = jwtUtils.createRefreshToken(userInfo);
         Cookie cookie = cookieUtils.setCookieExpire(CookieCode.REFRESH_TOKEN, refreshToken, Integer.parseInt(refreshTokenExp));
@@ -77,7 +87,14 @@ public class AuthService {
     public LoginDto.Response loginSeller(LoginDto.Request request, HttpServletResponse response) {
         JWTUserInfo userInfo = sellerService.checkLoginCredentials(request.getLoginId(), request.getPassword());
 
-        log.info("[SellerLogin] Create Access/Refresh token ");
+        log.atInfo()
+            .addKeyValue(EVENT, TOKEN_ISSUED)
+            .addKeyValue(USER_ID, userInfo.getId())
+            .addKeyValue(LOGIN_ID, userInfo.getLoginId())
+            .addKeyValue(USER_ROLE, userInfo.getRole())
+            .addKeyValue(TOKEN_TYPE, "access/refresh")
+            .log("Access and refresh tokens issued for seller");
+
         String accessToken = jwtUtils.createAccessToken((userInfo));
         String refreshToken = jwtUtils.createRefreshToken(userInfo);
         Cookie cookie = cookieUtils.setCookieExpire(CookieCode.REFRESH_TOKEN, refreshToken, Integer.parseInt(refreshTokenExp));
@@ -93,6 +110,12 @@ public class AuthService {
     public void logoutNormal(UserDetails user, HttpServletRequest request, HttpServletResponse response) {
         String memberId = user.getUsername();
         String accessToken = jwtUtils.getAccessToken(request.getHeader("Authorization"));
+
+        log.atInfo()
+            .addKeyValue(EVENT, LOGOUT)
+            .addKeyValue(USER_ID, memberId)
+            .log("User logged out successfully");
+
         redisUtils.setDataExpire(RedisKeyCode.LOGOUT_TOKEN.getSeparator()+memberId, accessToken, Long.parseLong(accessTokenExp)*minute);
         redisUtils.deleteData(RedisKeyCode.REFRESH_TOKEN.getSeparator()+memberId);
         cookieUtils.removeCookie("refresh_token", response);

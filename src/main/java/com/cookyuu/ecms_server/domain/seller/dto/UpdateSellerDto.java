@@ -1,7 +1,7 @@
 package com.cookyuu.ecms_server.domain.seller.dto;
 
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSProductException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,7 +25,7 @@ public class UpdateSellerDto {
         public void chkAllNull() {
             if (StringUtils.isEmpty(this.name) && StringUtils.isEmpty(this.businessName) && StringUtils.isEmpty(this.businessAddress)
                     && StringUtils.isEmpty(this.businessContactTelNum) && StringUtils.isEmpty(this.businessContactEmail)) {
-                throw new ECMSProductException(ResultCode.REQUEST_DATA_ISNULL);
+                throw new BusinessException(ResultCode.REQUEST_DATA_ISNULL);
             }
         }
     }

@@ -1,6 +1,6 @@
 package com.cookyuu.ecms_server.domain.member.dto;
 
-import com.cookyuu.ecms_server.domain.member.entity.RoleType;
+import com.cookyuu.ecms_server.domain.member.enums.RoleType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

@@ -9,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.cookyuu.ecms_server.common.logging.LogEvents.*;
+import static com.cookyuu.ecms_server.common.logging.LogFields.*;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -17,12 +20,17 @@ public class IssueCouponService {
 
     @Transactional
     public void issueCoupon(Member member, Coupon coupon) {
-        log.info("[Coupon::Issue] Insert issueCoupon");
         IssueCoupon issueCoupon = IssueCoupon.builder()
                 .expiredAt(coupon.getExpiredAt())
                 .coupon(coupon)
                 .member(member)
                 .build();
         issueCouponRepository.save(issueCoupon);
+        log.atInfo()
+                .addKeyValue(EVENT, COUPON_ISSUED)
+                .addKeyValue(COUPON_ID, coupon.getId())
+                .addKeyValue(COUPON_NUMBER, coupon.getCouponNumber())
+                .addKeyValue(MEMBER_ID, member.getId())
+                .log("Coupon issued successfully");
     }
 }

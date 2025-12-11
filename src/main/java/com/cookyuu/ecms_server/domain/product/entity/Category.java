@@ -1,6 +1,6 @@
 package com.cookyuu.ecms_server.domain.product.entity;
 
-import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
+import com.cookyuu.ecms_server.common.domain.BaseTimeEntity;
 import io.micrometer.common.util.StringUtils;
 import jakarta.persistence.*;
 import lombok.Builder;

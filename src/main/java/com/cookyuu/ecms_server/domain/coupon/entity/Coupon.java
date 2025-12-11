@@ -1,8 +1,9 @@
 package com.cookyuu.ecms_server.domain.coupon.entity;
 
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSCouponException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.domain.BaseTimeEntity;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
+import com.cookyuu.ecms_server.domain.coupon.enums.CouponCode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,19 +18,41 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "ecms_coupon")
+@Table(
+        name = "ecms_coupon",
+        indexes = {
+                @Index(name = "ecms_coupon_search_idx_1", columnList = "couponNumber", unique = true),
+                @Index(name = "ecms_coupon_search_idx_2", columnList = "couponCode")
+        }
+)
 public class Coupon extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 100)
     private String name;
+
+    @Column(nullable = false)
     private LocalDateTime startAt;
+
+    @Column(nullable = false)
     private LocalDateTime expiredAt;
-    private boolean isExpired;
+
+    @Column(nullable = false)
+    private boolean isExpired = false;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     private CouponCode couponCode;
+
+    @Column(nullable = false)
     private Integer discountPrice;
+
+    @Column(nullable = false)
     private Integer quantity;
+
+    @Column(nullable = false, unique = true, length = 50)
     private String couponNumber;
 
     @OneToMany(mappedBy = "coupon")
@@ -48,12 +71,16 @@ public class Coupon extends BaseTimeEntity {
 
     public void issue(int count) {
         if (this.quantity == 0) {
-            throw new ECMSCouponException(ResultCode.COUPON_SOLD_OUT);
+            throw new BusinessException(ResultCode.COUPON_SOLD_OUT);
         }
         this.quantity = count;
     }
 
     public void issueFail(int count) {
         this.quantity = count;
+    }
+
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(this.expiredAt) || this.isExpired;
     }
 }

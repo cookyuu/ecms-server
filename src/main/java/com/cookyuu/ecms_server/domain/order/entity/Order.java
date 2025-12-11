@@ -1,10 +1,11 @@
 package com.cookyuu.ecms_server.domain.order.entity;
 
 import com.cookyuu.ecms_server.domain.member.entity.Member;
+import com.cookyuu.ecms_server.domain.order.enums.OrderStatus;
 import com.cookyuu.ecms_server.domain.shipment.entity.Shipment;
-import com.cookyuu.ecms_server.global.code.ResultCode;
-import com.cookyuu.ecms_server.global.entity.BaseTimeEntity;
-import com.cookyuu.ecms_server.global.exception.domain.ECMSOrderException;
+import com.cookyuu.ecms_server.common.enums.ResultCode;
+import com.cookyuu.ecms_server.common.domain.BaseTimeEntity;
+import com.cookyuu.ecms_server.common.exception.BusinessException;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,39 +23,58 @@ import java.util.List;
 @Table(
         name = "ecms_order",
         indexes = {
-                @Index(name = "ecms_order_search_idx_1", columnList = "status", unique = true),
-                @Index(name = "ecms_order_search_idx_2", columnList = "orderNumber", unique = true)
+                @Index(name = "ecms_order_search_idx_1", columnList = "status"),
+                @Index(name = "ecms_order_search_idx_2", columnList = "orderNumber", unique = true),
+                @Index(name = "ecms_order_search_idx_3", columnList = "buyer_id")
         }
 )
 public class Order extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private Integer totalPrice;
+
+    @Column(nullable = false, unique = true, length = 50)
     private String orderNumber;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     private OrderStatus status;
 
+    @Column(length = 500)
     private String cancelReason;
-    private boolean isCanceled;
+
+    @Column(nullable = false)
+    private boolean isCanceled = false;
+
     private LocalDateTime canceledAt;
 
+    @Column(nullable = false, length = 200)
     private String destination;
+
+    @Column(length = 200)
     private String destinationDetail;
+
+    @Column(nullable = false, length = 50)
     private String recipientName;
+
+    @Column(nullable = false, length = 20)
     private String recipientPhoneNumber;
 
+    @Column(length = 500)
     private String paymentFailMsg;
-    @ManyToOne
-    @JoinColumn(name = "buyer_id")
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "buyer_id", nullable = false, foreignKey = @ForeignKey(name = "fk_order_buyer"))
     private Member buyer;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderLine> orderLines = new ArrayList<>();
 
-    @OneToOne
-    @JoinColumn(name = "shipment_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shipment_id", foreignKey = @ForeignKey(name = "fk_order_shipment"))
     private Shipment shipment;
 
     @Builder
@@ -63,7 +83,7 @@ public class Order extends BaseTimeEntity {
         this.orderNumber = orderNumber;
         this.status = status;
         this.buyer = buyer;
-        this.orderLines = orderLines;
+        this.orderLines = orderLines != null ? orderLines : new ArrayList<>();
         this.destination = destination;
         this.destinationDetail = destinationDetail;
         this.recipientName = recipientName;
@@ -82,15 +102,15 @@ public class Order extends BaseTimeEntity {
         this.totalPrice = totalPrice;
     }
 
-    public void isCanceled() {
+    public void validateNotCanceled() {
         if (isCanceled) {
-            throw new ECMSOrderException(ResultCode.ALREADY_CANCELED_ORDER);
+            throw new BusinessException(ResultCode.ALREADY_CANCELED_ORDER);
         }
     }
 
-    public void isPaymentComplete() {
+    public void validatePaymentComplete() {
         if (!this.status.equals(OrderStatus.PAYMENT_COMPLETE)) {
-            throw new ECMSOrderException(ResultCode.ORDER_STATUS_ERROR);
+            throw new BusinessException(ResultCode.ORDER_STATUS_ERROR);
         }
     }
 
