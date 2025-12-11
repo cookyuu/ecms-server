@@ -39,7 +39,7 @@
 <img src="https://github.com/user-attachments/assets/654170f0-8ec0-4510-b082-03c5634da287" width="900" height="500"/>
 
 ## 2. ERD
-<img src="https://github.com/user-attachments/assets/b240bd35-76d5-4f7e-836e-50da000c75ff" width="900" height="500"/>
+<img src="https://github.com/user-attachments/assets/8753a5cb-ca25-4657-bd6d-bba231fb8dc7" width="900" height="800"/>
 
 ## 3. 고려해본 문제점
 
